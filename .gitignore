@@ -88,6 +88,11 @@ gemini-debug.log
 # .tabnineignore
 # .tabnine/
 
+# Agent tool output written into the project
+.playwright-mcp/
+.remember/
+.superpowers/
+
 # GitHub Copilot
 # .github/copilot-instructions.md
 
@@ -1109,6 +1114,7 @@ FodyWeavers.xsd
 *.cab
 *.msi
 *.msix
+*.msixbundle
 *.msm
 *.msp
 
