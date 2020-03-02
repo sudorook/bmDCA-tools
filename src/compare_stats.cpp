@@ -37,7 +37,7 @@ int main(int argc, char* argv[]) {
 
   int idx = msa_file.find_last_of("."); 
   std::string msa_prefix = msa_file.substr(0, idx);
-  idx = msa_file.find_last_of("."); 
+  idx = mc_file.find_last_of(".");
   std::string mc_prefix = mc_file.substr(0, idx);
 
   msa.writeSequenceWeights(msa_prefix + "_weights.txt");
