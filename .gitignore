@@ -1,6 +1,7 @@
 # Generated files and directries
 relic/
 compute_stats
+compare_stats
 
 # Text editor backups
 *~
