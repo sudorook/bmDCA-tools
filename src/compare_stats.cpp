@@ -15,7 +15,7 @@ int main(int argc, char* argv[]) {
   double threshold = 0;
 
   char c;
-  while ((c = getopt(argc, argv, "s:c:d:")) != -1) {
+  while ((c = getopt(argc, argv, "s:c:t:")) != -1) {
     switch (c) {
       case 's':
         msa_file = optarg;
