@@ -91,7 +91,7 @@ int main(int argc, char* argv[]) {
                          2.0 * mc_stats.frequency_1p.at(aa1, i) *
                            mc_stats.frequency_1p.at(aa2, j) *
                            mc_stats.frequency_1p.at(aa3, k);
-                if ( (msa_tmp > threshold) && (mc_tmp > threshold) ) {
+                if ((fabs(msa_tmp) > threshold) && (fabs(mc_tmp) > threshold)) {
                   msa_stream << msa_tmp << std::endl;
                   mc_stream << mc_tmp << std::endl;
                 }
