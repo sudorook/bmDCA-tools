@@ -1,8 +1,8 @@
 TARGET := compute_stats
 CC := g++
 
-CXXFLAGS = -Wall -Wextra -O3
-LDFLAGS = -lm -fopenmp -larmadillo
+CXXFLAGS = -O3 $(shell pkg-config --cflags armadillo)
+LDFLAGS = -lm -fopenmp $(shell pkg-config --libs armadillo)
 
 SRCPATH = src
 
