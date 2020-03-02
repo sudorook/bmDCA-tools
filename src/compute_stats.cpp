@@ -13,7 +13,7 @@ int main(int argc, char* argv[]) {
   std::string infile;
   std::string outfile;
   std::string dest;
-  bool reweight = true;
+  // bool reweight = true;
 
   char c;
   while ((c = getopt(argc, argv, "i:o:")) != -1) {
@@ -36,17 +36,22 @@ int main(int argc, char* argv[]) {
   }
 
   std::cout << "reading sequences" << std::endl;
-  MSA msa = MSA(infile, reweight = true, 0.8);
+  MSA msa = MSA(infile, true, true, 0.8);
+
+  int idx = infile.find_last_of("."); 
+  std::string prefix = infile.substr(0, idx);
+  msa.writeSequenceWeights(prefix + "_weights.txt");
   
   std::cout << "computing stats" << std::endl;
   MSAStats msa_stats = MSAStats(msa);
   
   std::cout << "writing 1p stats" << std::endl;
-  msa_stats.WriteFrequency1pCompat(outfile + "_freq_1p.txt");
+  msa_stats.writeFrequency1p(outfile + "_freq_1p.txt");
   
   std::cout << "writing 2p stats" << std::endl;
-  msa_stats.WriteCorrelation2pCompat(outfile + "_corr_2p.txt");
+  msa_stats.writeCorrelation2p(outfile + "_corr_2p.txt");
   
   std::cout << "writing 3p stats" << std::endl;
-  msa_stats.WriteCorrelation3pCompat(outfile + "_corr_3p.txt");
+  // msa_stats.writeCorrelation3p(outfile + "_corr_3p.txt", 0.01);
+  msa_stats.writeCorrelation3p(outfile + "_corr_3p.txt");
 }
