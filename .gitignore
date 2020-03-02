@@ -6,17 +6,6 @@ compute_stats
 *~
 *.sw[a-p]
 
-# autotools
-autom4te.cache
-configure
-Makefile.in
-Makefile
-aclocal.m4
-config.log
-config.status
-install-sh
-missing
-
 ## From: https://github.com/github/gitignore/blob/master/C.gitignore
 # Prerequisites
 *.d
