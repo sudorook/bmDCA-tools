@@ -65,7 +65,7 @@ MSA::readInputNumericMSA(std::string numeric_msa_file)
     int n;
     i = 0;
     while (iss >> n) {
-      alignment.at(counter, i) = n-1;
+      alignment.at(counter, i) = n;
       i++;
     }
     counter++;
