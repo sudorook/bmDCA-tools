@@ -9,6 +9,10 @@
 #include "msa.hpp"
 #include "msa_stats.hpp"
 
+#ifndef AA_ALPHABET_SIZE
+#define AA_ALPHABET_SIZE 21
+#endif
+
 int main(int argc, char* argv[]) {
   std::string msa_file;
   std::string mc_file;
@@ -61,7 +65,6 @@ int main(int argc, char* argv[]) {
     std::ofstream mc_stream(mc_prefix + "_corr_3p.txt");
 
     int N = msa.N;
-    int AA_ALPHABET_SIZE = 21;
 
     double msa_tmp = 0;
     double mc_tmp = 0;
