@@ -7,17 +7,19 @@ import pandas as pd
 import random
 from scipy.sparse import csr_matrix as sparsify
 import matplotlib
-matplotlib.use('Agg')
+
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import seaborn as sns
 from pysca import scaTools as sca
 
 plt.rcParams["figure.figsize"] = [10, 7.5]
-sns.set(rc={'figure.figsize': (10, 7.5)})
+sns.set(rc={"figure.figsize": (10, 7.5)})
 
 
 random.seed(0)
 np.random.seed(0)
+
 
 def parse_options():
     """ cli parser """
@@ -61,6 +63,7 @@ def load_sequences(seq_file):
     data = np.loadtxt(seq_file, dtype="float", skiprows=1)
     return data
 
+
 def load_sequence_weights(weight_file):
     """ load msa weights """
     return np.loadtxt(weight_file, dtype="float")
@@ -70,9 +73,9 @@ def compute_sequence_weights(msa, Q=21):
     """ comptue seq weights """
     X2d = sca.alg2bin(msa, Q)
     simMat = (X2d.dot(X2d.T)).todense() / msa.shape[1]
-    seqw = np.array(1 / (simMat > .8).sum(axis=0))
+    seqw = np.array(1 / (simMat > 0.8).sum(axis=0))
     #  return seqw[0] # ???
-    return seqw # ???
+    return seqw  # ???
 
 
 def compute_sim_mat(msa, Q=21):
@@ -110,7 +113,9 @@ def sample_msa_weighted(msa, weights, N):
     """ subset the alignment """
     Ntot = min(int(sum(weights)), N)
     wlist = [w for w in weights]
-    selection2 = np.random.choice(range(msa.shape[0]), Ntot, replace=False, p=weights/sum(weights))
+    selection2 = np.random.choice(
+        range(msa.shape[0]), Ntot, replace=False, p=weights / sum(weights)
+    )
     return msa[selection2, :]
 
 
@@ -132,18 +137,17 @@ def main():
 
     # compute eignvectors for the msa
     msa_subset_sim = compute_sim_mat(msa_subset)
-    posw, Dia, Di = sca.posWeights(msa_subset, msa_subset_weights, 0, 21, np.ones(21)/21)
+    posw, Dia, Di = sca.posWeights(
+        msa_subset, msa_subset_weights, 0, 21, np.ones(21) / 21
+    )
     X2d = sca.alg2bin(msa_subset, 21)
     X2d_2 = sca.alg2bin(msa_subset_2, 21)
     X2dw = sparsify(np.diag(np.sqrt(msa_subset_weights[0]))).dot(X2d)
     u, s, v = sca.svdss(X2dw, k=250)
     print(s)
-    print((s[0]**2 + s[1]**2) / sum(s**2))
+    print((s[0] ** 2 + s[1] ** 2) / sum(s ** 2))
     tmp = X2d_2.dot(v).dot(np.diag(1 / s))
-    data_df = pd.DataFrame(
-            data={"PC1": tmp[:, 0],
-                  "PC2": tmp[:, 1]
-                  })
+    data_df = pd.DataFrame(data={"PC1": tmp[:, 0], "PC2": tmp[:, 1]})
 
     # plot the projection of the msa onto the first two eigenvectors
     with plt.style.context("fivethirtyeight"):
@@ -157,16 +161,13 @@ def main():
         plt.savefig("msa_proj.svg")
         plt.close()
 
-
     # project new mcmc onto msa eigenvectors
     X2d_new = sca.alg2bin(mcmc_new, 21)
     tmp_new = X2d_new.dot(v).dot(np.diag(1 / s))
-    
+
     data_df_new = pd.DataFrame(
-              data= {
-                  "PC1": tmp_new[:, 0],
-                  "PC2": tmp_new[:, 1]
-              })
+        data={"PC1": tmp_new[:, 0], "PC2": tmp_new[:, 1]}
+    )
 
     with plt.style.context("fivethirtyeight"):
         ax = data_df_new.plot.hexbin(
@@ -182,12 +183,10 @@ def main():
     # project reg mcmc onto msa eigenvectors
     X2d_reg = sca.alg2bin(mcmc_reg, 21)
     tmp_reg = X2d_reg.dot(v).dot(np.diag(1 / s))
-    
+
     data_df_reg = pd.DataFrame(
-              data= {
-                  "PC1": tmp_reg[:, 0],
-                  "PC2": tmp_reg[:, 1]
-              })
+        data={"PC1": tmp_reg[:, 0], "PC2": tmp_reg[:, 1]}
+    )
 
     with plt.style.context("fivethirtyeight"):
         ax = data_df_reg.plot.hexbin(
@@ -203,12 +202,10 @@ def main():
     # project old mcmc onto msa eigenvectors
     X2d_old = sca.alg2bin(mcmc_old, 21)
     tmp_old = X2d_old.dot(v).dot(np.diag(1 / s))
-    
+
     data_df_old = pd.DataFrame(
-              data= {
-                  "PC1": tmp_old[:, 0],
-                  "PC2": tmp_old[:, 1]
-              })
+        data={"PC1": tmp_old[:, 0], "PC2": tmp_old[:, 1]}
+    )
 
     with plt.style.context("fivethirtyeight"):
         ax = data_df_old.plot.hexbin(

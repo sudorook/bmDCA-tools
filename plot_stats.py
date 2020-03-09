@@ -5,7 +5,8 @@ import argparse
 import numpy as np
 import pandas as pd
 import matplotlib
-matplotlib.use('Agg')
+
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 plt.rcParams["figure.figsize"] = [10, 7.5]

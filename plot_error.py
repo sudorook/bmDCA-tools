@@ -6,20 +6,31 @@ import os
 import numpy as np
 import pandas as pd
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-sns.set(rc={'figure.figsize': (10, 7.5)})
+sns.set(rc={"figure.figsize": (10, 7.5)})
 
 
 def parse_options():
     """ cli parser """
     parser = argparse.ArgumentParser()
     parser.add_argument(
-            "-o", "--old", dest="params_old", required=True, help="input parameters file")
+        "-o",
+        "--old",
+        dest="params_old",
+        required=True,
+        help="input parameters file",
+    )
     parser.add_argument(
-            "-n", "--new", dest="params_new", required=True, help="input parameters file")
+        "-n",
+        "--new",
+        dest="params_new",
+        required=True,
+        help="input parameters file",
+    )
     return parser.parse_args()
 
 
@@ -28,7 +39,7 @@ def reduce_tensor(J, norm=2):
     Npos = np.shape(J)[0]
     J_new = np.zeros((Npos, Npos))
     for i in range(Npos):
-        for j in range(i+1, Npos):
+        for j in range(i + 1, Npos):
             J_new[i, j] = np.linalg.norm(J[i, j], norm)
     return J_new
 
@@ -47,7 +58,7 @@ def load_data(data_file):
 
     tmpJ = np.array(tmpJ)
     tmph = np.array(tmph)
-                    
+
     #  h = np.loadtxt(h_file)
     Naa = 21
     Npos = int(len(tmph) / Naa)
@@ -55,7 +66,7 @@ def load_data(data_file):
 
     # Jijs are saved as upper triangular matrix...
     J = np.zeros((Npos, Npos, Naa, Naa))
-    Ntriu = int((Npos * Npos - Npos)/2)
+    Ntriu = int((Npos * Npos - Npos) / 2)
 
     #  tmp = np.loadtxt(J_file)
     tmpJ = tmpJ.reshape(Ntriu, Naa, Naa)
@@ -75,7 +86,7 @@ def main():
     h_old, J_old = load_data(options.params_old)
     h_1d_old = h_old.flatten()
     J_1d_old = J_old.flatten()
-    
+
     h_new, J_new = load_data(options.params_new)
     h_1d_new = h_new.flatten()
     J_1d_new = J_new.flatten()
@@ -83,18 +94,8 @@ def main():
     h_abs_error = abs(h_1d_old - h_1d_new)
     J_abs_error = abs(J_1d_old - J_1d_new)
 
-    h_df = pd.DataFrame(
-        data={
-            "Old": h_old.flatten(),
-            "New": h_new.flatten(),
-        }
-    )
-    J_df = pd.DataFrame(
-        data={
-            "Old": J_old.flatten(),
-            "New": J_new.flatten(),
-        }
-    )
+    h_df = pd.DataFrame(data={"Old": h_old.flatten(), "New": h_new.flatten(),})
+    J_df = pd.DataFrame(data={"Old": J_old.flatten(), "New": J_new.flatten(),})
 
     with sns.axes_style("whitegrid"):
         ax = sns.distplot(h_abs_error, kde=False)
@@ -133,5 +134,5 @@ def main():
         plt.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

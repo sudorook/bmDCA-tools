@@ -6,6 +6,7 @@ import os
 from itertools import combinations
 import numpy as np
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
@@ -15,11 +16,37 @@ plt.rcParams["figure.figsize"] = [10, 7.5]
 def parse_options():
     """ cli parser """
     parser = argparse.ArgumentParser()
-    parser.add_argument("-s", "--msa", dest="msa", required=True, help="msa file")
-    parser.add_argument("-o", "--mcmc_old", dest="mcmc_old", required=True, help="mcmc_old file")
-    parser.add_argument("-n", "--mcmc_new", dest="mcmc_new", required=True, help="mcmc_new file")
-    parser.add_argument("-p", "--params_new", dest="params_new", required=True, help="parameters file")
-    parser.add_argument("-t", "--params_old", dest="params_old", required=True, help="params file")
+    parser.add_argument(
+        "-s", "--msa", dest="msa", required=True, help="msa file"
+    )
+    parser.add_argument(
+        "-o",
+        "--mcmc_old",
+        dest="mcmc_old",
+        required=True,
+        help="mcmc_old file",
+    )
+    parser.add_argument(
+        "-n",
+        "--mcmc_new",
+        dest="mcmc_new",
+        required=True,
+        help="mcmc_new file",
+    )
+    parser.add_argument(
+        "-p",
+        "--params_new",
+        dest="params_new",
+        required=True,
+        help="parameters file",
+    )
+    parser.add_argument(
+        "-t",
+        "--params_old",
+        dest="params_old",
+        required=True,
+        help="params file",
+    )
     #  parser.add_argument("-t", "--title", dest="title", required=True, help="title prefix")
     return parser.parse_args()
 
@@ -38,7 +65,7 @@ def load_params(data_file):
 
     tmpJ = np.array(tmpJ)
     tmph = np.array(tmph)
-                    
+
     #  h = np.loadtxt(h_file)
     Naa = 21
     Npos = int(len(tmph) / Naa)
@@ -46,7 +73,7 @@ def load_params(data_file):
 
     # Jijs are saved as upper triangular matrix...
     J = np.zeros((Npos, Npos, Naa, Naa))
-    Ntriu = int((Npos * Npos - Npos)/2)
+    Ntriu = int((Npos * Npos - Npos) / 2)
 
     #  tmp = np.loadtxt(J_file)
     tmpJ = tmpJ.reshape(Ntriu, Naa, Naa)
@@ -96,38 +123,50 @@ def main():
     mcmc_new_energies_old = compute_energies(mcmc_new_seqs, h_old, J_old)
 
     with plt.style.context("fivethirtyeight"):
-        plt.hist(msa_new_energies, alpha=.5, label="MSA", density=True)
-        plt.hist(mcmc_new_energies, alpha=.5, label="MCMC (New)", density=True)
-        plt.legend(loc='upper right')
+        plt.hist(msa_new_energies, alpha=0.5, label="MSA", density=True)
+        plt.hist(
+            mcmc_new_energies, alpha=0.5, label="MCMC (New)", density=True
+        )
+        plt.legend(loc="upper right")
         plt.xlabel("Sequence Energy")
         plt.ylabel("Probability")
         plt.title("Normed histogram of sequence energies (new bmDCA)")
         plt.savefig("energies_new_hist_normed.svg")
         plt.close()
 
-        plt.hist(msa_old_energies, alpha=.5, label="MSA", density=True)
-        plt.hist(mcmc_old_energies, alpha=.5, label="MCMC (Old)", density=True)
-        plt.legend(loc='upper right')
+        plt.hist(msa_old_energies, alpha=0.5, label="MSA", density=True)
+        plt.hist(
+            mcmc_old_energies, alpha=0.5, label="MCMC (Old)", density=True
+        )
+        plt.legend(loc="upper right")
         plt.xlabel("Sequence Energy")
         plt.ylabel("Probability")
         plt.title("Normed histogram of sequence energies (old bmDCA)")
         plt.savefig("energies_old_hist_normed.svg")
         plt.close()
 
-        plt.hist(msa_new_energies, alpha=.5, label="MSA", density=True)
-        plt.hist(mcmc_old_energies_new, alpha=.5, label="MCMC (Old)", density=True)
-        plt.hist(mcmc_new_energies, alpha=.5, label="MCMC (New)", density=True)
-        plt.legend(loc='upper right')
+        plt.hist(msa_new_energies, alpha=0.5, label="MSA", density=True)
+        plt.hist(
+            mcmc_old_energies_new, alpha=0.5, label="MCMC (Old)", density=True
+        )
+        plt.hist(
+            mcmc_new_energies, alpha=0.5, label="MCMC (New)", density=True
+        )
+        plt.legend(loc="upper right")
         plt.xlabel("Sequence Energy")
         plt.ylabel("Probability")
         plt.title("Combined normed hist of seq energies (new bmDCA params)")
         plt.savefig("energies_combined_new_hist_normed.svg")
         plt.close()
 
-        plt.hist(msa_old_energies, alpha=.5, label="MSA", density=True)
-        plt.hist(mcmc_old_energies, alpha=.5, label="MCMC (Old)", density=True)
-        plt.hist(mcmc_new_energies_old, alpha=.5, label="MCMC (New)", density=True)
-        plt.legend(loc='upper right')
+        plt.hist(msa_old_energies, alpha=0.5, label="MSA", density=True)
+        plt.hist(
+            mcmc_old_energies, alpha=0.5, label="MCMC (Old)", density=True
+        )
+        plt.hist(
+            mcmc_new_energies_old, alpha=0.5, label="MCMC (New)", density=True
+        )
+        plt.legend(loc="upper right")
         plt.xlabel("Sequence Energy")
         plt.ylabel("Probability")
         plt.title("Combined normed hist of seq energies (old bmDCA params)")
@@ -135,5 +174,5 @@ def main():
         plt.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
