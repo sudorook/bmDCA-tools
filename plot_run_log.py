@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 
 #  import seaborn as sns
 
-plt.rcParams["figure.figsize"] = [10, 16]
+plt.rcParams["figure.figsize"] = [12, 16]
 #  sns.set(rc={"figure.figsize": (10, 7.5)})
 
 
