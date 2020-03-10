@@ -22,6 +22,9 @@ def parse_options():
     parser.add_argument(
         "-i", "--input", dest="input", required=True, help="run log file",
     )
+    parser.add_argument(
+        "-o", "--output", dest="output", required=True, help="figure name",
+    )
     return parser.parse_args()
 
 
@@ -38,7 +41,7 @@ def main():
             subplots=True,
         )
         plt.tight_layout()
-        plt.savefig("figure.png")
+        plt.savefig(options.output)
 
 
 if __name__ == "__main__":
