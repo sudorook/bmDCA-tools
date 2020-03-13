@@ -37,7 +37,13 @@ def main():
     with plt.style.context("fivethirtyeight"):
         ax = df.plot(
             x="step",
-            y=["burn-between", "burn-in", "energy-err", "error-tot", "step-time"],
+            y=[
+                "burn-between",
+                "burn-in",
+                "energy-err",
+                "error-tot",
+                "step-time",
+            ],
             subplots=True,
         )
         plt.tight_layout()
