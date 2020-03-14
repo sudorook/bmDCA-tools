@@ -2,7 +2,6 @@
 """ docstring """
 
 import argparse
-import os
 import numpy as np
 import pandas as pd
 import matplotlib
@@ -10,10 +9,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-#  import seaborn as sns
-
 plt.rcParams["figure.figsize"] = [12, 16]
-#  sns.set(rc={"figure.figsize": (10, 7.5)})
 
 
 def parse_options():
