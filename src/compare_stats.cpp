@@ -44,8 +44,8 @@ int main(int argc, char* argv[]) {
   idx = mc_file.find_last_of(".");
   std::string mc_prefix = mc_file.substr(0, idx);
 
-  msa.writeSequenceWeights(msa_prefix + "_weights.txt");
-  mc.writeSequenceWeights(mc_prefix + "_weights.txt");
+  // msa.writeSequenceWeights(msa_prefix + "_weights.txt");
+  // mc.writeSequenceWeights(mc_prefix + "_weights.txt");
   
   std::cout << "computing stats" << std::endl;
   MSAStats msa_stats = MSAStats(msa);
@@ -94,7 +94,8 @@ int main(int argc, char* argv[]) {
                          2.0 * mc_stats.frequency_1p.at(aa1, i) *
                            mc_stats.frequency_1p.at(aa2, j) *
                            mc_stats.frequency_1p.at(aa3, k);
-                if ((fabs(msa_tmp) > threshold) && (fabs(mc_tmp) > threshold)) {
+                if ((fabs(msa_tmp) > threshold) || (fabs(mc_tmp) > threshold)) {
+                // if ((fabs(msa_tmp) > threshold) && (fabs(mc_tmp) > threshold)) {
                   msa_stream << msa_tmp << std::endl;
                   mc_stream << mc_tmp << std::endl;
                 }
