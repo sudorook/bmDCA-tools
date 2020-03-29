@@ -44,16 +44,21 @@ SLUG=$(echo "$DESCRIPTION" | tr '[:upper:]' '[:lower:]' | sed -e "s/ /_/g")
   -c "$MCMC" \
   -t "$THRESHOLD"
 
+echo "plotting 1p frequencies"
 "${SCRIPT_DIR}/plot_stats.py" \
   -s "${MSA%.*}_freq_1p.txt" \
   -c "${MCMC%.*}_freq_1p.txt" \
   -t "1p: MSA vs MCMC (${DESCRIPTION})" \
   -o "msa_mcmc_${SLUG}_1p"
+
+echo "plotting 2p correlations"
 "${SCRIPT_DIR}/plot_stats.py" \
   -s "${MSA%.*}_corr_2p.txt" \
   -c "${MCMC%.*}_corr_2p.txt" \
   -t "2p: MSA vs MCMC (${DESCRIPTION})" \
   -o "msa_mcmc_${SLUG}_2p"
+
+echo "plotting 3p correlations"
 "${SCRIPT_DIR}/plot_stats.py" \
   -s "${MSA%.*}_corr_3p.txt" \
   -c "${MCMC%.*}_corr_3p.txt" \
