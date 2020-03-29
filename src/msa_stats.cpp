@@ -166,20 +166,6 @@ MSAStats::writeFrequency1p(std::string output_file)
   }
 };
 
-// void
-// MSAStats::writeFrequency1p(std::string output_file)
-// {
-//   std::ofstream output_stream(output_file);
-// 
-//   for (int i = 0; i < N; i++) {
-//     output_stream << i;
-//     for (int aa = 0; aa < AA_ALPHABET_SIZE; aa++) {
-//       output_stream << " " << frequency_1p.at(aa, i);
-//     }
-//     output_stream << std::endl;
-//   }
-// };
-
 void
 MSAStats::writeFrequency2p(std::string output_file)
 {

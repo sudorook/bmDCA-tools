@@ -7,6 +7,10 @@
 #include <string>
 #include <vector>
 
+#ifndef AA_ALPHABET_SIZE
+#define AA_ALPHABET_SIZE 21
+#endif
+
 MSA::MSA(std::string msa_file,
          bool reweight,
          bool is_numeric_msa,
@@ -18,7 +22,7 @@ MSA::MSA(std::string msa_file,
     readInputMSA(msa_file);
     M = seq_records.size();
     N = getSequenceLength(seq_records.begin()->getSequence());
-    Q = 21;
+    Q = AA_ALPHABET_SIZE;
     makeNumericalMatrix();
   }
   if (reweight) {
@@ -36,7 +40,7 @@ MSA::MSA(std::string msa_file, std::string weights_file, bool is_numeric_msa)
     readInputMSA(msa_file);
     M = seq_records.size();
     N = getSequenceLength(seq_records.begin()->getSequence());
-    Q = 21;
+    Q = AA_ALPHABET_SIZE;
     makeNumericalMatrix();
   }
   readSequenceWeights(weights_file);
@@ -64,6 +68,7 @@ MSA::readInputNumericMSA(std::string numeric_msa_file)
     std::istringstream iss(line);
     int n;
     i = 0;
+
     while (iss >> n) {
       alignment.at(counter, i) = n;
       i++;
@@ -144,7 +149,6 @@ MSA::makeNumericalMatrix(void)
     int col_idx = 0;
     for (auto aa = sequence.begin(); aa != sequence.end(); aa++) {
       switch (*aa) {
-        case '.':
         case '-':
         case 'B':
         case 'J':
@@ -274,7 +278,6 @@ MSA::getSequenceLength(std::string sequence)
   for (std::string::iterator it = sequence.begin(); it != sequence.end();
        ++it) {
     switch (*it) {
-      case '.':
       case '-':
       case 'B':
       case 'J':
