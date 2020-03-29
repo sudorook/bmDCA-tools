@@ -11,10 +11,9 @@
 
 int main(int argc, char* argv[]) {
   std::string msa_file;
-  std::string energy_file = "seqeuence_energies.txt";
+  std::string energy_file = "sequence_energies.txt";
   std::string params_file;
   std::string params_J_file;
-  // std::string dest = ".";
   bool compat_mode = true;
 
   char c;
@@ -26,9 +25,6 @@ int main(int argc, char* argv[]) {
       case 'o':
         energy_file = optarg;
         break;
-      // case 'd':
-      //   dest = optarg;
-      //   break;
       case 'p':
         params_file = optarg;
         break;
@@ -36,9 +32,6 @@ int main(int argc, char* argv[]) {
         params_J_file = optarg;
         compat_mode = false;
         break;
-      // case 'r':
-      //   reweight = true;
-      //   break;
       case '?':
         std::cerr << "what the fuck?" << std::endl;
     }
