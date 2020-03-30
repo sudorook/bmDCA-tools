@@ -41,6 +41,7 @@ def main():
                 "error-tot",
                 "step-time",
             ],
+            linewidth=1.0,
             subplots=True,
         )
         plt.tight_layout()
