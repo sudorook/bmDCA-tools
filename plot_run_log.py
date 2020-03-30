@@ -28,15 +28,15 @@ def main():
     """ do stuff """
     options = parse_options()
     df = pd.read_csv(options.input, sep="\t")
-    df["log-burn-in"] = np.log10(df["burn-in"])
-    df["log-burn-between"] = np.log10(df["burn-between"])
+    df["log10-burn-in"] = np.log10(df["burn-in"])
+    df["log10-burn-between"] = np.log10(df["burn-between"])
 
     with plt.style.context("fivethirtyeight"):
         ax = df.plot(
             x="step",
             y=[
-                "log-burn-between",
-                "log-burn-in",
+                "log10-burn-between",
+                "log10-burn-in",
                 "energy-err",
                 "error-tot",
                 "step-time",
