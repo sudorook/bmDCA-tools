@@ -37,7 +37,8 @@ while [ $# -ge 1 ]; do
   esac
 done
 
-SLUG=$(echo "$DESCRIPTION" | tr '[:upper:]' '[:lower:]' | sed -e "s/ /_/g")
+SLUG=$(echo "$DESCRIPTION" | tr '[:upper:]' '[:lower:]' | sed -e "s/ /_/g" | \
+       sed -e "s/,//g" -e "s/(//g" -e "s/)//g")
 
 "${SCRIPT_DIR}/compare_stats" \
   -s "$MSA" \
