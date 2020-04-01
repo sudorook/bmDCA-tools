@@ -44,18 +44,18 @@ def main():
     msa_energies = load_energies(options.msa)
     mcmc_energies = load_energies(options.mcmc)
 
-    standard_energy1 = msa_energies[0]  # e coli energy
-    standard_energy2 = np.mean(msa_energies)
+    standard_energy = msa_energies[0]  # e coli energy
+    #  standard_energy = np.mean(msa_energies)
 
     with plt.style.context("fivethirtyeight"):
         plt.hist(
-            msa_energies - standard_energy1,
+            msa_energies - standard_energy,
             alpha=0.5,
             label="MSA",
             density=True,
         )
         plt.hist(
-            mcmc_energies - standard_energy2,
+            mcmc_energies - standard_energy,
             alpha=0.5,
             label="MCMC",
             density=True,
