@@ -30,6 +30,7 @@ MSA::MSA(std::string msa_file,
   } else {
     sequence_weights = arma::vec(M, arma::fill::ones);
   }
+  computeHammingDistances();
 };
 
 MSA::MSA(std::string msa_file, std::string weights_file, bool is_numeric_msa)
@@ -44,6 +45,7 @@ MSA::MSA(std::string msa_file, std::string weights_file, bool is_numeric_msa)
     makeNumericalMatrix();
   }
   readSequenceWeights(weights_file);
+  computeHammingDistances();
 };
 
 void
@@ -350,5 +352,40 @@ MSA::writeSequenceWeights(std::string output_file)
   std::ofstream output_stream(output_file);
   for (int i = 0; i < M; i++) {
     output_stream << sequence_weights.at(i) << std::endl;
+  }
+};
+
+void
+MSA::computeHammingDistances(double threshold) {
+  hamming_distances = arma::Col<double>(M, arma::fill::zeros);
+  arma::Mat<int> alignment_T = alignment.t();
+
+  int *i_ptr = nullptr;
+  int *j_ptr = nullptr;
+  int count = 0;
+  double id = 0;
+  for (int i = 0; i < M; i++) {
+    i_ptr = alignment_T.colptr(i);
+    for (int j = i + 1; j < M; j++) {
+      count = 0;
+      j_ptr = alignment_T.colptr(j);
+      for (int n = 0; n < N; n++) {
+        if (*(i_ptr+n) == *(j_ptr+n)) {
+          count++;
+        }
+      }
+      id = (double)count / N;
+      if (id > hamming_distances.at(i)) {
+        hamming_distances.at(i) = id;
+      }
+    }
+  }
+};
+
+void
+MSA::writeHammingDistances(std::string output_file) {
+  std::ofstream output_stream(output_file);
+  for (int i = 0; i < M; i++) {
+    output_stream << hamming_distances.at(i) << std::endl;
   }
 };
