@@ -20,13 +20,21 @@ def parse_options():
         "-s", "--msa", dest="msa", required=True, help="msa file"
     )
     parser.add_argument(
-        "-S", "--msa_label", dest="msa_label", required=True, help="msa label for plot"
+        "-S",
+        "--msa_label",
+        dest="msa_label",
+        required=True,
+        help="msa label for plot",
     )
     parser.add_argument(
         "-c", "--mcmc", dest="mcmc", required=True, help="mcmc file"
     )
     parser.add_argument(
-        "-C", "--mcmc_label", dest="mcmc_label", required=True, help="mcmc label for plot"
+        "-C",
+        "--mcmc_label",
+        dest="mcmc_label",
+        required=True,
+        help="mcmc label for plot",
     )
     parser.add_argument(
         "-o", "--output", dest="output", required=True, help="output file name"
@@ -57,16 +65,10 @@ def main():
 
     with plt.style.context("fivethirtyeight"):
         plt.hist(
-            msa_distances,
-            alpha=0.5,
-            label=options.msa_label,
-            density=True,
+            msa_distances, alpha=0.5, label=options.msa_label, density=True,
         )
         plt.hist(
-            mcmc_distances,
-            alpha=0.5,
-            label=options.mcmc_label,
-            density=True,
+            mcmc_distances, alpha=0.5, label=options.mcmc_label, density=True,
         )
         plt.legend(loc="upper right")
         plt.xlabel("Sequence Hamming Distance")
