@@ -23,13 +23,28 @@ def parse_options():
         "-c", "--mcmc", dest="mcmc", required=True, help="mcmc file"
     )
     parser.add_argument(
-        "-S", "--msa_label", dest="msa_label", required=True, help="msa plot label"
+        "-S",
+        "--msa_label",
+        dest="msa_label",
+        required=True,
+        help="msa plot label",
     )
     parser.add_argument(
-        "-C", "--mcmc_label", dest="mcmc_label", required=True, help="mcmc plot label"
+        "-C",
+        "--mcmc_label",
+        dest="mcmc_label",
+        required=True,
+        help="mcmc plot label",
     )
     parser.add_argument(
         "-t", "--title", dest="title", required=True, help="title prefix"
+    )
+    parser.add_argument(
+        "-m",
+        "--offset_mode",
+        dest="mode",
+        default=0,
+        help="offset type (default none)",
     )
     parser.add_argument(
         "-o", "--output", dest="output", required=True, help="output file name"
@@ -50,9 +65,12 @@ def main():
     msa_energies = load_energies(options.msa)
     mcmc_energies = load_energies(options.mcmc)
 
-    standard_energy = msa_energies[0]  # e coli energy
-    #  standard_energy = np.mean(msa_energies)
-    standard_energy = 0
+    if options.offset_mode == 0:
+        standard_energy = 0
+    elif options.offset_mode == 1:
+        standard_energy = msa_energies[0]  # e coli energy
+    elif options.offset_mode == 2:
+        standard_energy = np.mean(msa_energies)
 
     with plt.style.context("fivethirtyeight"):
         plt.hist(
