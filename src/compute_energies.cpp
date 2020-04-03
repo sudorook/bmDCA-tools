@@ -15,12 +15,17 @@ int main(int argc, char* argv[]) {
   std::string params_file;
   std::string params_J_file;
   bool compat_mode = true;
+  bool is_numeric = false;
 
   char c;
-  while ((c = getopt(argc, argv, "i:o:p:P:")) != -1) {
+  while ((c = getopt(argc, argv, "i:o:n:p:P:")) != -1) {
     switch (c) {
       case 'i':
         msa_file = optarg;
+        break;
+      case 'n':
+        msa_file = optarg;
+        is_numeric = true;
         break;
       case 'o':
         energy_file = optarg;
@@ -41,7 +46,7 @@ int main(int argc, char* argv[]) {
   std::string prefix = msa_file.substr(0, idx);
 
   std::cout << "reading sequences... " << std::flush;
-  MSA msa = MSA(msa_file, true, true, 0.8);
+  MSA msa = MSA(msa_file, true, is_numeric, 0.8);
   std::cout << "done" << std::endl;
 
   std::cout << "reading parameters... " << std::flush;
