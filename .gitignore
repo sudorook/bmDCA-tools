@@ -3,6 +3,7 @@ relic/
 compute_stats
 compare_stats
 compute_energies
+compute_distances
 
 # Text editor backups
 *~

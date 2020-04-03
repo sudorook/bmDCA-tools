@@ -1,6 +1,7 @@
 COMPUTE := compute_stats
 COMPARE := compare_stats
 ENERGY := compute_energies
+DISTANCE := compute_distances
 
 CC := g++
 
@@ -26,9 +27,14 @@ SOURCES_ENERGY = ${SRCPATH}/compute_energies.cpp \
                  ${SRCPATH}/utils.cpp
 OBJECTS_ENERGY = $(SOURCES_ENERGY:%.cpp=%.o)
 
+SOURCES_DISTANCE = ${SRCPATH}/compute_distances.cpp \
+                   ${SRCPATH}/msa.cpp \
+                   ${SRCPATH}/utils.cpp
+OBJECTS_DISTANCE = $(SOURCES_DISTANCE:%.cpp=%.o)
+
 .PHONY: all
 
-all: $(COMPUTE) $(COMPARE) $(ENERGY)
+all: $(COMPUTE) $(COMPARE) $(ENERGY) $(DISTANCE)
 
 $(COMPUTE): $(OBJECTS_COMPUTE)
 	$(CC) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
@@ -39,12 +45,17 @@ $(COMPARE): $(OBJECTS_COMPARE)
 $(ENERGY): $(OBJECTS_ENERGY)
 	$(CC) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
+$(DISTANCE): $(OBJECTS_DISTANCE)
+	$(CC) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
+
 .PHONY: clean
 
 clean:
 	rm -f $(COMPUTE)
 	rm -f $(COMPARE)
 	rm -f $(ENERGY)
+	rm -f $(DISTANCE)
 	rm -f $(OBJECTS_COMPUTE)
 	rm -f $(OBJECTS_COMPARE)
 	rm -f $(OBJECTS_ENERGY)
+	rm -f $(OBJECTS_DISTANCE)
