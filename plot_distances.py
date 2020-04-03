@@ -31,9 +31,9 @@ def parse_options():
     parser.add_argument(
         "-o", "--output", dest="output", required=True, help="output file name"
     )
-    #  parser.add_argument(
-    #      "-t", "--title", dest="title", required=True, help="plot title"
-    #  )
+    parser.add_argument(
+        "-t", "--title", dest="title", required=True, help="plot title"
+    )
     return parser.parse_args()
 
 
@@ -73,7 +73,7 @@ def main():
         plt.xlim(0, 1)
         plt.ylabel("Probability")
         plt.xlabel("Min Pairwise Distance")
-        #  plt.title(options.title)
+        plt.title(options.title)
         plt.savefig(options.output)
         plt.close()
 
