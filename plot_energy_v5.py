@@ -23,6 +23,12 @@ def parse_options():
         "-c", "--mcmc", dest="mcmc", required=True, help="mcmc file"
     )
     parser.add_argument(
+        "-S", "--msa_label", dest="msa_label", required=True, help="msa plot label"
+    )
+    parser.add_argument(
+        "-C", "--mcmc_label", dest="mcmc_label", required=True, help="mcmc plot label"
+    )
+    parser.add_argument(
         "-t", "--title", dest="title", required=True, help="title prefix"
     )
     parser.add_argument(
@@ -46,25 +52,25 @@ def main():
 
     standard_energy = msa_energies[0]  # e coli energy
     #  standard_energy = np.mean(msa_energies)
+    standard_energy = 0
 
     with plt.style.context("fivethirtyeight"):
         plt.hist(
             msa_energies - standard_energy,
             alpha=0.5,
-            label="MSA",
+            label=options.msa_label,
             density=True,
         )
         plt.hist(
             mcmc_energies - standard_energy,
             alpha=0.5,
-            label="MCMC",
+            label=options.mcmc_label,
             density=True,
         )
         plt.legend(loc="upper right")
         plt.xlabel("Sequence Energy")
-        plt.xlim(-50, 200)
+        #  plt.xlim(-100, 120)
         plt.ylabel("Probability")
-        #  plt.title("Normed histogram of sequence energies (new bmDCA)")
         plt.title(options.title)
         plt.savefig(options.output)
         plt.close()
