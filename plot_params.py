@@ -60,18 +60,23 @@ def load_data(data_file):
 
     tmpJ = []
     tmph = []
+    Naa = 0
+    Npos = 0
     with open(data_file, "r") as handle:
         for line in handle:
             if line[0] == "J":
                 tmpJ.append(float(line.split(" ")[5].strip()))
             elif line[0] == "h":
+                tmp = line.split(" ")
                 tmph.append(float(line.split(" ")[3].strip()))
+                if tmp[1] == "0":
+                    Naa += 1
+                if tmp[2] == "0":
+                    Npos += 1
 
     tmpJ = np.array(tmpJ)
     tmph = np.array(tmph)
 
-    Naa = 21
-    Npos = int(len(tmph) / Naa)
     h = tmph.reshape(Npos, Naa)
 
     # Jijs are saved as upper triangular matrix...
