@@ -7,10 +7,6 @@
 #include <string>
 #include <sys/types.h>
 
-#ifndef AA_ALPHABET_SIZE
-#define AA_ALPHABET_SIZE 21
-#endif
-
 SeqRecord::SeqRecord(std::string h, std::string s)
   : header(h)
   , sequence(s){};
@@ -61,16 +57,30 @@ loadPottsModelCompat(std::string parameters_file)
     std::exit(EXIT_FAILURE);
   }
 
-  int count = 0;
-  std::string line;
-  while (std::getline(input_stream, line))
+  int N = 0;
+  int Q = 0;
+
+  int count = 1;
+  int n1, n2, aa1, aa2;
+  double value;
+  std::string tmp = "";
+  std::getline(input_stream, tmp);
+  while(std::getline(input_stream, tmp)) {
+    input_stream >> tmp;
+    input_stream >> n1 >> n2 >> aa1 >> aa2;
+    input_stream >> value;
     count++;
 
-  int N;
-  int Q = AA_ALPHABET_SIZE;
-  N =
-    (int)(sqrt(2 * count + ((double)Q - 2) * ((double)Q - 2) / 4) / (double)Q +
-          ((double)Q - 2) / (2 * (double)Q));
+    if ( (n1 == 1) & (N == 0)) {
+      N = count;
+    }
+    if ( (aa2 == 0) & (Q == 0)) {
+      Q = count;
+    }
+    if ( (N != 0) & (Q != 0))
+      break;
+  }
+  N = (int)( (double)N / (double)Q / double(Q)) + 1;
 
   input_stream.clear();
   input_stream.seekg(0);
@@ -84,10 +94,6 @@ loadPottsModelCompat(std::string parameters_file)
     }
   }
 
-  // Read parameters
-  int n1, n2, aa1, aa2;
-  double value;
-  std::string tmp = "";
   for (int count = 0; count < (int)N * (N - 1) / 2 * Q * Q; count++) {
     input_stream >> tmp;
     input_stream >> n1 >> n2 >> aa1 >> aa2;
@@ -136,21 +142,19 @@ convertFrequencyToAscii(std::string stats_file)
     int N = frequency_1p.n_cols;
     int Q = frequency_1p.n_rows;
 
-    if (Q == AA_ALPHABET_SIZE) {
-      for (int i = 0; i < N; i++) {
-        output_stream << i;
-        for (int aa = 0; aa < Q; aa++) {
-          output_stream << " " << frequency_1p.at(aa, i);
-        }
-        output_stream << std::endl;
+    for (int i = 0; i < N; i++) {
+      output_stream << i;
+      for (int aa = 0; aa < Q; aa++) {
+        output_stream << " " << frequency_1p.at(aa, i);
       }
+      output_stream << std::endl;
     }
   } else if (is_2p) {
     arma::field<arma::Mat<double>> frequency_2p;
     frequency_2p.load(stats_file, arma::arma_binary);
 
     int N = frequency_2p.n_rows;
-    int Q = AA_ALPHABET_SIZE;
+    int Q = frequency_2p.at(0, 1).n_rows;
 
     for (int i = 0; i < N; i++) {
       for (int j = i + 1; j < N; j++) {
@@ -170,7 +174,7 @@ convertFrequencyToAscii(std::string stats_file)
     int N = frequency_1p.n_cols;
     int Q = frequency_1p.n_rows;
 
-    if (Q == AA_ALPHABET_SIZE) { // 1p
+    if ((Q != 0) & (N != 0)) { // 1p
       for (int i = 0; i < N; i++) {
         output_stream << i;
         for (int aa = 0; aa < Q; aa++) {
@@ -182,13 +186,14 @@ convertFrequencyToAscii(std::string stats_file)
       arma::field<arma::Mat<double>> frequency_2p;
       frequency_2p.load(stats_file, arma::arma_binary);
 
-      N = frequency_2p.n_rows;
+      int N = frequency_2p.n_rows;
+      int Q = frequency_2p.at(0, 1).n_rows;
 
       for (int i = 0; i < N; i++) {
         for (int j = i + 1; j < N; j++) {
           output_stream << i << " " << j;
-          for (int aa1 = 0; aa1 < AA_ALPHABET_SIZE; aa1++) {
-            for (int aa2 = 0; aa2 < AA_ALPHABET_SIZE; aa2++) {
+          for (int aa1 = 0; aa1 < Q; aa1++) {
+            for (int aa2 = 0; aa2 < Q; aa2++) {
               output_stream << " " << frequency_2p.at(i, j).at(aa1, aa2);
             }
           }
@@ -206,13 +211,13 @@ convertParametersToAscii(std::string h_file, std::string J_file)
   // Check file extensions and parse out file names.
   int idx = h_file.find_last_of(".");
   std::string h_name = h_file.substr(0, idx);
-  std::string h_ext = h_file.substr(idx+1);
+  std::string h_ext = h_file.substr(idx + 1);
 
   idx = J_file.find_last_of(".");
   std::string J_name = J_file.substr(0, idx);
-  std::string J_ext = J_file.substr(idx+1);
+  std::string J_ext = J_file.substr(idx + 1);
 
-  if ( (J_ext != "bin") & (h_ext != "bin") ) {
+  if ((J_ext != "bin") & (h_ext != "bin")) {
     std::cerr << "ERROR: input parameters do not have 'bin' extension."
               << std::endl;
     std::exit(EXIT_FAILURE);
@@ -238,9 +243,9 @@ convertParametersToAscii(std::string h_file, std::string J_file)
 
   // Generate an output file name.
   std::string output_file;
-  for (int i=0; i < Min(h_name.size(), J_name.size()); i++) {
+  for (int i = 0; i < Min(h_name.size(), J_name.size()); i++) {
     if (h_name[i] == J_name[i]) {
-      if ( (output_file.back() == '_') && (h_name[i] == '_') )
+      if ((output_file.back() == '_') && (h_name[i] == '_'))
         continue;
       output_file += h_name[i];
     }
@@ -264,8 +269,7 @@ convertParametersToAscii(std::string h_file, std::string J_file)
   // Write h
   for (int i = 0; i < N; i++) {
     for (int aa = 0; aa < Q; aa++) {
-      output_stream << "h " << i << " " << aa << " " << h(aa, i)
-                    << std::endl;
+      output_stream << "h " << i << " " << aa << " " << h(aa, i) << std::endl;
     }
   }
   return;
@@ -304,7 +308,8 @@ Min(double a, double b)
 };
 
 int
-deleteFile(std::string filename) {
+deleteFile(std::string filename)
+{
   std::fstream fs;
   fs.open(filename);
   if (!fs.fail()) {
@@ -318,27 +323,33 @@ deleteFile(std::string filename) {
 };
 
 bool
-checkFileExists(std::string filename) {
+checkFileExists(std::string filename)
+{
   std::fstream fs;
   fs.open(filename);
   if (fs.fail()) {
+    fs.close();
     return false;
   } else {
+    fs.close();
     return true;
   }
 };
 
 void
-deleteAllFiles(std::string directory) {
-  DIR *dp;
-  struct dirent *dirp;
+deleteAllFiles(std::string directory)
+{
+  DIR* dp;
+  struct dirent* dirp;
 
   dp = opendir(".");
   std::vector<int> steps;
   while ((dirp = readdir(dp)) != NULL) {
     std::string fname = dirp->d_name;
-    if (fname == ".") continue;
-    if (fname == "..") continue;
+    if (fname == ".")
+      continue;
+    if (fname == "..")
+      continue;
     if (std::remove(fname.c_str()) != 0) {
       std::cerr << "ERROR: deletion of '" << fname << "' failed." << std::endl;
     }
