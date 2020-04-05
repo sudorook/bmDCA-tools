@@ -66,7 +66,7 @@ def main():
     Q, N = h.shape
 
     alignment_file = prefix + "_msa_numerical.txt"
-    save_alignment((alignment-1), M, N, Q, alignment_file)
+    save_alignment((alignment - 1), M, N, Q, alignment_file)
 
     parameters_file = prefix + "_parameters.txt"
     save_parameters(h, J, M, N, Q, parameters_file)
