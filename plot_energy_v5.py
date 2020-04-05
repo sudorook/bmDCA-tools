@@ -54,7 +54,7 @@ def parse_options():
 
 def load_energies(energy_file):
     """ load sequences """
-    data = np.loadtxt(energy_file, dtype="double", skiprows=1)
+    data = np.loadtxt(energy_file, dtype="double", skiprows=0)
     return data
 
 
@@ -65,11 +65,10 @@ def main():
     msa_energies = load_energies(options.msa)
     mcmc_energies = load_energies(options.mcmc)
 
-    if options.offset_mode == 0:
-        standard_energy = 0
-    elif options.offset_mode == 1:
+    standard_energy = 0;
+    if options.mode == "1":
         standard_energy = msa_energies[0]  # e coli energy
-    elif options.offset_mode == 2:
+    elif options.mode == "2":
         standard_energy = np.mean(msa_energies)
 
     with plt.style.context("fivethirtyeight"):
