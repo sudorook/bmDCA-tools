@@ -27,7 +27,7 @@ public:
   arma::Mat<double> rel_entropy_grad_1p;
 
 private:
-  double pseudocount;
+  // double pseudocount;
   int M;              // number of sequences
   int N;              // number of positions
   int Q;              // amino acid alphabet size

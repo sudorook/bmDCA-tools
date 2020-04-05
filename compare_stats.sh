@@ -49,27 +49,45 @@ echo "plotting 1p frequencies"
 "${SCRIPT_DIR}/plot_stats.py" \
   -s "${MSA%.*}_freq_1p.txt" \
   -c "${MCMC%.*}_freq_1p.txt" \
-  -t "1p: MSA vs MCMC (${DESCRIPTION})" \
-  -o "msa_mcmc_${SLUG}_1p"
+  -t "1p frequencies (${DESCRIPTION})" \
+  -o "msa_mcmc_${SLUG}_freq_1p"
+
+echo "plotting 2p frequencies"
+"${SCRIPT_DIR}/plot_stats.py" \
+  -s "${MSA%.*}_freq_2p.txt" \
+  -c "${MCMC%.*}_freq_2p.txt" \
+  -t "2p frequencies (${DESCRIPTION})" \
+  -o "msa_mcmc_${SLUG}_freq_2p"
 
 echo "plotting 2p correlations"
 "${SCRIPT_DIR}/plot_stats.py" \
   -s "${MSA%.*}_corr_2p.txt" \
   -c "${MCMC%.*}_corr_2p.txt" \
-  -t "2p: MSA vs MCMC (${DESCRIPTION})" \
-  -o "msa_mcmc_${SLUG}_2p"
+  -t "2p correlations (${DESCRIPTION})" \
+  -o "msa_mcmc_${SLUG}_corr_2p"
+
+echo "plotting 3p frequencies"
+"${SCRIPT_DIR}/plot_stats.py" \
+  -s "${MSA%.*}_freq_3p.txt" \
+  -c "${MCMC%.*}_freq_3p.txt" \
+  -t "3p frequencies (${DESCRIPTION})" \
+  -o "msa_mcmc_${SLUG}_freq_3p"
 
 echo "plotting 3p correlations"
 "${SCRIPT_DIR}/plot_stats.py" \
   -s "${MSA%.*}_corr_3p.txt" \
   -c "${MCMC%.*}_corr_3p.txt" \
-  -t "3p: MSA vs MCMC (${DESCRIPTION})" \
-  -o "msa_mcmc_${SLUG}_3p"
+  -t "3p correlations (${DESCRIPTION})" \
+  -o "msa_mcmc_${SLUG}_corr_3p"
 
 rm -v \
   "${MSA%.*}_freq_1p.txt" \
   "${MCMC%.*}_freq_1p.txt" \
+  "${MSA%.*}_freq_2p.txt" \
+  "${MCMC%.*}_freq_2p.txt" \
   "${MSA%.*}_corr_2p.txt" \
   "${MCMC%.*}_corr_2p.txt" \
+  "${MSA%.*}_freq_3p.txt" \
+  "${MCMC%.*}_freq_3p.txt" \
   "${MSA%.*}_corr_3p.txt" \
   "${MCMC%.*}_corr_3p.txt"

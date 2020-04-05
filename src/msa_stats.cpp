@@ -20,11 +20,15 @@ MSAStats::MSAStats(MSA msa)
   aa_background_frequencies =
     arma::Col<double>(Q, arma::fill::ones);
 
-  aa_background_frequencies = {
-    0.000, 0.073, 0.025, 0.050, 0.061, 0.042, 0.072, 0.023, 0.053, 0.064, 0.089,
-    0.023, 0.043, 0.052, 0.040, 0.052, 0.073, 0.056, 0.063, 0.013, 0.033
-  };
-  pseudocount = 0.03;
+  // if (Q == 21) {
+  //   aa_background_frequencies = {
+  //     0.000, 0.073, 0.025, 0.050, 0.061, 0.042, 0.072, 0.023, 0.053, 0.064, 0.089,
+  //     0.023, 0.043, 0.052, 0.040, 0.052, 0.073, 0.056, 0.063, 0.013, 0.033
+  //   };
+  // } else {
+  //   aa_background_frequencies = aa_background_frequencies / (double)Q;
+  // }
+  // pseudocount = 0.03;
 
   // Compute the frequecies (1p statistics) for amino acids (and gaps) for each
   // position. Use pointers to make things speedier.
@@ -55,7 +59,7 @@ MSAStats::MSAStats(MSA msa)
       frequency_2p.at(i, j) = frequency_2p.at(i, j) / M_effective;
     }
   }
-  
+
   // Compute the 3p statistics
   for (int i = 0; i < N; i++) {
     for (int j = i + 1; j < N; j++) {
@@ -81,35 +85,35 @@ MSAStats::MSAStats(MSA msa)
   std::cout << Q << " amino acids (including gaps)" << std::endl;
   std::cout << M_effective << " effective sequences" << std::endl;
 
-  // Update the background frequencies based by computing overall gap frequency
-  // theta.
-  double theta = 0;
-  for (int i = 0; i < N; i++) {
-    theta += frequency_1p.at(0, i);
-  }
-  theta = theta / N;
-  aa_background_frequencies[0] = theta;
-  for (int i = 1; i < AA_ALPHABET_SIZE; i++) {
-    aa_background_frequencies[i] = aa_background_frequencies[i] * (1. - theta);
-  }
-
-  // Use the positonal and backgrounds frequencies to estimate the relative
-  // entropy gradient for each position.
-  arma::Mat<double> tmp = frequency_1p * (1. - pseudocount);
-  tmp.each_col() += pseudocount * aa_background_frequencies;
-  double pos_freq;
-  double background_freq;
-  for (int i = 0; i < N; i++) {
-    for (int aa = 0; aa < AA_ALPHABET_SIZE; aa++) {
-      pos_freq = tmp.at(aa, i);
-      background_freq = aa_background_frequencies(aa);
-      if (pos_freq < 1. && pos_freq > 0.) {
-        rel_entropy_grad_1p.at(aa, i) =
-          log((pos_freq * (1. - background_freq)) /
-              ((1. - pos_freq) * background_freq));
-      }
-    }
-  }
+  // // Update the background frequencies based by computing overall gap frequency
+  // // theta.
+  // double theta = 0;
+  // for (int i = 0; i < N; i++) {
+  //   theta += frequency_1p.at(0, i);
+  // }
+  // theta = theta / N;
+  // aa_background_frequencies[0] = theta;
+  // for (int i = 1; i < Q; i++) {
+  //   aa_background_frequencies[i] = aa_background_frequencies[i] * (1. - theta);
+  // }
+  //
+  // // Use the positonal and backgrounds frequencies to estimate the relative
+  // // entropy gradient for each position.
+  // arma::Mat<double> tmp = frequency_1p * (1. - pseudocount);
+  // tmp.each_col() += pseudocount * aa_background_frequencies;
+  // double pos_freq;
+  // double background_freq;
+  // for (int i = 0; i < N; i++) {
+  //   for (int aa = 0; aa < Q; aa++) {
+  //     pos_freq = tmp.at(aa, i);
+  //     background_freq = aa_background_frequencies(aa);
+  //     if (pos_freq < 1. && pos_freq > 0.) {
+  //       rel_entropy_grad_1p.at(aa, i) =
+  //         log((pos_freq * (1. - background_freq)) /
+  //             ((1. - pos_freq) * background_freq));
+  //     }
+  //   }
+  // }
 };
 
 double
@@ -244,7 +248,7 @@ MSAStats::writeCorrelation3p(std::string output_file)
 // MSAStats::writeCorrelation3p(std::string output_file, double threshold)
 // {
 //   std::ofstream output_stream(output_file);
-// 
+//
 //   double tmp = 0;
 //   for (int i = 0; i < N; i++) {
 //     for (int j = i + 1; j < N; j++) {
