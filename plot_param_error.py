@@ -101,6 +101,12 @@ def main():
     h1, J1 = load_data(options.params)
     h2, J2 = load_data(options.params2)
 
+    #  print(h1)
+    #  print(h2)
+    #  
+    #  print(J1)
+    #  print(J2)
+
     J1_1d = J1.flatten()
     J2_1d = J2.flatten()
     h1_1d = h1.flatten()
