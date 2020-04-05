@@ -102,7 +102,7 @@ def main():
     h2, J2 = load_data(options.params2)
 
     J1_1d = J1.flatten()
-    J2_1d = J1.flatten()
+    J2_1d = J2.flatten()
     h1_1d = h1.flatten()
     h2_1d = h2.flatten()
     
@@ -127,7 +127,7 @@ def main():
         plt.close()
 
     J1_1d = reduce_tensor(J1).flatten()
-    J2_1d = reduce_tensor(J1).flatten()
+    J2_1d = reduce_tensor(J2).flatten()
     h1_1d = reduce_h(h1).flatten()
     h2_1d = reduce_h(h2).flatten()
 
