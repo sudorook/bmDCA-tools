@@ -25,22 +25,24 @@ def load_model(data_file):
     """ load mat file with alignment, fields, and couplings """
     data = loadmat(data_file)
     alignment = data["align"]
-    #  params_h = data['h'].T
-    #  params_J = data['J'].T
     params_h = data["h"]
     params_J = data["J"]
 
     return alignment, params_h, params_J
 
 
-def save_alignment(alignment, filename):
+def save_alignment(alignment, M, N, Q, filename):
     """ save numerical alignment """
-    np.savetxt(filename, alignment, fmt="%d")
+    with open(filename, "w") as handle:
+        handle.write("%d %d %d\n" % (M, N, Q))
+        for i in range(M):
+            for j in range(N):
+                handle.write(str(alignment[i, j]) + " ")
+            handle.write("\n")
 
 
-def save_parameters(h, J, filename):
+def save_parameters(h, J, M, N, Q, filename):
     """ save parameters (h, J) to file """
-    Q, N = h.shape
     with open(filename, "w") as handle:
         for i in range(N):
             for j in range(i + 1, N):
@@ -60,15 +62,14 @@ def main():
     prefix = os.path.splitext((options.input).replace("/", "_"))[0]
 
     alignment, h, J = load_model(options.input)
-    #  print(alignment)
-    #  print(h)
-    #  print(J)
+    M = alignment.shape[0]
+    Q, N = h.shape
 
     alignment_file = prefix + "_msa_numerical.txt"
-    save_alignment(alignment, alignment_file)
+    save_alignment((alignment-1), M, N, Q, alignment_file)
 
     parameters_file = prefix + "_parameters.txt"
-    save_parameters(h, J, parameters_file)
+    save_parameters(h, J, M, N, Q, parameters_file)
 
 
 if __name__ == "__main__":
