@@ -32,8 +32,8 @@ int main(int argc, char* argv[]) {
   }
 
   std::cout << "reading sequences" << std::endl;
-  MSA msa = MSA(msa_file, true, true, 0.8);
-  MSA mc = MSA(mc_file, true, true, 0.8);
+  MSA msa = MSA(msa_file, false, true, 0.8);
+  MSA mc = MSA(mc_file, false, true, 0.8);
 
   int idx = msa_file.find_last_of(".");
   std::string msa_prefix = msa_file.substr(0, idx);
