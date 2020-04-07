@@ -50,8 +50,8 @@ def reduce_h(h):
     h_new = np.zeros(Npos)
     for i in range(Npos):
         for j in range(Naa):
-            h_new[i] += (h[i, j])**2
-        h_new[i] = h_new[i]**.5
+            h_new[i] += (h[i, j]) ** 2
+        h_new[i] = h_new[i] ** 0.5
     return h_new
 
 
@@ -103,7 +103,7 @@ def main():
 
     #  print(h1)
     #  print(h2)
-    #  
+    #
     #  print(J1)
     #  print(J2)
 
@@ -111,7 +111,7 @@ def main():
     J2_1d = J2.flatten()
     h1_1d = h1.flatten()
     h2_1d = h2.flatten()
-    
+
     with plt.style.context("fivethirtyeight"):
         fig, ax = plt.subplots(2, 1)
         ax[0].scatter(x=h1_1d, y=h2_1d)

@@ -65,7 +65,7 @@ def main():
     msa_energies = load_energies(options.msa)
     mcmc_energies = load_energies(options.mcmc)
 
-    standard_energy = 0;
+    standard_energy = 0
     if options.mode == "1":
         standard_energy = msa_energies[0]  # e coli energy
     elif options.mode == "2":

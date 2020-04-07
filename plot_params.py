@@ -43,8 +43,8 @@ def reduce_h(h):
     h_new = np.zeros(Npos)
     for i in range(Npos):
         for j in range(Naa):
-            h_new[i] += (h[i, j])**2
-        h_new[i] = h_new[i]**.5
+            h_new[i] += (h[i, j]) ** 2
+        h_new[i] = h_new[i] ** 0.5
     return h_new
 
 

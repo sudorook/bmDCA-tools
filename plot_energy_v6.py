@@ -67,7 +67,7 @@ def main():
         plt.hist(
             mcmc_energies2 - standard_energy,
             alpha=0.5,
-            label="MCMC (Martin)",
+            label="MCMC 2",
             density=True,
         )
         plt.legend(loc="upper right")
