@@ -31,19 +31,18 @@ def main():
     df["log10-burn-in"] = np.log10(df["burn-in"])
     df["log10-burn-between"] = np.log10(df["burn-between"])
 
+    # collect fields
+    wants = [
+        "log10-burn-between",
+        "log10-burn-in",
+        "energy-err",
+        "error-tot",
+        "step-time",
+    ]
+    fields = [field for field in wants if field in df.columns]
+
     with plt.style.context("fivethirtyeight"):
-        ax = df.plot(
-            x="step",
-            y=[
-                "log10-burn-between",
-                "log10-burn-in",
-                "energy-err",
-                "error-tot",
-                "step-time",
-            ],
-            linewidth=1.0,
-            subplots=True,
-        )
+        ax = df.plot(x="step", y=fields, linewidth=1.0, subplots=True,)
         plt.tight_layout()
         plt.savefig(options.output)
 
