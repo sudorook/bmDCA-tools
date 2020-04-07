@@ -35,9 +35,9 @@ def save_alignment(alignment, M, N, Q, filename):
     """ save numerical alignment """
     with open(filename, "w") as handle:
         handle.write("%d %d %d\n" % (M, N, Q))
-        for i in range(M):
-            for j in range(N):
-                handle.write(str(alignment[i, j]) + " ")
+        for i in range(0, M):
+            line = " ".join([str(x) for x in alignment[i, :]])
+            handle.write(line)
             handle.write("\n")
 
 
