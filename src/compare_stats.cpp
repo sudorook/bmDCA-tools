@@ -14,14 +14,19 @@ int main(int argc, char* argv[]) {
   std::string mc_file;
   double threshold = 0;
 
+  bool reweight = false;
+
   char c;
-  while ((c = getopt(argc, argv, "s:c:t:")) != -1) {
+  while ((c = getopt(argc, argv, "s:c:t:r")) != -1) {
     switch (c) {
       case 's':
         msa_file = optarg;
         break;
       case 'c':
         mc_file = optarg;
+        break;
+      case 'r':
+        reweight = true;
         break;
       case 't':
         threshold = std::stod(optarg);
@@ -32,7 +37,7 @@ int main(int argc, char* argv[]) {
   }
 
   std::cout << "reading sequences" << std::endl;
-  MSA msa = MSA(msa_file, false, true, 0.8);
+  MSA msa = MSA(msa_file, reweight, true, 0.8);
   MSA mc = MSA(mc_file, false, true, 0.8);
 
   int idx = msa_file.find_last_of(".");

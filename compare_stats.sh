@@ -2,9 +2,10 @@
 set -eu
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+REWEIGHT=false
 
-OPTIONS=s:c:d:t:
-LONGOPTIONS=msa:,mcmc:,description:,threshold:
+OPTIONS=s:c:d:t:r
+LONGOPTIONS=msa:,mcmc:,description:,threshold:,reweight
 PARSED=$(getopt -o ${OPTIONS} --long ${LONGOPTIONS} -n "$0" -- "$@")
 eval set -- "$PARSED"
 
@@ -26,6 +27,10 @@ while [ $# -ge 1 ]; do
       THRESHOLD="$2"
       shift 2
       ;;
+    -r|--reweight)
+      REWEIGHT=true
+      shift
+      ;;
     --)
       shift
       break
@@ -40,10 +45,17 @@ done
 SLUG=$(echo "$DESCRIPTION" | tr '[:upper:]' '[:lower:]' | sed -e "s/ /_/g" | \
        sed -e "s/,//g" -e "s/(//g" -e "s/)//g")
 
-"${SCRIPT_DIR}/compare_stats" \
-  -s "$MSA" \
-  -c "$MCMC" \
-  -t "$THRESHOLD"
+if [ "${REWEIGHT}" == true ]; then
+  "${SCRIPT_DIR}/compare_stats" -r \
+    -s "$MSA" \
+    -c "$MCMC" \
+    -t "$THRESHOLD"
+else
+  "${SCRIPT_DIR}/compare_stats" \
+    -s "$MSA" \
+    -c "$MCMC" \
+    -t "$THRESHOLD"
+fi
 
 echo "plotting 1p frequencies"
 "${SCRIPT_DIR}/plot_stats.py" \
