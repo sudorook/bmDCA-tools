@@ -33,49 +33,61 @@ MSAStats::MSAStats(MSA msa)
   // Compute the frequecies (1p statistics) for amino acids (and gaps) for each
   // position. Use pointers to make things speedier.
   M_effective = sum(msa.sequence_weights);
-  int* align_ptr = nullptr;
-  double* freq_ptr = nullptr;
-  double* weight_ptr = msa.sequence_weights.memptr();
-  for (int i = 0; i < N; i++) {
-    align_ptr = msa.alignment.colptr(i);
-    freq_ptr = frequency_1p.colptr(i);
-    for (int m = 0; m < M; m++) {
-      *(freq_ptr + *(align_ptr + m)) += *(weight_ptr + m);
+#pragma omp parallel
+  {
+#pragma omp for
+    for (int i = 0; i < N; i++) {
+      int* align_ptr = msa.alignment.colptr(i);
+      double* freq_ptr = frequency_1p.colptr(i);
+      double* weight_ptr = msa.sequence_weights.memptr();
+      for (int m = 0; m < M; m++) {
+        *(freq_ptr + *(align_ptr + m)) += *(weight_ptr + m);
+      }
     }
   }
   frequency_1p = frequency_1p / M_effective;
 
   // Compute the 2p statistics
-  for (int i = 0; i < N; i++) {
-    for (int j = i + 1; j < N; j++) {
-      frequency_2p.at(i, j) = arma::Mat<double>(Q, Q, arma::fill::zeros);
+#pragma omp parallel
+  {
+#pragma omp for
+    for (int i = 0; i < N; i++) {
+      for (int j = i + 1; j < N; j++) {
+        double* weight_ptr = msa.sequence_weights.memptr();
+        frequency_2p.at(i, j) = arma::Mat<double>(Q, Q, arma::fill::zeros);
 
-      int* align_ptr1 = msa.alignment.colptr(i);
-      int* align_ptr2 = msa.alignment.colptr(j);
-      for (int m = 0; m < M; m++) {
-        frequency_2p.at(i, j)(*(align_ptr1 + m), *(align_ptr2 + m)) +=
-          *(weight_ptr + m);
+        int* align_ptr1 = msa.alignment.colptr(i);
+        int* align_ptr2 = msa.alignment.colptr(j);
+        for (int m = 0; m < M; m++) {
+          frequency_2p.at(i, j)(*(align_ptr1 + m), *(align_ptr2 + m)) +=
+            *(weight_ptr + m);
+        }
+        frequency_2p.at(i, j) = frequency_2p.at(i, j) / M_effective;
       }
-      frequency_2p.at(i, j) = frequency_2p.at(i, j) / M_effective;
     }
   }
 
   // Compute the 3p statistics
-  for (int i = 0; i < N; i++) {
-    for (int j = i + 1; j < N; j++) {
-      for (int k = j + 1; k < N; k++) {
-        frequency_3p.at(i, j, k) =
-          arma::Cube<double>(Q, Q, Q, arma::fill::zeros);
+#pragma omp parallel
+  {
+#pragma omp for
+    for (int i = 0; i < N; i++) {
+      double* weight_ptr = msa.sequence_weights.memptr();
+      for (int j = i + 1; j < N; j++) {
+        for (int k = j + 1; k < N; k++) {
+          frequency_3p.at(i, j, k) =
+            arma::Cube<double>(Q, Q, Q, arma::fill::zeros);
 
-        int* align_ptr1 = msa.alignment.colptr(i);
-        int* align_ptr2 = msa.alignment.colptr(j);
-        int* align_ptr3 = msa.alignment.colptr(k);
-        for (int m = 0; m < M; m++) {
-          frequency_3p.at(i, j, k).at(*(align_ptr1 + m),
-                                      *(align_ptr2 + m),
-                                      *(align_ptr3 + m)) += *(weight_ptr + m);
+          int* align_ptr1 = msa.alignment.colptr(i);
+          int* align_ptr2 = msa.alignment.colptr(j);
+          int* align_ptr3 = msa.alignment.colptr(k);
+          for (int m = 0; m < M; m++) {
+            frequency_3p.at(i, j, k).at(*(align_ptr1 + m),
+                                        *(align_ptr2 + m),
+                                        *(align_ptr3 + m)) += *(weight_ptr + m);
+          }
+          frequency_3p.at(i, j, k) = frequency_3p.at(i, j, k) / M_effective;
         }
-        frequency_3p.at(i, j, k) = frequency_3p.at(i, j, k) / M_effective;
       }
     }
   }
