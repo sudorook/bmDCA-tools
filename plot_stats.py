@@ -40,6 +40,14 @@ def parse_options():
         required=True,
         help="figure output name",
     )
+    parser.add_argument(
+        "-l",
+        "--ols",
+        dest="ols",
+        action="store_true",
+        default=False,
+        help="add regression line",
+    )
     return parser.parse_args()
 
 
@@ -62,15 +70,18 @@ def main():
             x="MSA", y="MCMC", bins="log", mincnt=1, cmap="viridis", zorder=1
         )
         x = np.linspace(*ax.get_xlim())
-        ax.plot(
-            x,
-            params.MSA * x + params.Intercept,
-            label=r"y={:.3g}x+{:.3g}, $r^2$={:.3g}".format(
-                params.MSA, params.Intercept, res.rsquared
-            ),
-            alpha=0.5,
-        )
-        ax.plot(x, x, "--k", alpha=0.25, zorder=0, label=r"y=x")
+        if options.ols:
+            ax.plot(
+                x,
+                params.MSA * x + params.Intercept,
+                label=r"y={:.3g}x+{:.3g}, $r^2$={:.3g}".format(
+                    params.MSA, params.Intercept, res.rsquared
+                ),
+                alpha=0.5,
+            )
+            ax.plot(x, x, "--k", alpha=0.25, zorder=0, label=r"y=x")
+        else:
+            ax.plot(x, x, "--k", alpha=0.25, zorder=0)
         plt.legend(loc="upper left")
         plt.title(options.title)
         plt.tight_layout()
