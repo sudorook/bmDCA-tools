@@ -4,6 +4,7 @@
 import argparse
 import numpy as np
 import pandas as pd
+import statsmodels.formula.api as sm
 import matplotlib
 
 matplotlib.use("Agg")
@@ -52,6 +53,8 @@ def main():
             "MSA": np.loadtxt(options.msa, dtype="float"),
         }
     )
+    res = sm.ols(formula="MCMC ~ MSA", data=data_df).fit()
+    params = res.params
     #  data_df.loc[~(data_df==0).all(axis=1)]
 
     with plt.style.context("fivethirtyeight"):
@@ -59,7 +62,16 @@ def main():
             x="MSA", y="MCMC", bins="log", mincnt=1, cmap="viridis", zorder=1
         )
         x = np.linspace(*ax.get_xlim())
-        ax.plot(x, x, "--k", alpha=0.25, zorder=0)
+        ax.plot(
+            x,
+            params.MSA * x + params.Intercept,
+            label=r"y={:.3g}x+{:.3g}, $r^2$={:.3g}".format(
+                params.MSA, params.Intercept, res.rsquared
+            ),
+            alpha=0.5,
+        )
+        ax.plot(x, x, "--k", alpha=0.25, zorder=0, label=r"y=x")
+        plt.legend(loc="upper left")
         plt.title(options.title)
         plt.tight_layout()
         plt.savefig(options.output + ".png")
