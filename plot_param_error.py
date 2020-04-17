@@ -4,6 +4,8 @@
 import argparse
 import os
 import numpy as np
+import pandas as pd
+import statsmodels.formula.api as sm
 import matplotlib
 
 matplotlib.use("Agg")
@@ -101,30 +103,61 @@ def main():
     h1, J1 = load_data(options.params)
     h2, J2 = load_data(options.params2)
 
-    #  print(h1)
-    #  print(h2)
-    #
-    #  print(J1)
-    #  print(J2)
-
     J1_1d = J1.flatten()
     J2_1d = J2.flatten()
     h1_1d = h1.flatten()
     h2_1d = h2.flatten()
 
+    df_h = pd.DataFrame(data={"h1": h1_1d, "h2": h2_1d,})
+    res_h = sm.ols(formula="h2 ~ h1", data=df_h).fit()
+    params_h = res_h.params
+
+    df_J = pd.DataFrame(data={"J1": J1_1d, "J2": J2_1d,})
+    res_J = sm.ols(formula="J2 ~ J1", data=df_J).fit()
+    params_J = res_J.params
+
     with plt.style.context("fivethirtyeight"):
         fig, ax = plt.subplots(2, 1)
-        ax[0].scatter(x=h1_1d, y=h2_1d)
+
+        df_h.plot.hexbin(
+            ax=ax[0], x="h1", y="h2", mincnt=1, cmap="viridis", zorder=1
+        )
         x = np.linspace(*(ax[0]).get_xlim())
-        ax[0].plot(x, x, "--k", alpha=0.25, zorder=0)
+        ax[0].plot(
+            x,
+            params_h.h1 * x + params_h.Intercept,
+            label=r"y={:.3g}x+{:.3g}, $R^2$={:.3g}".format(
+                params_h.h1, params_h.Intercept, res_h.rsquared
+            ),
+            alpha=0.5,
+        )
+        ax[0].plot(x, x, "--k", alpha=0.25, zorder=0, label=r"y=x")
         ax[0].set_xlabel("h value (old)")
         ax[0].set_ylabel("h value (new)")
+        ax[0].legend(loc="lower right")
 
-        ax[1].scatter(x=J1_1d, y=J2_1d)
+        df_J.plot.hexbin(
+            ax=ax[1],
+            x="J1",
+            y="J2",
+            bins="log",
+            mincnt=1,
+            cmap="viridis",
+            zorder=1,
+        )
         x = np.linspace(*ax[1].get_xlim())
-        ax[1].plot(x, x, "--k", alpha=0.25, zorder=0)
+        ax[1].plot(
+            x,
+            params_J.J1 * x + params_J.Intercept,
+            label=r"y={:.3g}x+{:.3g}, $R^2$={:.3g}".format(
+                params_J.J1, params_J.Intercept, res_J.rsquared
+            ),
+            alpha=0.5,
+        )
+        ax[1].plot(x, x, "--k", alpha=0.25, zorder=0, label=r"y=x")
         ax[1].set_xlabel("J value (old)")
         ax[1].set_ylabel("J value (new)")
+        ax[1].legend(loc="lower right")
 
         fig.suptitle(prefix + " vs " + prefix2)
 
@@ -137,20 +170,56 @@ def main():
     h1_1d = reduce_h(h1).flatten()
     h2_1d = reduce_h(h2).flatten()
 
+    df_h = pd.DataFrame(data={"h1": h1_1d, "h2": h2_1d,})
+    res_h = sm.ols(formula="h2 ~ h1", data=df_h).fit()
+    params_h = res_h.params
+
+    df_J = pd.DataFrame(data={"J1": J1_1d, "J2": J2_1d,})
+    res_J = sm.ols(formula="J2 ~ J1", data=df_J).fit()
+    params_J = res_J.params
+
     with plt.style.context("fivethirtyeight"):
         fig, ax = plt.subplots(2, 1)
 
-        ax[0].scatter(x=h1_1d, y=h2_1d)
+        df_h.plot.hexbin(
+            ax=ax[0], x="h1", y="h2", mincnt=1, cmap="viridis", zorder=1
+        )
         x = np.linspace(*(ax[0]).get_xlim())
-        ax[0].plot(x, x, "--k", alpha=0.25, zorder=0)
-        ax[0].set_xlabel("h frob value (old)")
-        ax[0].set_ylabel("h frob value (new)")
+        ax[0].plot(
+            x,
+            params_h.h1 * x + params_h.Intercept,
+            label=r"y={:.3g}x+{:.3g}, $R^2$={:.3g}".format(
+                params_h.h1, params_h.Intercept, res_h.rsquared
+            ),
+            alpha=0.5,
+        )
+        ax[0].plot(x, x, "--k", alpha=0.25, zorder=0, label=r"y=x")
+        ax[0].set_xlabel("h value (old)")
+        ax[0].set_ylabel("h value (new)")
+        ax[0].legend(loc="lower right")
 
-        ax[1].scatter(x=J1_1d, y=J2_1d)
+        df_J.plot.hexbin(
+            ax=ax[1],
+            x="J1",
+            y="J2",
+            bins="log",
+            mincnt=1,
+            cmap="viridis",
+            zorder=1,
+        )
         x = np.linspace(*ax[1].get_xlim())
-        ax[1].plot(x, x, "--k", alpha=0.25, zorder=0)
-        ax[1].set_xlabel("J frob value (old)")
-        ax[1].set_ylabel("J frob value (new)")
+        ax[1].plot(
+            x,
+            params_J.J1 * x + params_J.Intercept,
+            label=r"y={:.3g}x+{:.3g}, $R^2$={:.3g}".format(
+                params_J.J1, params_J.Intercept, res_J.rsquared
+            ),
+            alpha=0.5,
+        )
+        ax[1].plot(x, x, "--k", alpha=0.25, zorder=0, label=r"y=x")
+        ax[1].set_xlabel("J value (old)")
+        ax[1].set_ylabel("J value (new)")
+        ax[1].legend(loc="lower right")
 
         fig.suptitle(prefix + " vs " + prefix2)
 
