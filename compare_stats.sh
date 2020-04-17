@@ -3,6 +3,7 @@ set -eu
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 REWEIGHT=false
+THRESHOLD=0
 
 OPTIONS=s:c:d:t:r
 LONGOPTIONS=msa:,mcmc:,description:,threshold:,reweight
