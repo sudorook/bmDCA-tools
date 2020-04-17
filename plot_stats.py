@@ -74,7 +74,7 @@ def main():
             ax.plot(
                 x,
                 params.MSA * x + params.Intercept,
-                label=r"y={:.3g}x+{:.3g}, $r^2$={:.3g}".format(
+                label=r"y={:.3g}x+{:.3g}, $R^2$={:.3g}".format(
                     params.MSA, params.Intercept, res.rsquared
                 ),
                 alpha=0.5,
