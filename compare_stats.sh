@@ -81,7 +81,7 @@ echo "plotting 2p correlations"
   -l \
   -o "${SLUG}_corr_2p"
 
-if (( THRESHOLD == 0 )); then
+if (( $(echo "$THRESHOLD == 0" | bc -l) )); then
   echo "plotting 3p frequencies"
   "${SCRIPT_DIR}/plot_stats.py" \
     -s "${MSA%.*}_freq_3p.txt" \

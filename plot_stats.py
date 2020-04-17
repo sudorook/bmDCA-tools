@@ -80,9 +80,9 @@ def main():
                 alpha=0.5,
             )
             ax.plot(x, x, "--k", alpha=0.25, zorder=0, label=r"y=x")
+            plt.legend(loc="upper left")
         else:
             ax.plot(x, x, "--k", alpha=0.25, zorder=0)
-        plt.legend(loc="upper left")
         plt.title(options.title)
         plt.tight_layout()
         plt.savefig(options.output + ".png")
