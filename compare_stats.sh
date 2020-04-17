@@ -62,6 +62,7 @@ echo "plotting 1p frequencies"
   -s "${MSA%.*}_freq_1p.txt" \
   -c "${MCMC%.*}_freq_1p.txt" \
   -t "1p frequencies (${DESCRIPTION})" \
+  -l \
   -o "${SLUG}_freq_1p"
 
 echo "plotting 2p frequencies"
@@ -69,6 +70,7 @@ echo "plotting 2p frequencies"
   -s "${MSA%.*}_freq_2p.txt" \
   -c "${MCMC%.*}_freq_2p.txt" \
   -t "2p frequencies (${DESCRIPTION})" \
+  -l \
   -o "${SLUG}_freq_2p"
 
 echo "plotting 2p correlations"
@@ -76,21 +78,40 @@ echo "plotting 2p correlations"
   -s "${MSA%.*}_corr_2p.txt" \
   -c "${MCMC%.*}_corr_2p.txt" \
   -t "2p correlations (${DESCRIPTION})" \
+  -l \
   -o "${SLUG}_corr_2p"
 
-echo "plotting 3p frequencies"
-"${SCRIPT_DIR}/plot_stats.py" \
-  -s "${MSA%.*}_freq_3p.txt" \
-  -c "${MCMC%.*}_freq_3p.txt" \
-  -t "3p frequencies (${DESCRIPTION})" \
-  -o "${SLUG}_freq_3p"
+if (( THRESHOLD == 0 )); then
+  echo "plotting 3p frequencies"
+  "${SCRIPT_DIR}/plot_stats.py" \
+    -s "${MSA%.*}_freq_3p.txt" \
+    -c "${MCMC%.*}_freq_3p.txt" \
+    -t "3p frequencies (${DESCRIPTION})" \
+    -l \
+    -o "${SLUG}_freq_3p"
 
-echo "plotting 3p correlations"
-"${SCRIPT_DIR}/plot_stats.py" \
-  -s "${MSA%.*}_corr_3p.txt" \
-  -c "${MCMC%.*}_corr_3p.txt" \
-  -t "3p correlations (${DESCRIPTION})" \
-  -o "${SLUG}_corr_3p"
+  echo "plotting 3p correlations"
+  "${SCRIPT_DIR}/plot_stats.py" \
+    -s "${MSA%.*}_corr_3p.txt" \
+    -c "${MCMC%.*}_corr_3p.txt" \
+    -t "3p correlations (${DESCRIPTION})" \
+    -l \
+    -o "${SLUG}_corr_3p"
+else
+  echo "plotting 3p frequencies"
+  "${SCRIPT_DIR}/plot_stats.py" \
+    -s "${MSA%.*}_freq_3p.txt" \
+    -c "${MCMC%.*}_freq_3p.txt" \
+    -t "3p frequencies (${DESCRIPTION})" \
+    -o "${SLUG}_freq_3p"
+
+  echo "plotting 3p correlations"
+  "${SCRIPT_DIR}/plot_stats.py" \
+    -s "${MSA%.*}_corr_3p.txt" \
+    -c "${MCMC%.*}_corr_3p.txt" \
+    -t "3p correlations (${DESCRIPTION})" \
+    -o "${SLUG}_corr_3p"
+fi
 
 rm -v \
   "${MSA%.*}_freq_1p.txt" \
