@@ -194,8 +194,8 @@ def main():
             alpha=0.5,
         )
         ax[0].plot(x, x, "--k", alpha=0.25, zorder=0, label=r"y=x")
-        ax[0].set_xlabel("h value (old)")
-        ax[0].set_ylabel("h value (new)")
+        ax[0].set_xlabel("h Frobenius value (old)")
+        ax[0].set_ylabel("h Frobenius value (new)")
         ax[0].legend(loc="lower right")
 
         df_J.plot.hexbin(
@@ -217,8 +217,8 @@ def main():
             alpha=0.5,
         )
         ax[1].plot(x, x, "--k", alpha=0.25, zorder=0, label=r"y=x")
-        ax[1].set_xlabel("J value (old)")
-        ax[1].set_ylabel("J value (new)")
+        ax[1].set_xlabel("J Frobenius value (old)")
+        ax[1].set_ylabel("J Frobenius value (new)")
         ax[1].legend(loc="lower right")
 
         fig.suptitle(prefix + " vs " + prefix2)
