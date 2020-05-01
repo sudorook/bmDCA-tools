@@ -12,7 +12,7 @@
 int main(int argc, char* argv[]) {
   std::string msa_file;
   std::string mc_file;
-  double threshold = 0;
+  double threshold = 0.8;
 
   bool reweight = false;
 
@@ -37,8 +37,8 @@ int main(int argc, char* argv[]) {
   }
 
   std::cout << "reading sequences" << std::endl;
-  MSA msa = MSA(msa_file, reweight, true, 0.8);
-  MSA mc = MSA(mc_file, false, true, 0.8);
+  MSA msa = MSA(msa_file, reweight, true, threshold);
+  MSA mc = MSA(mc_file, false, true, threshold);
 
   int idx = msa_file.find_last_of(".");
   std::string msa_prefix = msa_file.substr(0, idx);
