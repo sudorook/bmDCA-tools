@@ -5,127 +5,110 @@
 #include <fstream>
 #include <iostream>
 
-MSAStats::MSAStats(MSA msa)
+MSAStats::MSAStats(MSA msa): msa(msa)
 {
   // Initialize
   N = msa.N;
   M = msa.M;
   Q = msa.Q;
-
-  frequency_1p = arma::Mat<double>(Q, N, arma::fill::zeros);
-  frequency_2p = arma::field<arma::Mat<double>>(N, N);
-  frequency_3p = arma::field<arma::Cube<double>>(N, N, N);
-  rel_entropy_grad_1p =
-    arma::Mat<double>(Q, N, arma::fill::zeros);
-  aa_background_frequencies =
-    arma::Col<double>(Q, arma::fill::ones);
-
-  // if (Q == 21) {
-  //   aa_background_frequencies = {
-  //     0.000, 0.073, 0.025, 0.050, 0.061, 0.042, 0.072, 0.023, 0.053, 0.064, 0.089,
-  //     0.023, 0.043, 0.052, 0.040, 0.052, 0.073, 0.056, 0.063, 0.013, 0.033
-  //   };
-  // } else {
-  //   aa_background_frequencies = aa_background_frequencies / (double)Q;
-  // }
-  // pseudocount = 0.03;
-
-  // Compute the frequecies (1p statistics) for amino acids (and gaps) for each
-  // position. Use pointers to make things speedier.
   M_effective = sum(msa.sequence_weights);
-#pragma omp parallel
-  {
-#pragma omp for
-    for (int i = 0; i < N; i++) {
-      int* align_ptr = msa.alignment.colptr(i);
-      double* freq_ptr = frequency_1p.colptr(i);
-      double* weight_ptr = msa.sequence_weights.memptr();
-      for (int m = 0; m < M; m++) {
-        *(freq_ptr + *(align_ptr + m)) += *(weight_ptr + m);
-      }
-    }
-  }
-  frequency_1p = frequency_1p / M_effective;
-
-  // Compute the 2p statistics
-#pragma omp parallel
-  {
-#pragma omp for
-    for (int i = 0; i < N; i++) {
-      for (int j = i + 1; j < N; j++) {
-        double* weight_ptr = msa.sequence_weights.memptr();
-        frequency_2p.at(i, j) = arma::Mat<double>(Q, Q, arma::fill::zeros);
-
-        int* align_ptr1 = msa.alignment.colptr(i);
-        int* align_ptr2 = msa.alignment.colptr(j);
-        for (int m = 0; m < M; m++) {
-          frequency_2p.at(i, j)(*(align_ptr1 + m), *(align_ptr2 + m)) +=
-            *(weight_ptr + m);
-        }
-        frequency_2p.at(i, j) = frequency_2p.at(i, j) / M_effective;
-      }
-    }
-  }
-
-  // Compute the 3p statistics
-#pragma omp parallel
-  {
-#pragma omp for
-    for (int i = 0; i < N; i++) {
-      double* weight_ptr = msa.sequence_weights.memptr();
-      for (int j = i + 1; j < N; j++) {
-        for (int k = j + 1; k < N; k++) {
-          frequency_3p.at(i, j, k) =
-            arma::Cube<double>(Q, Q, Q, arma::fill::zeros);
-
-          int* align_ptr1 = msa.alignment.colptr(i);
-          int* align_ptr2 = msa.alignment.colptr(j);
-          int* align_ptr3 = msa.alignment.colptr(k);
-          for (int m = 0; m < M; m++) {
-            frequency_3p.at(i, j, k).at(*(align_ptr1 + m),
-                                        *(align_ptr2 + m),
-                                        *(align_ptr3 + m)) += *(weight_ptr + m);
-          }
-          frequency_3p.at(i, j, k) = frequency_3p.at(i, j, k) / M_effective;
-        }
-      }
-    }
-  }
 
   std::cout << M << " sequences" << std::endl;
   std::cout << N << " positions" << std::endl;
   std::cout << Q << " amino acids (including gaps)" << std::endl;
   std::cout << M_effective << " effective sequences" << std::endl;
 
-  // // Update the background frequencies based by computing overall gap frequency
-  // // theta.
-  // double theta = 0;
-  // for (int i = 0; i < N; i++) {
-  //   theta += frequency_1p.at(0, i);
-  // }
-  // theta = theta / N;
-  // aa_background_frequencies[0] = theta;
-  // for (int i = 1; i < Q; i++) {
-  //   aa_background_frequencies[i] = aa_background_frequencies[i] * (1. - theta);
-  // }
-  //
-  // // Use the positonal and backgrounds frequencies to estimate the relative
-  // // entropy gradient for each position.
-  // arma::Mat<double> tmp = frequency_1p * (1. - pseudocount);
-  // tmp.each_col() += pseudocount * aa_background_frequencies;
-  // double pos_freq;
-  // double background_freq;
-  // for (int i = 0; i < N; i++) {
-  //   for (int aa = 0; aa < Q; aa++) {
-  //     pos_freq = tmp.at(aa, i);
-  //     background_freq = aa_background_frequencies(aa);
-  //     if (pos_freq < 1. && pos_freq > 0.) {
-  //       rel_entropy_grad_1p.at(aa, i) =
-  //         log((pos_freq * (1. - background_freq)) /
-  //             ((1. - pos_freq) * background_freq));
-  //     }
-  //   }
-  // }
+  rel_entropy_grad_1p = arma::Mat<double>(Q, N, arma::fill::zeros);
+  aa_background_frequencies = arma::Col<double>(Q, arma::fill::ones);
+
+  if (Q == 21) {
+    aa_background_frequencies = { 0.000, 0.073, 0.025, 0.050, 0.061, 0.042,
+                                  0.072, 0.023, 0.053, 0.064, 0.089, 0.023,
+                                  0.043, 0.052, 0.040, 0.052, 0.073, 0.056,
+                                  0.063, 0.013, 0.033 };
+  } else {
+    aa_background_frequencies = aa_background_frequencies / (double)Q;
+  }
+  pseudocount = 0.03;
+
+  computeFrequency1p();
+  computeFrequency2p();
+  computeCorrelation2p();
+};
+
+void MSAStats::computeFrequency1p(void) {
+  arma::wall_clock timer;
+  frequency_1p = arma::Col<double>((int)Q * N, arma::fill::zeros);
+
+  std::cout << "computing 1p frequencies... " << std::flush;
+  timer.tic();
+#pragma omp parallel
+  {
+#pragma omp for
+    for (int i = 0; i < N; i++) {
+      int* align_ptr = msa.alignment.colptr(i);
+      double* weight_ptr = msa.sequence_weights.memptr();
+      for (int m = 0; m < M; m++) {
+        frequency_1p.at(i * Q + *(align_ptr + m)) += *(weight_ptr + m);
+      }
+    }
+  }
+  frequency_1p = frequency_1p / M_effective;
+  std::cout << timer.toc() << " sec" << std::endl;
+};
+
+void MSAStats::computeFrequency2p(void) {
+  arma::wall_clock timer;
+  frequency_2p =
+    arma::Col<double>((int)N * (N - 1) / 2 * Q * Q, arma::fill::zeros);
+
+  std::cout << "computing 2p frequencies... " << std::flush;
+  timer.tic();
+#pragma omp parallel
+  {
+#pragma omp for
+    for (int i = 0; i < N; i++) {
+      for (int j = i + 1; j < N; j++) {
+        double* weight_ptr = msa.sequence_weights.memptr();
+        int* align_ptr1 = msa.alignment.colptr(i);
+        int* align_ptr2 = msa.alignment.colptr(j);
+        for (int m = 0; m < M; m++) {
+          frequency_2p.at(*(align_ptr2 + m) + *(align_ptr1 + m) * Q +
+                          Q * Q *
+                            (j - i - 1 + i * (N - 1) - i * (i - 1) / 2)) +=
+            *(weight_ptr + m);
+        }
+      }
+    }
+  }
+  frequency_2p = frequency_2p / M_effective;
+  std::cout << timer.toc() << " sec" << std::endl;
+};
+
+void MSAStats::computeCorrelation2p(void) {
+  arma::wall_clock timer;
+  correlation_2p = arma::Col<double>((int)N*(N-1)/2*Q*Q, arma::fill::zeros);
+
+  std::cout << "computing 2p correlations... " << std::flush;
+  timer.tic();
+#pragma omp parallel
+  {
+#pragma omp for
+    for (int i = 0; i < N; i++) {
+      for (int j = i + 1; j < N; j++) {
+        for (int aa1 = 0; aa1 < Q; aa1++) {
+          for (int aa2 = 0; aa2 < Q; aa2++) {
+            int idx = aa2 + aa1 * Q +
+                      Q * Q * (j - i - 1 + i * (N - 1) - i * (i - 1) / 2);
+            correlation_2p.at(idx) =
+              frequency_2p.at(idx) -
+              frequency_1p.at(i * Q + aa1) * frequency_1p.at(j * Q + aa2);
+          }
+        }
+      }
+    }
+  }
+  std::cout << timer.toc() << " sec" << std::endl;
 };
 
 double
@@ -168,126 +151,35 @@ MSAStats::writeRelEntropyGradient(std::string output_file)
 void
 MSAStats::writeFrequency1p(std::string output_file)
 {
-  std::ofstream output_stream(output_file);
+  frequency_1p.save(output_file, arma::raw_binary);
+};
 
-  for (int i = 0; i < N; i++) {
-    for (int aa = 0; aa < Q; aa++) {
-      output_stream << frequency_1p.at(aa, i) << std::endl;
-    }
-  }
+void
+MSAStats::writeFrequency1pAscii(std::string output_file)
+{
+  frequency_1p.save(output_file, arma::raw_ascii);
 };
 
 void
 MSAStats::writeFrequency2p(std::string output_file)
 {
-  std::ofstream output_stream(output_file);
-
-  for (int i = 0; i < N; i++) {
-    for (int j = i + 1; j < N; j++) {
-      for (int aa1 = 0; aa1 < Q; aa1++) {
-        for (int aa2 = 0; aa2 < Q; aa2++) {
-          output_stream  << frequency_2p.at(i, j).at(aa1, aa2) << std::endl;
-        }
-      }
-    }
-  }
+  frequency_2p.save(output_file, arma::raw_binary);
 };
 
 void
-MSAStats::writeFrequency3p(std::string output_file)
+MSAStats::writeFrequency2pAscii(std::string output_file)
 {
-  std::ofstream output_stream(output_file);
-
-  for (int i = 0; i < N; i++) {
-    for (int j = i + 1; j < N; j++) {
-      for (int k = j + 1; k < N; k++) {
-        for (int aa1 = 0; aa1 < Q; aa1++) {
-          for (int aa2 = 0; aa2 < Q; aa2++) {
-            for (int aa3 = 0; aa3 < Q; aa3++) {
-              output_stream << frequency_3p.at(i, j, k).at(aa1, aa2, aa3) <<
-                std::endl;
-            }
-          }
-        }
-      }
-    }
-  }
+  frequency_2p.save(output_file, arma::raw_ascii);
 };
 
 void
 MSAStats::writeCorrelation2p(std::string output_file)
 {
-  std::ofstream output_stream(output_file);
-
-  for (int i = 0; i < N; i++) {
-    for (int j = i + 1; j < N; j++) {
-      for (int aa1 = 0; aa1 < Q; aa1++) {
-        for (int aa2 = 0; aa2 < Q; aa2++) {
-          output_stream << frequency_2p.at(i, j).at(aa1, aa2) -
-            frequency_1p.at(aa1, i)*frequency_1p.at(aa2, j) << std::endl;
-        }
-      }
-    }
-  }
+  correlation_2p.save(output_file, arma::raw_binary);
 };
 
 void
-MSAStats::writeCorrelation3p(std::string output_file)
+MSAStats::writeCorrelation2pAscii(std::string output_file)
 {
-  std::ofstream output_stream(output_file);
-
-  for (int i = 0; i < N; i++) {
-    for (int j = i + 1; j < N; j++) {
-      for (int k = j + 1; k < N; k++) {
-        for (int aa1 = 0; aa1 < Q; aa1++) {
-          for (int aa2 = 0; aa2 < Q; aa2++) {
-            for (int aa3 = 0; aa3 < Q; aa3++) {
-              output_stream << frequency_3p.at(i, j, k).at(aa1, aa2, aa3) -
-                frequency_2p.at(i, j).at(aa1, aa2)*frequency_1p.at(aa3, k) -
-                frequency_2p.at(i, k).at(aa1, aa3)*frequency_1p.at(aa2, j) -
-                frequency_2p.at(j, k).at(aa2, aa3)*frequency_1p.at(aa1, i) +
-                2.0*frequency_1p.at(aa1, i)*frequency_1p.at(aa2,
-                    j)*frequency_1p.at(aa3, k) << std::endl;
-            }
-          }
-        }
-      }
-    }
-  }
+  correlation_2p.save(output_file, arma::raw_ascii);
 };
-
-// void
-// MSAStats::writeCorrelation3p(std::string output_file, double threshold)
-// {
-//   std::ofstream output_stream(output_file);
-//
-//   double tmp = 0;
-//   for (int i = 0; i < N; i++) {
-//     for (int j = i + 1; j < N; j++) {
-//       for (int k = j + 1; k < N; k++) {
-//         for (int aa1 = 0; aa1 < Q; aa1++) {
-//           for (int aa2 = 0; aa2 < Q; aa2++) {
-//             for (int aa3 = 0; aa3 < Q; aa3++) {
-//               tmp =
-//                 frequency_3p.at(i, j, k).at(aa1, aa2, aa3) -
-//                 frequency_2p.at(i, j).at(aa1, aa2) * frequency_1p.at(aa3, k) -
-//                 frequency_2p.at(i, k).at(aa1, aa3) * frequency_1p.at(aa2, j) -
-//                 frequency_2p.at(j, k).at(aa2, aa3) * frequency_1p.at(aa1, i) +
-//                 2.0 * frequency_1p.at(aa1, i) * frequency_1p.at(aa2, j) *
-//                   frequency_1p.at(aa3, k);
-//               if (fabs(tmp) > threshold) {
-//                 output_stream << tmp << std::endl;
-//               }
-//               // output_stream << frequency_3p.at(i, j, k).at(aa1, aa2, aa3) -
-//               //   frequency_2p.at(i, j).at(aa1, aa2)*frequency_1p.at(aa3, k) -
-//               //   frequency_2p.at(i, k).at(aa1, aa3)*frequency_1p.at(aa2, j) -
-//               //   frequency_2p.at(j, k).at(aa2, aa3)*frequency_1p.at(aa1, i) +
-//               //   2.0*frequency_1p.at(aa1, i)*frequency_1p.at(aa2,
-//               //       j)*frequency_1p.at(aa3, k) << std::endl;
-//             }
-//           }
-//         }
-//       }
-//     }
-//   }
-// };

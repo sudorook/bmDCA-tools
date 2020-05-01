@@ -49,91 +49,213 @@ int main(int argc, char* argv[]) {
   MSAStats msa_stats = MSAStats(msa);
   MSAStats mc_stats = MSAStats(mc);
 
-  std::cout << "writing 1p stats" << std::endl;
-  msa_stats.writeFrequency1p(msa_prefix + "_freq_1p.txt");
-  mc_stats.writeFrequency1p(mc_prefix + "_freq_1p.txt");
+  int N = msa_stats.getN();
+  int Q = msa_stats.getQ();
+  if ( (N != mc_stats.getN()) | (Q != mc_stats.getQ()) ) {
+    std::cerr << "Mismatched number of positions and/or alphabet size"
+              << std::endl;
+    std::exit(EXIT_FAILURE);
+  }
 
-  std::cout << "writing 2p stats" << std::endl;
-  msa_stats.writeFrequency2p(msa_prefix + "_freq_2p.txt");
-  mc_stats.writeFrequency2p(mc_prefix + "_freq_2p.txt");
-  msa_stats.writeCorrelation2p(msa_prefix + "_corr_2p.txt");
-  mc_stats.writeCorrelation2p(mc_prefix + "_corr_2p.txt");
+  int M_msa = msa_stats.getM();
+  int M_mc = mc_stats.getM();
+  double M_effective_msa = msa_stats.getEffectiveM();
+  double M_effective_mc = mc_stats.getEffectiveM();
 
-  std::cout << "writing 3p stats" << std::endl;
+  arma::wall_clock timer;
+
+  std::cout << "computing 1p frequency regression.." << std::endl;
+  timer.tic();
   {
-    std::ofstream msa_freq_stream(msa_prefix + "_freq_3p.txt");
-    std::ofstream mc_freq_stream(mc_prefix + "_freq_3p.txt");
+    double f = 1. / (double)Q;
+    double xy = arma::accu((msa_stats.frequency_1p - f) %
+                           (mc_stats.frequency_1p - f));
+    double xx = arma::accu(arma::pow((msa_stats.frequency_1p - f), 2));
+    double yy = arma::accu(arma::pow((mc_stats.frequency_1p - f), 2));
 
-    int N = msa.N;
-    int Q = msa.Q;
-    for (int i = 0; i < N; i++) {
-      for (int j = i + 1; j < N; j++) {
-        for (int k = j + 1; k < N; k++) {
-          for (int aa1 = 0; aa1 < Q; aa1++) {
-            for (int aa2 = 0; aa2 < Q; aa2++) {
-              for (int aa3 = 0; aa3 < Q; aa3++) {
-                if ((msa_stats.frequency_3p.at(i, j, k).at(aa1, aa2, aa3) >
-                     threshold) ||
-                    (mc_stats.frequency_3p.at(i, j, k).at(aa1, aa2, aa3) >
-                     threshold)) {
-                  msa_freq_stream
-                    << msa_stats.frequency_3p.at(i, j, k).at(aa1, aa2, aa3)
-                    << std::endl;
-                  mc_freq_stream
-                    << mc_stats.frequency_3p.at(i, j, k).at(aa1, aa2, aa3)
-                    << std::endl;
+    double b = xy / xx;
+    double a = f*(1-b);
+    double r2 = (2*b*xy - b*b*xx)/yy;
+    std::cout << "model: " << b << " x + " << a << ", r2=" << r2 << std::endl;
+  }
+  std::cout << timer.toc() << " sec" << std::endl;
+
+  std::cout << "computing 2p frequency regression.." << std::endl;
+  timer.tic();
+  {
+    double f = 1. / (double)(Q*Q);
+    double xy = arma::accu((msa_stats.frequency_2p - f) %
+                           (mc_stats.frequency_2p - f));
+    double xx = arma::accu(arma::pow((msa_stats.frequency_2p - f), 2));
+    double yy = arma::accu(arma::pow((mc_stats.frequency_2p - f), 2));
+
+    double b = xy / xx;
+    double a = f*(1-b);
+    double r2 = (2*b*xy - b*b*xx)/yy;
+    std::cout << "model: " << b << " x + " << a << ", r2=" << r2 << std::endl;
+  }
+  std::cout << timer.toc() << " sec" << std::endl;
+
+  std::cout << "computing 2p correlation regression.." << std::endl;
+  timer.tic();
+  {
+    double xy = arma::accu((msa_stats.correlation_2p) %
+                           (mc_stats.correlation_2p));
+    double xx = arma::accu(arma::pow((msa_stats.correlation_2p), 2));
+    double yy = arma::accu(arma::pow((mc_stats.correlation_2p), 2));
+
+    double b = xy / xx;
+    double a = 0;
+    double r2 = (2*b*xy - b*b*xx)/yy;
+    std::cout << "model: " << b << " x + " << a << ", r2=" << r2 << std::endl;
+  }
+  std::cout << timer.toc() << " sec" << std::endl;
+
+  std::cout << "computing 3p frequency and correlation regressions.."
+            << std::endl;
+  timer.tic();
+  {
+    arma::Col<double> freq_xx_vec =
+      arma::Col<double>((int)(N * (N - 1) * (N - 2) / 6), arma::fill::zeros);
+    arma::Col<double> freq_xy_vec =
+      arma::Col<double>((int)(N * (N - 1) * (N - 2) / 6), arma::fill::zeros);
+    arma::Col<double> freq_yy_vec =
+      arma::Col<double>((int)(N * (N - 1) * (N - 2) / 6), arma::fill::zeros);
+
+    arma::Col<double> corr_xx_vec =
+      arma::Col<double>((int)(N * (N - 1) * (N - 2) / 6), arma::fill::zeros);
+    arma::Col<double> corr_xy_vec =
+      arma::Col<double>((int)(N * (N - 1) * (N - 2) / 6), arma::fill::zeros);
+    arma::Col<double> corr_yy_vec =
+      arma::Col<double>((int)(N * (N - 1) * (N - 2) / 6), arma::fill::zeros);
+
+    double f = 1. / (double)(Q*Q*Q);
+
+#pragma omp parallel
+    {
+#pragma omp for
+      for (int i = 0; i < N; i++) {
+
+        double* msa_weight_ptr = msa.sequence_weights.memptr();
+        double* mc_weight_ptr = mc.sequence_weights.memptr();
+
+        for (int j = i + 1; j < N; j++) {
+          for (int k = j + 1; k < N; k++) {
+
+            int idx =
+              (N * (N - 1) * (N - 2) / 6 -
+               (N - i - 1) * (N - i) * (N - i - 2) / 6 + k - j +
+               (j - i - 1) * (N - i - 1) - (j - i) * (j - i - 1) / 2 - 1);
+
+            arma::Col<double> msa_frequency_3p_ijk = arma::Col<double>(Q*Q*Q,
+                arma::fill::zeros);
+            arma::Col<double> msa_correlation_3p_ijk = arma::Col<double>(Q*Q*Q,
+                arma::fill::zeros);
+            int* msa_align_ptr1 = msa.alignment.colptr(i);
+            int* msa_align_ptr2 = msa.alignment.colptr(j);
+            int* msa_align_ptr3 = msa.alignment.colptr(k);
+
+            arma::Col<double> mc_frequency_3p_ijk = arma::Col<double>(Q*Q*Q,
+                arma::fill::zeros);
+            arma::Col<double> mc_correlation_3p_ijk = arma::Col<double>(Q*Q*Q,
+                arma::fill::zeros);
+            int* mc_align_ptr1 = mc.alignment.colptr(i);
+            int* mc_align_ptr2 = mc.alignment.colptr(j);
+            int* mc_align_ptr3 = mc.alignment.colptr(k);
+
+            for (int m = 0; m < M_msa; m++) {
+              int msa_idx = *(msa_align_ptr3 + m) + *(msa_align_ptr2 + m) * Q +
+                            *(msa_align_ptr1 + m) * Q * Q;
+
+              msa_frequency_3p_ijk.at(msa_idx) += *(msa_weight_ptr + m);
+            }
+            msa_frequency_3p_ijk = msa_frequency_3p_ijk / M_effective_msa;
+
+            for (int m = 0; m < M_mc; m++) {
+              int mc_idx = *(mc_align_ptr3 + m) + *(mc_align_ptr2 + m) * Q +
+                           *(mc_align_ptr1 + m) * Q * Q;
+
+              mc_frequency_3p_ijk.at(mc_idx) += *(mc_weight_ptr + m);
+            }
+            mc_frequency_3p_ijk = mc_frequency_3p_ijk / M_effective_mc;
+
+            freq_xx_vec.at(idx) =
+              arma::accu(arma::pow(msa_frequency_3p_ijk - f, 2));
+            freq_yy_vec.at(idx) =
+              arma::accu(arma::pow(mc_frequency_3p_ijk - f, 2));
+            freq_xy_vec.at(idx) = arma::accu((msa_frequency_3p_ijk - f) %
+                                             (mc_frequency_3p_ijk - f));
+
+            for (int aa1 = 0; aa1 < Q; aa1++) {
+              for (int aa2 = 0; aa2 < Q; aa2++) {
+                for (int aa3 = 0; aa3 < Q; aa3++) {
+                  int idx =
+                    aa3 + aa2 * Q + aa1 * Q * Q;
+                  int idx2_12 = aa2 + aa1 * Q +
+                                Q * Q * (j - i - 1 + i * (N - 1) - i * (i - 1) / 2);
+                  int idx2_13 = aa3 + aa1 * Q +
+                                Q * Q * (k - i - 1 + i * (N - 1) - i * (i - 1) / 2);
+                  int idx2_23 = aa3 + aa2 * Q +
+                                Q * Q * (k - j - 1 + j * (N - 1) - j * (j - 1) / 2);
+
+                  msa_correlation_3p_ijk.at(idx) =
+                    msa_frequency_3p_ijk.at(idx) -
+                    msa_stats.frequency_2p.at(idx2_12) *
+                      msa_stats.frequency_1p.at(aa3 + k * Q) -
+                    msa_stats.frequency_2p.at(idx2_13) *
+                      msa_stats.frequency_1p.at(aa2 + j * Q) -
+                    msa_stats.frequency_2p.at(idx2_23) *
+                      msa_stats.frequency_1p.at(aa1 + i * Q) +
+                    2.0 * msa_stats.frequency_1p.at(aa1 + i * Q) *
+                      msa_stats.frequency_1p.at(aa2 + j * Q) *
+                      msa_stats.frequency_1p.at(aa3 + k * Q);
+
+                  mc_correlation_3p_ijk.at(idx) =
+                    mc_frequency_3p_ijk.at(idx) -
+                    mc_stats.frequency_2p.at(idx2_12) *
+                      mc_stats.frequency_1p.at(aa3 + k * Q) -
+                    mc_stats.frequency_2p.at(idx2_13) *
+                      mc_stats.frequency_1p.at(aa2 + j * Q) -
+                    mc_stats.frequency_2p.at(idx2_23) *
+                      mc_stats.frequency_1p.at(aa1 + i * Q) +
+                    2.0 * mc_stats.frequency_1p.at(aa1 + i * Q) *
+                      mc_stats.frequency_1p.at(aa2 + j * Q) *
+                      mc_stats.frequency_1p.at(aa3 + k * Q);
                 }
               }
             }
+
+            corr_xx_vec.at(idx) =
+              arma::accu(arma::pow(msa_correlation_3p_ijk, 2));
+            corr_yy_vec.at(idx) =
+              arma::accu(arma::pow(mc_correlation_3p_ijk, 2));
+            corr_xy_vec.at(idx) =
+              arma::accu((msa_correlation_3p_ijk) % (mc_correlation_3p_ijk));
           }
         }
       }
     }
-  }
-  {
-    std::ofstream msa_stream(msa_prefix + "_corr_3p.txt");
-    std::ofstream mc_stream(mc_prefix + "_corr_3p.txt");
+    std::cout << timer.toc() << " sec" << std::endl;
+    {
+      double xx = arma::accu(freq_xx_vec);
+      double xy = arma::accu(freq_xy_vec);
+      double yy = arma::accu(freq_yy_vec);
 
-    int N = msa.N;
-    int Q = msa.Q;
+      double b = xy / xx;
+      double a = f*(1-b);
+      double r2 = (2*b*xy - b*b*xx)/yy;
+      std::cout << "model: " << b << " x + " << a << ", r2=" << r2 << std::endl;
+    }
+    {
+      double xx = arma::accu(corr_xx_vec);
+      double xy = arma::accu(corr_xy_vec);
+      double yy = arma::accu(corr_yy_vec);
 
-    double msa_tmp = 0;
-    double mc_tmp = 0;
-    for (int i = 0; i < N; i++) {
-      for (int j = i + 1; j < N; j++) {
-        for (int k = j + 1; k < N; k++) {
-          for (int aa1 = 0; aa1 < Q; aa1++) {
-            for (int aa2 = 0; aa2 < Q; aa2++) {
-              for (int aa3 = 0; aa3 < Q; aa3++) {
-                msa_tmp = msa_stats.frequency_3p.at(i, j, k).at(aa1, aa2, aa3) -
-                          msa_stats.frequency_2p.at(i, j).at(aa1, aa2) *
-                            msa_stats.frequency_1p.at(aa3, k) -
-                          msa_stats.frequency_2p.at(i, k).at(aa1, aa3) *
-                            msa_stats.frequency_1p.at(aa2, j) -
-                          msa_stats.frequency_2p.at(j, k).at(aa2, aa3) *
-                            msa_stats.frequency_1p.at(aa1, i) +
-                          2.0 * msa_stats.frequency_1p.at(aa1, i) *
-                            msa_stats.frequency_1p.at(aa2, j) *
-                            msa_stats.frequency_1p.at(aa3, k);
-                mc_tmp = mc_stats.frequency_3p.at(i, j, k).at(aa1, aa2, aa3) -
-                         mc_stats.frequency_2p.at(i, j).at(aa1, aa2) *
-                           mc_stats.frequency_1p.at(aa3, k) -
-                         mc_stats.frequency_2p.at(i, k).at(aa1, aa3) *
-                           mc_stats.frequency_1p.at(aa2, j) -
-                         mc_stats.frequency_2p.at(j, k).at(aa2, aa3) *
-                           mc_stats.frequency_1p.at(aa1, i) +
-                         2.0 * mc_stats.frequency_1p.at(aa1, i) *
-                           mc_stats.frequency_1p.at(aa2, j) *
-                           mc_stats.frequency_1p.at(aa3, k);
-                if ((fabs(msa_tmp) > threshold) || (fabs(mc_tmp) > threshold)) {
-                  msa_stream << msa_tmp << std::endl;
-                  mc_stream << mc_tmp << std::endl;
-                }
-              }
-            }
-          }
-        }
-      }
+      double b = xy / xx;
+      double a = 0;
+      double r2 = (2*b*xy - b*b*xx)/yy;
+      std::cout << "model: " << b << " x + " << a << ", r2=" << r2 << std::endl;
     }
   }
+  std::cout << timer.toc() << " sec" << std::endl;
 };

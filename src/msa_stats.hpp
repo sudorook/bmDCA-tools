@@ -13,27 +13,38 @@ public:
   double getN();
   double getM();
   double getQ();
+
   void writeRelEntropyGradient(std::string);
+
   void writeFrequency1p(std::string);
   void writeFrequency2p(std::string);
-  void writeFrequency3p(std::string);
   void writeCorrelation2p(std::string);
-  void writeCorrelation3p(std::string);
-  // void writeCorrelation3p(std::string, double=0.01);
 
-  arma::Mat<double> frequency_1p;
-  arma::field<arma::Mat<double>> frequency_2p;
-  arma::field<arma::Cube<double>> frequency_3p;
-  arma::Mat<double> rel_entropy_grad_1p;
+  void writeFrequency1pAscii(std::string);
+  void writeFrequency2pAscii(std::string);
+  void writeCorrelation2pAscii(std::string);
+
+  arma::Col<double> frequency_1p;
+  arma::Col<double> frequency_2p;
+  arma::Col<double> correlation_2p;
 
 private:
-  // double pseudocount;
   int M;              // number of sequences
   int N;              // number of positions
   int Q;              // amino acid alphabet size
   double M_effective; // effect number of sequences
 
+  MSA msa;
+
+  void computeFrequency1p(void);
+  void computeFrequency2p(void);
+  void computeFrequency3p(void);
+  void computeCorrelation2p(void);
+  void computeCorrelation3p(void);
+
   arma::Col<double> aa_background_frequencies;
+  arma::Mat<double> rel_entropy_grad_1p;
+  double pseudocount;
 };
 
 #endif
