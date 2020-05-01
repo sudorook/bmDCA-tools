@@ -33,7 +33,7 @@ private:
   void readSequenceWeights(std::string);
   void makeNumericalMatrix(void);
   void computeSequenceWeights(double);
-  void computeHammingDistances(double=0.8);
+  void computeHammingDistances(void);
 };
 
 #endif
