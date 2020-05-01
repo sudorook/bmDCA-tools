@@ -5,8 +5,9 @@ DISTANCE := compute_distances
 
 CC := g++
 
-CXXFLAGS = -O3 $(shell pkg-config --cflags armadillo)
-LDFLAGS = -lm -fopenmp $(shell pkg-config --libs armadillo)
+CXXFLAGS = -O3 $(shell pkg-config --cflags armadillo) \
+           -fopenmp -std=c++11 -DARMA_DONT_USE_HDF5
+LDFLAGS = -lm $(shell pkg-config --libs armadillo)
 
 SRCPATH = src
 
