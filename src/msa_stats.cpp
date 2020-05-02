@@ -40,8 +40,8 @@ void MSAStats::computeFrequency1p(void) {
   arma::wall_clock timer;
   frequency_1p = arma::Col<double>((int)Q * N, arma::fill::zeros);
 
-  std::cout << "computing 1p frequencies... " << std::flush;
-  timer.tic();
+  // std::cout << "computing 1p frequencies... " << std::flush;
+  // timer.tic();
 #pragma omp parallel
   {
 #pragma omp for
@@ -54,7 +54,7 @@ void MSAStats::computeFrequency1p(void) {
     }
   }
   frequency_1p = frequency_1p / M_effective;
-  std::cout << timer.toc() << " sec" << std::endl;
+  // std::cout << timer.toc() << " sec" << std::endl;
 };
 
 void MSAStats::computeFrequency2p(void) {
@@ -62,8 +62,8 @@ void MSAStats::computeFrequency2p(void) {
   frequency_2p =
     arma::Col<double>((int)N * (N - 1) / 2 * Q * Q, arma::fill::zeros);
 
-  std::cout << "computing 2p frequencies... " << std::flush;
-  timer.tic();
+  // std::cout << "computing 2p frequencies... " << std::flush;
+  // timer.tic();
 #pragma omp parallel
   {
 #pragma omp for
@@ -82,15 +82,15 @@ void MSAStats::computeFrequency2p(void) {
     }
   }
   frequency_2p = frequency_2p / M_effective;
-  std::cout << timer.toc() << " sec" << std::endl;
+  // std::cout << timer.toc() << " sec" << std::endl;
 };
 
 void MSAStats::computeCorrelation2p(void) {
   arma::wall_clock timer;
   correlation_2p = arma::Col<double>((int)N*(N-1)/2*Q*Q, arma::fill::zeros);
 
-  std::cout << "computing 2p correlations... " << std::flush;
-  timer.tic();
+  // std::cout << "computing 2p correlations... " << std::flush;
+  // timer.tic();
 #pragma omp parallel
   {
 #pragma omp for
@@ -108,7 +108,7 @@ void MSAStats::computeCorrelation2p(void) {
       }
     }
   }
-  std::cout << timer.toc() << " sec" << std::endl;
+  // std::cout << timer.toc() << " sec" << std::endl;
 };
 
 double

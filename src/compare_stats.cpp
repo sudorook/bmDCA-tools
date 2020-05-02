@@ -13,7 +13,7 @@
 
 typedef struct {
   arma::Mat<unsigned long long int> grid;
-  int bins;
+  int bins=BINS;
   double bin_width;
   double min=0;
   double max=1;
@@ -250,7 +250,6 @@ int main(int argc, char* argv[]) {
     double min = std::min(arma::min(msa_stats.correlation_2p),
                      arma::min(mc_stats.correlation_2p));
     double corr_bin_width = (max - min) / (double)(BINS - 1);
-    // int offset = (int)((BINS - 1) / 2);
 
     arma::Cube<unsigned long long int> freq_hist_i =
       arma::Cube<unsigned long long int>(BINS, BINS, N, arma::fill::zeros);
@@ -268,7 +267,6 @@ int main(int argc, char* argv[]) {
       arma::Mat<unsigned long long int>(BINS, BINS, arma::fill::zeros);
     corr_hist.bin_width = corr_bin_width;
     corr_hist.bins = BINS;
-    // corr_hist.offset = offset;
     corr_hist.max = max;
     corr_hist.min = min;
 
