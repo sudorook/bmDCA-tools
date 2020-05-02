@@ -1,5 +1,5 @@
-COMPUTE := compute_stats
-COMPARE := compare_stats
+COMPUTE := compute_msa_stats
+COMPARE := _compare_msa_stats
 ENERGY := compute_energies
 DISTANCE := compute_distances
 

@@ -151,9 +151,9 @@ def main():
         os.makedirs(destination)
 
     if options.reweight1:
-        subprocess.call(['compare_stats', '-s', options.msa1, '-c', options.msa2, '-r'])
+        subprocess.call(['_compare_msa_stats', '-s', options.msa1, '-c', options.msa2, '-r'])
     else:
-        subprocess.call(['compare_stats', '-s', options.msa1, '-c', options.msa2])
+        subprocess.call(['_compare_msa_stats', '-s', options.msa1, '-c', options.msa2])
 
     prefix = slugify(options.title)
 
