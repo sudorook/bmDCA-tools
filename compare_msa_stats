@@ -194,7 +194,7 @@ def main():
                 y=data_df[options.ylabel],
                 weights=data_df["Count"],
                 bins=[options.bins, options.bins],
-                cmap="jet",
+                cmap="viridis",
                 zorder=1,
                 cmin=1,
                 norm=matplotlib.colors.LogNorm(),
