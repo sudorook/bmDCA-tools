@@ -2,6 +2,7 @@
 """ docstring """
 
 import os
+import sys
 import re
 import subprocess
 import argparse
@@ -151,7 +152,7 @@ def main():
         os.makedirs(destination)
 
     if options.reweight1:
-        subprocess.call(
+        res = subprocess.call(
             [
                 "_compare_msa_stats",
                 "-s",
@@ -162,9 +163,13 @@ def main():
             ]
         )
     else:
-        subprocess.call(
+        res = subprocess.call(
             ["_compare_msa_stats", "-s", options.msa1, "-c", options.msa2]
         )
+
+    if res != 0:
+        sys.exit(1)
+
 
     prefix = slugify(options.title)
 
