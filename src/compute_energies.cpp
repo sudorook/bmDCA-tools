@@ -46,7 +46,7 @@ int main(int argc, char* argv[]) {
   std::string prefix = msa_file.substr(0, idx);
 
   std::cout << "reading sequences... " << std::flush;
-  MSA msa = MSA(msa_file, true, is_numeric, 0.8);
+  MSA msa = MSA(msa_file, "", false, is_numeric, 0.8);
   std::cout << "done" << std::endl;
 
   std::cout << "reading parameters... " << std::flush;
@@ -76,6 +76,7 @@ int main(int argc, char* argv[]) {
   }
   std::cout << "done" << std::endl;
 
+  std::cout << "writing energies... " << std::flush;
   std::ofstream output_stream(energy_file);
 
   for (int rep = 0; rep < 1; rep++) {
@@ -83,4 +84,6 @@ int main(int argc, char* argv[]) {
       output_stream << energies.at(rep, m) << std::endl;
     }
   }
+  output_stream.close();
+  std::cout << "done" << std::endl;
 }

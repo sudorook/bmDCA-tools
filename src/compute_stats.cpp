@@ -11,12 +11,13 @@
 
 int main(int argc, char* argv[]) {
   std::string infile;
+  std::string weight_file;
   bool reweight = false;
   bool is_numeric = false;
   double threshold = 0.8;
 
   char c;
-  while ((c = getopt(argc, argv, "i:n:rt:")) != -1) {
+  while ((c = getopt(argc, argv, "i:n:rt:w:")) != -1) {
     switch (c) {
       case 'i':
         infile = optarg;
@@ -29,6 +30,9 @@ int main(int argc, char* argv[]) {
       case 'r':
         reweight = true;
         break;
+      case 'w':
+        weight_file = optarg;
+        break;
       case 't':
         threshold = std::stod(optarg);
         break;
@@ -38,7 +42,7 @@ int main(int argc, char* argv[]) {
   }
 
   std::cout << "reading sequences" << std::endl;
-  MSA msa = MSA(infile, reweight, is_numeric, threshold);
+  MSA msa = MSA(infile, weight_file, reweight, is_numeric, threshold);
 
   int idx = infile.find_last_of("."); 
   std::string prefix = infile.substr(0, idx);
