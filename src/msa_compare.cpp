@@ -10,7 +10,6 @@ MSACompare::MSACompare(MSA* msa, MSA* mc, int bins)
   , mc(mc)
   , bins(bins)
 {
-  std::cout << bins << std::endl;
   if (msa->Q != mc->Q) {
     std::cerr << "alphabet mismatch: " << msa->Q << " vs " << mc->Q
               << std::endl;
@@ -43,9 +42,6 @@ MSACompare::MSACompare(MSA* msa, MSA* mc, int bins)
   std::cout << Q << " amino acids (including gaps)" << std::endl;
   std::cout << M_effective_mc << " effective sequences" << std::endl;
   std::cout << std::endl;
-
-  // computeFrequency1p();
-  // computeFrequency2p();
 };
 
 void MSACompare::computeFrequency1p(void) {
@@ -172,8 +168,6 @@ void MSACompare::computeFrequency3p(void) {
 
   freq_3p_max = std::max(arma::max(msa_frequency_3p), arma::max(mc_frequency_3p));
   freq_3p_min = std::min(arma::min(msa_frequency_3p), arma::min(mc_frequency_3p));
-  // std::cout << "freq msa sum: " << arma::accu(msa_frequency_3p) << std::endl;
-  // std::cout << "freq mc sum: " << arma::accu(mc_frequency_3p) << std::endl;
   frequency_3p_set = true;
 }
 
@@ -210,8 +204,6 @@ void MSACompare::computeCorrelation2p(void) {
   }
   corr_2p_max = std::max(arma::max(msa_correlation_2p), arma::max(mc_correlation_2p));
   corr_2p_min = std::min(arma::min(msa_correlation_2p), arma::min(mc_correlation_2p));
-  // std::cout << arma::accu(msa_correlation_2p) << std::endl;
-  // std::cout << arma::accu(mc_correlation_2p) << std::endl;
   correlation_2p_set = true;
 };
 
@@ -257,67 +249,21 @@ void MSACompare::computeCorrelation3p(void) {
                 int idx1_2 = aa2 + j * Q;
                 int idx1_3 = aa3 + k * Q;
 
-                // if ((aa1 == 12) & (aa2 == 2) & (aa3 == 2) & (i == 39) &
-                //     (j == 47) & (k == 51)) {
-                //   std::cout << "pos: " << i << ", " << j << ", " << k
-                //             << std::endl;
-                //   std::cout << "aa: " << aa1 << ", " << aa2 << ", " << aa3
-                //             << std::endl;
-                //
-                //   double f_123 = msa_frequency_3p(idx);
-                //   double f_12 = msa_frequency_2p(idx2_12);
-                //   double f_13 = msa_frequency_2p(idx2_13);
-                //   double f_23 = msa_frequency_2p(idx2_23);
-                //   double f_1 = msa_frequency_1p(idx1_1);
-                //   double f_2 = msa_frequency_1p(idx1_2);
-                //   double f_3 = msa_frequency_1p(idx1_3);
-                //
-                //   double c_123 = f_123 - f_12 * f_3 - f_13 * f_2 -
-                //                  f_23 * f_1 + 2 * f_1 * f_2 * f_3;
-                //   double c_12 = f_12 - f_1 * f_2;
-                //   double c_13 = f_13 - f_1 * f_3;
-                //   double c_23 = f_23 - f_2 * f_3;
-                //
-                //   std::cout << "f_123=" << f_123 << std::endl;
-                //   std::cout << "f_12=" << f_12 << std::endl;
-                //   std::cout << "f_13=" << f_13 << std::endl;
-                //   std::cout << "f_23=" << f_23 << std::endl;
-                //   std::cout << "f_1=" << f_1 << std::endl;
-                //   std::cout << "f_2=" << f_2 << std::endl;
-                //   std::cout << "f_3=" << f_3 << std::endl;
-                //
-                //   std::cout << "c_123=" << c_123 << std::endl;
-                //   std::cout << "c_12=" << c_12 << std::endl;
-                //   std::cout << "c_13=" << c_13 << std::endl;
-                //   std::cout << "c_23=" << c_23 << std::endl;
-                //
-                //   std::cout << std::endl;
-                // }
-
-                // std::cout << idx << std::endl;
                 msa_correlation_3p(idx) =
                   msa_frequency_3p(idx) -
-                  msa_frequency_2p(idx2_12) *
-                    msa_frequency_1p(aa3 + k * Q) -
-                  msa_frequency_2p(idx2_13) *
-                    msa_frequency_1p(aa2 + j * Q) -
-                  msa_frequency_2p(idx2_23) *
-                    msa_frequency_1p(aa1 + i * Q) +
-                  2.0 * msa_frequency_1p(aa1 + i * Q) *
-                    msa_frequency_1p(aa2 + j * Q) *
-                    msa_frequency_1p(aa3 + k * Q);
+                  msa_frequency_2p(idx2_12) * msa_frequency_1p(idx1_3) -
+                  msa_frequency_2p(idx2_13) * msa_frequency_1p(idx1_2) -
+                  msa_frequency_2p(idx2_23) * msa_frequency_1p(idx1_1) +
+                  2.0 * msa_frequency_1p(idx1_1) * msa_frequency_1p(idx1_2) *
+                    msa_frequency_1p(idx1_3);
 
                 mc_correlation_3p(idx) =
                   mc_frequency_3p(idx) -
-                  mc_frequency_2p(idx2_12) *
-                    mc_frequency_1p(aa3 + k * Q) -
-                  mc_frequency_2p(idx2_13) *
-                    mc_frequency_1p(aa2 + j * Q) -
-                  mc_frequency_2p(idx2_23) *
-                    mc_frequency_1p(aa1 + i * Q) +
-                  2.0 * mc_frequency_1p(aa1 + i * Q) *
-                    mc_frequency_1p(aa2 + j * Q) *
-                    mc_frequency_1p(aa3 + k * Q);
+                  mc_frequency_2p(idx2_12) * mc_frequency_1p(idx1_3) -
+                  mc_frequency_2p(idx2_13) * mc_frequency_1p(idx1_2) -
+                  mc_frequency_2p(idx2_23) * mc_frequency_1p(idx1_1) +
+                  2.0 * mc_frequency_1p(idx1_1) * mc_frequency_1p(idx1_2) *
+                    mc_frequency_1p(idx1_3);
               }
             }
           }
@@ -335,8 +281,6 @@ void MSACompare::computeCorrelation3p(void) {
     std::max(arma::max(msa_correlation_3p), arma::max(mc_correlation_3p));
   corr_3p_min =
     std::min(arma::min(msa_correlation_3p), arma::min(mc_correlation_3p));
-  // std::cout << "corr msa sum: " << arma::accu(msa_correlation_3p) << std::endl;
-  // std::cout << "corr mc sum: " << arma::accu(mc_correlation_3p) << std::endl;
 };
 
 void
@@ -561,20 +505,6 @@ MSACompare::makeEfficient3pHistograms(void) {
   arma::Col<double> corr_yy_vec =
     arma::Col<double>(N, arma::fill::zeros);
 
-  // arma::Col<double> freq_xx_vec =
-  //   arma::Col<double>((int)(N * (N - 1) * (N - 2) / 6), arma::fill::zeros);
-  // arma::Col<double> freq_xy_vec =
-  //   arma::Col<double>((int)(N * (N - 1) * (N - 2) / 6), arma::fill::zeros);
-  // arma::Col<double> freq_yy_vec =
-  //   arma::Col<double>((int)(N * (N - 1) * (N - 2) / 6), arma::fill::zeros);
-  //
-  // arma::Col<double> corr_xx_vec =
-  //   arma::Col<double>((int)(N * (N - 1) * (N - 2) / 6), arma::fill::zeros);
-  // arma::Col<double> corr_xy_vec =
-  //   arma::Col<double>((int)(N * (N - 1) * (N - 2) / 6), arma::fill::zeros);
-  // arma::Col<double> corr_yy_vec =
-  //   arma::Col<double>((int)(N * (N - 1) * (N - 2) / 6), arma::fill::zeros);
-
   arma::Col<double> corr_max_vec = arma::Col<double>(N, arma::fill::zeros);
   arma::Col<double> corr_min_vec = arma::Col<double>(N, arma::fill::zeros);
   arma::Col<double> freq_max_vec = arma::Col<double>(N, arma::fill::zeros);
@@ -664,13 +594,6 @@ MSACompare::makeEfficient3pHistograms(void) {
           freq_xy_vec(i) +=
             arma::accu((msa_frequency_3p_ijk - f) % (mc_frequency_3p_ijk - f));
 
-          // freq_xx_vec(idx) =
-          //   arma::accu(arma::pow(msa_frequency_3p_ijk - f, 2));
-          // freq_yy_vec(idx) =
-          //   arma::accu(arma::pow(mc_frequency_3p_ijk - f, 2));
-          // freq_xy_vec(idx) = arma::accu((msa_frequency_3p_ijk - f) %
-          //                                  (mc_frequency_3p_ijk - f));
-
           for (int aa1 = 0; aa1 < Q; aa1++) {
             for (int aa2 = 0; aa2 < Q; aa2++) {
               for (int aa3 = 0; aa3 < Q; aa3++) {
@@ -689,100 +612,31 @@ MSACompare::makeEfficient3pHistograms(void) {
                 int idx1_2 = aa2 + j * Q;
                 int idx1_3 = aa3 + k * Q;
 
-                // if ((aa1 == 12) & (aa2 == 2) & (aa3 == 2) & (i == 39) &
-                //     (j == 47) & (k == 51)) {
-                //   std::cout << "pos: " << i << ", " << j << ", " << k
-                //             << std::endl;
-                //   std::cout << "aa: " << aa1 << ", " << aa2 << ", " << aa3
-                //             << std::endl;
-                //
-                //   double f_123 = msa_frequency_3p_ijk(idx_aa);
-                //   double f_12 = msa_frequency_2p(idx2_12);
-                //   double f_13 = msa_frequency_2p(idx2_13);
-                //   double f_23 = msa_frequency_2p(idx2_23);
-                //   double f_1 = msa_frequency_1p(idx1_1);
-                //   double f_2 = msa_frequency_1p(idx1_2);
-                //   double f_3 = msa_frequency_1p(idx1_3);
-                //
-                //   double c_123 = f_123 - f_12 * f_3 - f_13 * f_2 -
-                //                  f_23 * f_1 + 2 * f_1 * f_2 * f_3;
-                //   double c_12 = f_12 - f_1 * f_2;
-                //   double c_13 = f_13 - f_1 * f_3;
-                //   double c_23 = f_23 - f_2 * f_3;
-                //
-                //   std::cout << "f_123=" << f_123 << std::endl;
-                //   std::cout << "f_12=" << f_12 << std::endl;
-                //   std::cout << "f_13=" << f_13 << std::endl;
-                //   std::cout << "f_23=" << f_23 << std::endl;
-                //   std::cout << "f_1=" << f_1 << std::endl;
-                //   std::cout << "f_2=" << f_2 << std::endl;
-                //   std::cout << "f_3=" << f_3 << std::endl;
-                //
-                //   std::cout << "c_123=" << c_123 << std::endl;
-                //   std::cout << "c_12=" << c_12 << std::endl;
-                //   std::cout << "c_13=" << c_13 << std::endl;
-                //   std::cout << "c_23=" << c_23 << std::endl;
-                //
-                //   std::cout << std::endl;
-                // }
-
-                // msa_correlation_3p_ijk(idx_aa) =
-                //   msa_frequency_3p_ijk(idx_aa) -
-                //   msa_frequency_2p(idx2_12) *
-                //     msa_frequency_1p(aa3 + k * Q) -
-                //   msa_frequency_2p(idx2_13) *
-                //     msa_frequency_1p(aa2 + j * Q) -
-                //   msa_frequency_2p(idx2_23) *
-                //     msa_frequency_1p(aa1 + i * Q) +
-                //   2.0 * msa_frequency_1p(aa1 + i * Q) *
-                //     msa_frequency_1p(aa2 + j * Q) *
-                //     msa_frequency_1p(aa3 + k * Q);
-
                 msa_correlation_3p_ijk(idx_aa) =
                   msa_frequency_3p_ijk(idx_aa) -
-                  msa_frequency_2p(idx2_12) *
-                    msa_frequency_1p(idx1_3) -
-                  msa_frequency_2p(idx2_13) *
-                    msa_frequency_1p(idx1_2) -
-                  msa_frequency_2p(idx2_23) *
-                    msa_frequency_1p(idx1_1) +
-                  2.0 * msa_frequency_1p(idx1_1) *
-                    msa_frequency_1p(idx1_2) *
+                  msa_frequency_2p(idx2_12) * msa_frequency_1p(idx1_3) -
+                  msa_frequency_2p(idx2_13) * msa_frequency_1p(idx1_2) -
+                  msa_frequency_2p(idx2_23) * msa_frequency_1p(idx1_1) +
+                  2.0 * msa_frequency_1p(idx1_1) * msa_frequency_1p(idx1_2) *
                     msa_frequency_1p(idx1_3);
-
-                // if (fabs(msa_correlation_3p_ijk(idx_aa)) > .75) {
-                //   std::cout << "pos: " << i << ", " << j << ", " << k
-                //             << std::endl;
-                //   std::cout << "aa: " << aa1 << ", " << aa2 << ", " << aa3
-                //             << std::endl;
-                // }
-
-                // mc_correlation_3p_ijk(idx_aa) =
-                //   mc_frequency_3p_ijk(idx_aa) -
-                //   mc_frequency_2p(idx2_12) *
-                //     mc_frequency_1p(aa3 + k * Q) -
-                //   mc_frequency_2p(idx2_13) *
-                //     mc_frequency_1p(aa2 + j * Q) -
-                //   mc_frequency_2p(idx2_23) *
-                //     mc_frequency_1p(aa1 + i * Q) +
-                //   2.0 * mc_frequency_1p(aa1 + i * Q) *
-                //     mc_frequency_1p(aa2 + j * Q) *
-                //     mc_frequency_1p(aa3 + k * Q);
 
                 mc_correlation_3p_ijk(idx_aa) =
                   mc_frequency_3p_ijk(idx_aa) -
-                  mc_frequency_2p(idx2_12) *
-                    mc_frequency_1p(idx1_3) -
-                  mc_frequency_2p(idx2_13) *
-                    mc_frequency_1p(idx1_2) -
-                  mc_frequency_2p(idx2_23) *
-                    mc_frequency_1p(idx1_1) +
-                  2.0 * mc_frequency_1p(idx1_1) *
-                    mc_frequency_1p(idx1_2) *
+                  mc_frequency_2p(idx2_12) * mc_frequency_1p(idx1_3) -
+                  mc_frequency_2p(idx2_13) * mc_frequency_1p(idx1_2) -
+                  mc_frequency_2p(idx2_23) * mc_frequency_1p(idx1_1) +
+                  2.0 * mc_frequency_1p(idx1_1) * mc_frequency_1p(idx1_2) *
                     mc_frequency_1p(idx1_3);
               }
             }
           }
+
+          corr_xx_vec(i) +=
+            arma::accu(arma::pow(msa_correlation_3p_ijk, 2));
+          corr_yy_vec(i) +=
+            arma::accu(arma::pow(mc_correlation_3p_ijk, 2));
+          corr_xy_vec(i) +=
+            arma::accu((msa_correlation_3p_ijk) % (mc_correlation_3p_ijk));
 
           {
             arma::Col<double> tmp_msa_frequency_3p_ijk =
@@ -804,20 +658,6 @@ MSACompare::makeEfficient3pHistograms(void) {
                           i)++;
             }
           }
-
-          corr_xx_vec(i) +=
-            arma::accu(arma::pow(msa_correlation_3p_ijk, 2));
-          corr_yy_vec(i) +=
-            arma::accu(arma::pow(mc_correlation_3p_ijk, 2));
-          corr_xy_vec(i) +=
-            arma::accu((msa_correlation_3p_ijk) % (mc_correlation_3p_ijk));
-
-          // corr_xx_vec(idx) =
-          //   arma::accu(arma::pow(msa_correlation_3p_ijk, 2));
-          // corr_yy_vec(idx) =
-          //   arma::accu(arma::pow(mc_correlation_3p_ijk, 2));
-          // corr_xy_vec(idx) =
-          //   arma::accu((msa_correlation_3p_ijk) % (mc_correlation_3p_ijk));
 
           {
             double tmp_max = std::max(arma::max(msa_frequency_3p_ijk),
@@ -919,9 +759,6 @@ MSACompare::makeFrequency3pHistogram(void) {
   std::cout << "computing 3p frequency regression... " << std::flush;
   timer.tic();
 
-  // std::cout << "3p freq range: " << freq_3p_min << ", " << freq_3p_max <<
-  //   std::endl;
-
   double f = 1. / (double)(Q * Q * Q);
   double xy = arma::accu((msa_frequency_3p - f) %
                          (mc_frequency_3p - f));
@@ -953,9 +790,6 @@ MSACompare::makeFrequency3pHistogram(void) {
   // hist.grid.print("freq 3p:");
   writeHistogram("freq_3p_hist.tsv", hist);
   writeLinearModel("freq_3p_model.tsv", model);
-
-  std::cout << "basic freq 3p: " << freq_3p_min << ", " << freq_3p_max <<
-    std::endl;
 };
 
 void
@@ -1011,8 +845,10 @@ MSACompare::makeCorrelation3pHistogram(void) {
       (int)N * (N - 1) * (N - 2) / 6 * Q * Q * Q, arma::fill::zeros);
     arma::Col<double> tmp_mc_correlation_3p = arma::Col<double>(
       (int)N * (N - 1) * (N - 2) / 6 * Q * Q * Q, arma::fill::zeros);
+
     arma::Col<double> corr_max_vec = arma::Col<double>(N, arma::fill::zeros);
     arma::Col<double> corr_min_vec = arma::Col<double>(N, arma::fill::zeros);
+
 #pragma omp parallel
     {
 #pragma omp for
@@ -1038,27 +874,20 @@ MSACompare::makeCorrelation3pHistogram(void) {
                     aa3 + aa2 * Q +
                     Q * Q * (k - j - 1 + j * (N - 1) - j * (j - 1) / 2);
 
-                  // std::cout << idx << std::endl;
                   tmp_msa_correlation_3p(idx) =
                     msa_frequency_3p(idx) -
-                    msa_frequency_2p(idx2_12) *
-                      msa_frequency_1p(aa3 + k * Q) -
-                    msa_frequency_2p(idx2_13) *
-                      msa_frequency_1p(aa2 + j * Q) -
-                    msa_frequency_2p(idx2_23) *
-                      msa_frequency_1p(aa1 + i * Q) +
+                    msa_frequency_2p(idx2_12) * msa_frequency_1p(aa3 + k * Q) -
+                    msa_frequency_2p(idx2_13) * msa_frequency_1p(aa2 + j * Q) -
+                    msa_frequency_2p(idx2_23) * msa_frequency_1p(aa1 + i * Q) +
                     2.0 * msa_frequency_1p(aa1 + i * Q) *
                       msa_frequency_1p(aa2 + j * Q) *
                       msa_frequency_1p(aa3 + k * Q);
 
                   tmp_mc_correlation_3p(idx) =
                     mc_frequency_3p(idx) -
-                    mc_frequency_2p(idx2_12) *
-                      mc_frequency_1p(aa3 + k * Q) -
-                    mc_frequency_2p(idx2_13) *
-                      mc_frequency_1p(aa2 + j * Q) -
-                    mc_frequency_2p(idx2_23) *
-                      mc_frequency_1p(aa1 + i * Q) +
+                    mc_frequency_2p(idx2_12) * mc_frequency_1p(aa3 + k * Q) -
+                    mc_frequency_2p(idx2_13) * mc_frequency_1p(aa2 + j * Q) -
+                    mc_frequency_2p(idx2_23) * mc_frequency_1p(aa1 + i * Q) +
                     2.0 * mc_frequency_1p(aa1 + i * Q) *
                       mc_frequency_1p(aa2 + j * Q) *
                       mc_frequency_1p(aa3 + k * Q);
@@ -1148,20 +977,6 @@ MSACompare::makeEfficient4pHistograms(void) {
   arma::Col<double> corr_yy_vec =
     arma::Col<double>(N, arma::fill::zeros);
 
-  // arma::Col<double> freq_xx_vec = arma::Col<double>(
-  //   (int)(N * (N - 1) * (N - 2) * (N - 3) / 24), arma::fill::zeros);
-  // arma::Col<double> freq_xy_vec = arma::Col<double>(
-  //   (int)(N * (N - 1) * (N - 2) * (N - 3) / 24), arma::fill::zeros);
-  // arma::Col<double> freq_yy_vec = arma::Col<double>(
-  //   (int)(N * (N - 1) * (N - 2) * (N - 3) / 24), arma::fill::zeros);
-  //
-  // arma::Col<double> corr_xx_vec = arma::Col<double>(
-  //   (int)(N * (N - 1) * (N - 2) * (N - 3) / 24), arma::fill::zeros);
-  // arma::Col<double> corr_xy_vec = arma::Col<double>(
-  //   (int)(N * (N - 1) * (N - 2) * (N - 3) / 24), arma::fill::zeros);
-  // arma::Col<double> corr_yy_vec = arma::Col<double>(
-  //   (int)(N * (N - 1) * (N - 2) * (N - 3) / 24), arma::fill::zeros);
-
   arma::Col<double> corr_max_vec = arma::Col<double>(N, arma::fill::zeros);
   arma::Col<double> corr_min_vec = arma::Col<double>(N, arma::fill::zeros);
   arma::Col<double> freq_max_vec = arma::Col<double>(N, arma::fill::zeros);
@@ -1196,12 +1011,8 @@ MSACompare::makeEfficient4pHistograms(void) {
   corr_hist.max = max;
   corr_hist.min = min;
 
-  // std::cout << "3p freq range: " << freq_3p_min << ", " << freq_3p_max <<
-  //   std::endl;
   // std::cout << "3p corr range: " << corr_3p_min << ", " << corr_3p_max <<
   //   std::endl;
-
-  // std::exit(0);
 
 #pragma omp parallel
   {
@@ -1213,12 +1024,6 @@ MSACompare::makeEfficient4pHistograms(void) {
       for (int j = i + 1; j < N; j++) {
         for (int k = j + 1; k < N; k++) {
           for (int l = k + 1; l < N; l++) {
-
-            // int idx =
-            //   (N * (N - 1) * (N - 2) / 6 -
-            //    (N - i - 1) * (N - i) * (N - i - 2) / 6 + k - j +
-            //    (j - i - 1) * (N - i - 1) - (j - i) * (j - i - 1) / 2 - 1);
-
             arma::Col<double> msa_frequency_4p_ijkl =
               arma::Col<double>(Q * Q * Q * Q, arma::fill::zeros);
             arma::Col<double> msa_correlation_4p_ijkl =
@@ -1261,13 +1066,6 @@ MSACompare::makeEfficient4pHistograms(void) {
               arma::accu(arma::pow(mc_frequency_4p_ijkl - f, 2));
             freq_xy_vec(i) += arma::accu((msa_frequency_4p_ijkl - f) %
                                             (mc_frequency_4p_ijkl - f));
-
-            // freq_xx_vec(idx) =
-            //   arma::accu(arma::pow(msa_frequency_4p_ijkl - f, 2));
-            // freq_yy_vec(idx) =
-            //   arma::accu(arma::pow(mc_frequency_4p_ijkl - f, 2));
-            // freq_xy_vec(idx) = arma::accu((msa_frequency_4p_ijkl - f) %
-            //                                  (mc_frequency_4p_ijkl - f));
 
             for (int aa1 = 0; aa1 < Q; aa1++) {
               for (int aa2 = 0; aa2 < Q; aa2++) {
@@ -1324,81 +1122,6 @@ MSACompare::makeEfficient4pHistograms(void) {
                     int idx1_3 = aa3 + k * Q;
                     int idx1_4 = aa4 + l * Q;
 
-                    // if (fabs(msa_frequency_4p_ijkl(idx_aa)) > .75) {
-                    //   std::cout << "pos: " << i << ", " << j << ", " << k
-                    //             << ", " << l << std::endl;
-                    //   std::cout << "aa: " << aa1 << ", " << aa2 << ", " << aa3
-                    //             << ", " << aa4 << std::endl;
-                    //
-                    //   double f_1234 = msa_frequency_4p_ijkl(idx_aa);
-                    //   double f_123 = msa_frequency_3p(idx3_123);
-                    //   double f_124 = msa_frequency_3p(idx3_124);
-                    //   double f_134 = msa_frequency_3p(idx3_134);
-                    //   double f_234 = msa_frequency_3p(idx3_234);
-                    //   double f_12 = msa_frequency_2p(idx2_12);
-                    //   double f_13 = msa_frequency_2p(idx2_13);
-                    //   double f_14 = msa_frequency_2p(idx2_14);
-                    //   double f_23 = msa_frequency_2p(idx2_23);
-                    //   double f_24 = msa_frequency_2p(idx2_24);
-                    //   double f_34 = msa_frequency_2p(idx2_34);
-                    //   double f_1 = msa_frequency_1p(idx1_1);
-                    //   double f_2 = msa_frequency_1p(idx1_2);
-                    //   double f_3 = msa_frequency_1p(idx1_3);
-                    //   double f_4 = msa_frequency_1p(idx1_4);
-                    //
-                    //   double c_1234 =
-                    //     f_1234 - f_123 * f_4 - f_124 * f_3 - f_134 * f_2 -
-                    //     f_234 * f_1 - f_12 * f_34 - f_13 * f_24 - f_14 * f_23 +
-                    //     2 * f_12 * f_3 * f_4 + 2 * f_13 * f_2 * f_4 +
-                    //     2 * f_14 * f_2 * f_3 + 2 * f_23 * f_1 * f_4 +
-                    //     2 * f_24 * f_1 * f_3 + 2 * f_34 * f_1 * f_2 -
-                    //     6 * f_1 * f_2 * f_3 * f_4;
-                    //   double c_123 = f_123 - f_12 * f_3 - f_13 * f_2 -
-                    //                  f_23 * f_1 + 2 * f_1 * f_2 * f_3;
-                    //   double c_124 = f_124 - f_12 * f_4 - f_14 * f_2 -
-                    //                  f_24 * f_1 + 2 * f_1 * f_2 * f_4;
-                    //   double c_134 = f_134 - f_13 * f_4 - f_14 * f_2 -
-                    //                  f_34 * f_1 + 2 * f_1 * f_3 * f_4;
-                    //   double c_234 = f_234 - f_23 * f_4 - f_24 * f_3 -
-                    //                  f_34 * f_2 + 2 * f_2 * f_3 * f_4;
-                    //   double c_12 = f_12 - f_1 * f_2;
-                    //   double c_13 = f_13 - f_1 * f_3;
-                    //   double c_14 = f_14 - f_1 * f_4;
-                    //   double c_23 = f_23 - f_2 * f_3;
-                    //   double c_24 = f_24 - f_2 * f_4;
-                    //   double c_34 = f_34 - f_3 * f_4;
-                    //
-                    //   std::cout << "f_1234=" << f_1234 << std::endl;
-                    //   std::cout << "f_123=" << f_123 << std::endl;
-                    //   std::cout << "f_124=" << f_124 << std::endl;
-                    //   std::cout << "f_134=" << f_134 << std::endl;
-                    //   std::cout << "f_234=" << f_234 << std::endl;
-                    //   std::cout << "f_12=" << f_12 << std::endl;
-                    //   std::cout << "f_13=" << f_13 << std::endl;
-                    //   std::cout << "f_14=" << f_14 << std::endl;
-                    //   std::cout << "f_23=" << f_23 << std::endl;
-                    //   std::cout << "f_24=" << f_24 << std::endl;
-                    //   std::cout << "f_34=" << f_34 << std::endl;
-                    //   std::cout << "f_1=" << f_1 << std::endl;
-                    //   std::cout << "f_2=" << f_2 << std::endl;
-                    //   std::cout << "f_3=" << f_3 << std::endl;
-                    //   std::cout << "f_4=" << f_4 << std::endl;
-                    //
-                    //   std::cout << "c_1234=" << c_1234 << std::endl;
-                    //   std::cout << "c_123=" << c_123 << std::endl;
-                    //   std::cout << "c_124=" << c_124 << std::endl;
-                    //   std::cout << "c_134=" << c_134 << std::endl;
-                    //   std::cout << "c_234=" << c_234 << std::endl;
-                    //   std::cout << "c_12=" << c_12 << std::endl;
-                    //   std::cout << "c_13=" << c_13 << std::endl;
-                    //   std::cout << "c_14=" << c_14 << std::endl;
-                    //   std::cout << "c_23=" << c_23 << std::endl;
-                    //   std::cout << "c_24=" << c_24 << std::endl;
-                    //   std::cout << "c_34=" << c_34 << std::endl;
-                    //
-                    //   std::cout << std::endl;
-                    // }
-
                     msa_correlation_4p_ijkl(idx_aa) =
                       msa_frequency_4p_ijkl(idx_aa) -
                       msa_frequency_1p(idx1_1) * msa_frequency_3p(idx3_234) -
@@ -1451,6 +1174,13 @@ MSACompare::makeEfficient4pHistograms(void) {
               }
             }
 
+            corr_xx_vec(i) +=
+              arma::accu(arma::pow(msa_correlation_4p_ijkl, 2));
+            corr_yy_vec(i) +=
+              arma::accu(arma::pow(mc_correlation_4p_ijkl, 2));
+            corr_xy_vec(i) +=
+              arma::accu((msa_correlation_4p_ijkl) % (mc_correlation_4p_ijkl));
+
             {
               arma::Col<double> tmp_msa_frequency_4p_ijkl =
                 arma::floor(msa_frequency_4p_ijkl / freq_bin_width);
@@ -1472,19 +1202,6 @@ MSACompare::makeEfficient4pHistograms(void) {
               }
             }
 
-            corr_xx_vec(i) +=
-              arma::accu(arma::pow(msa_correlation_4p_ijkl, 2));
-            corr_yy_vec(i) +=
-              arma::accu(arma::pow(mc_correlation_4p_ijkl, 2));
-            corr_xy_vec(i) +=
-              arma::accu((msa_correlation_4p_ijkl) % (mc_correlation_4p_ijkl));
-
-            // corr_xx_vec(idx) =
-            //   arma::accu(arma::pow(msa_correlation_4p_ijkl, 2));
-            // corr_yy_vec(idx) =
-            //   arma::accu(arma::pow(mc_correlation_4p_ijkl, 2));
-            // corr_xy_vec(idx) =
-            //   arma::accu((msa_correlation_4p_ijkl) % (mc_correlation_4p_ijkl));
             {
               double tmp_max = std::max(arma::max(msa_frequency_4p_ijkl),
                                         arma::max(mc_frequency_4p_ijkl));
@@ -1521,11 +1238,6 @@ MSACompare::makeEfficient4pHistograms(void) {
   freq_4p_max = arma::max(freq_max_vec);
   corr_4p_min = arma::min(corr_min_vec);
   corr_4p_max = arma::max(corr_max_vec);
-
-  // std::cout << "4p freq range: " << freq_4p_min << ", " << freq_4p_max <<
-  //   std::endl;
-  // std::cout << "4p corr range: " << corr_4p_min << ", " << corr_4p_max <<
-  //   std::endl;
 
   {
     double xx = arma::accu(freq_xx_vec);
@@ -1571,6 +1283,11 @@ MSACompare::makeEfficient4pHistograms(void) {
     writeHistogram("corr_4p_hist.tsv", corr_hist);
     writeLinearModel("corr_4p_model.tsv", model);
   }
+
+  // std::cout << "4p freq range: " << freq_4p_min << ", " << freq_4p_max <<
+  //   std::endl;
+  // std::cout << "4p corr range: " << corr_4p_min << ", " << corr_4p_max <<
+  //   std::endl;
 };
 
 void

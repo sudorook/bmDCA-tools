@@ -1,10 +1,5 @@
-#include <armadillo>
-#include <cstdlib>
-#include <fstream>
 #include <iostream>
 #include <string>
-#include <unistd.h>
-#include <vector>
 
 #include "msa.hpp"
 #include "msa_compare.hpp"
