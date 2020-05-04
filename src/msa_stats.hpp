@@ -14,8 +14,6 @@ public:
   double getM();
   double getQ();
 
-  void writeRelEntropyGradient(std::string);
-
   void writeFrequency1p(std::string);
   void writeFrequency2p(std::string);
   void writeCorrelation2p(std::string);
@@ -41,10 +39,7 @@ private:
   void computeFrequency3p(void);
   void computeCorrelation2p(void);
   void computeCorrelation3p(void);
-
-  arma::Col<double> aa_background_frequencies;
-  arma::Mat<double> rel_entropy_grad_1p;
-  double pseudocount;
+  // void computeCorrelation4p(void);
 };
 
 #endif

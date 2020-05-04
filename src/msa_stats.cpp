@@ -18,22 +18,9 @@ MSAStats::MSAStats(MSA msa): msa(msa)
   std::cout << Q << " amino acids (including gaps)" << std::endl;
   std::cout << M_effective << " effective sequences" << std::endl;
 
-  rel_entropy_grad_1p = arma::Mat<double>(Q, N, arma::fill::zeros);
-  aa_background_frequencies = arma::Col<double>(Q, arma::fill::ones);
-
-  if (Q == 21) {
-    aa_background_frequencies = { 0.000, 0.073, 0.025, 0.050, 0.061, 0.042,
-                                  0.072, 0.023, 0.053, 0.064, 0.089, 0.023,
-                                  0.043, 0.052, 0.040, 0.052, 0.073, 0.056,
-                                  0.063, 0.013, 0.033 };
-  } else {
-    aa_background_frequencies = aa_background_frequencies / (double)Q;
-  }
-  pseudocount = 0.03;
-
   computeFrequency1p();
   computeFrequency2p();
-  computeCorrelation2p();
+  // computeCorrelation2p();
 };
 
 void MSAStats::computeFrequency1p(void) {
@@ -133,19 +120,6 @@ double
 MSAStats::getEffectiveM(void)
 {
   return M_effective;
-};
-
-void
-MSAStats::writeRelEntropyGradient(std::string output_file)
-{
-  std::ofstream output_stream(output_file);
-
-  for (int i = 0; i < N; i++) {
-    for (int aa = 0; aa < Q; aa++) {
-      output_stream << i << " " << aa << " " << rel_entropy_grad_1p.at(aa, i)
-                    << std::endl;
-    }
-  }
 };
 
 void
