@@ -1,7 +1,7 @@
 COMPUTE := compute_msa_stats
-COMPARE := _compare_msa_stats
 ENERGY := compute_energies
 DISTANCE := compute_distances
+COMPARE := compare_msa_stats
 
 CC := g++
 
@@ -19,7 +19,7 @@ OBJECTS_COMPUTE = $(SOURCES_COMPUTE:%.cpp=%.o)
 
 SOURCES_COMPARE = ${SRCPATH}/compare_stats.cpp \
                   ${SRCPATH}/msa.cpp \
-                  ${SRCPATH}/msa_stats.cpp \
+                  ${SRCPATH}/msa_compare.cpp \
                   ${SRCPATH}/utils.cpp
 OBJECTS_COMPARE = $(SOURCES_COMPARE:%.cpp=%.o)
 
