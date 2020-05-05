@@ -3,6 +3,7 @@
 
 import numpy as np
 
+
 def reduce_J(J, norm=2):
     """ reduce J using Frobenius-norm """
     Npos = np.shape(J)[0]

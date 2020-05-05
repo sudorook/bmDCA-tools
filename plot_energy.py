@@ -18,16 +18,35 @@ def parse_options():
     """ cli parser """
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-n", "--msa", dest="msa", action='append', required=False, help="numerical msa file(s)"
+        "-n",
+        "--msa",
+        dest="msa",
+        action="append",
+        required=False,
+        help="numerical msa file(s)",
     )
     parser.add_argument(
-        "-e", "--emergoes", dest="energies", action='append', required=False, help="msa energy file(s)"
+        "-e",
+        "--emergoes",
+        dest="energies",
+        action="append",
+        required=False,
+        help="msa energy file(s)",
     )
     parser.add_argument(
-        "-p", "--parameters", dest="params", required=False, help="msa energy file(s)"
+        "-p",
+        "--parameters",
+        dest="params",
+        required=False,
+        help="msa energy file(s)",
     )
     parser.add_argument(
-        "-l", "--labels", dest="labels", action='append',  required=True, help="labels"
+        "-l",
+        "--labels",
+        dest="labels",
+        action="append",
+        required=True,
+        help="labels",
     )
     parser.add_argument(
         "-t", "--title", dest="title", required=True, help="title prefix"
@@ -50,10 +69,15 @@ def main():
     options = parse_options()
 
     if options.energies is not None:
-        msa_energies = [tools.load_energies(msa_file) for msa_file in options.energies]
+        msa_energies = [
+            tools.load_energies(msa_file) for msa_file in options.energies
+        ]
     elif options.msa is not None and options.parameters is not None:
         h, J = tools.load_model(options.parameters)
-        msa_energies = [tools.compute_energies(tools.load_sequences(msa_file), h, J) for msa_file in options.msa]
+        msa_energies = [
+            tools.compute_energies(tools.load_sequences(msa_file), h, J)
+            for msa_file in options.msa
+        ]
     else:
         sys.exit("ERROR: missing input data")
 
@@ -62,18 +86,19 @@ def main():
     standard_energy = 0
     if options.mode == "1":
         standard_energy = msa_energies[0][0]
-        msa_energies = [msa_energy - standard_energy for msa_energy in msa_energies]
+        msa_energies = [
+            msa_energy - standard_energy for msa_energy in msa_energies
+        ]
     elif options.mode == "2":
         standard_energy = np.mean(msa_energies[0])
-        msa_energies = [msa_energy - standard_energy for msa_energy in msa_energies]
+        msa_energies = [
+            msa_energy - standard_energy for msa_energy in msa_energies
+        ]
 
     with plt.style.context("fivethirtyeight"):
         for i, msa_energy in enumerate(msa_energies):
             plt.hist(
-                msa_energy,
-                alpha=0.5,
-                label=msa_labels[i],
-                density=True,
+                msa_energy, alpha=0.5, label=msa_labels[i], density=True,
             )
         plt.legend(loc="upper right")
         plt.xlabel("Sequence Energy")
