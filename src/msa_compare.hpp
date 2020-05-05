@@ -7,15 +7,17 @@
 
 #define BINS 201
 
-typedef struct {
+typedef struct
+{
   arma::Mat<unsigned long long int> grid;
-  int bins=BINS;
+  int bins = BINS;
   double bin_width;
-  double min=0;
-  double max=1;
+  double min = 0;
+  double max = 1;
 } histogram;
 
-typedef struct {
+typedef struct
+{
   double a;
   double b;
   double R2;
@@ -24,7 +26,7 @@ typedef struct {
 class MSACompare
 {
 public:
-  MSACompare(MSA*, MSA*, int=BINS);
+  MSACompare(MSA*, MSA*, int = BINS);
 
   void computeFrequency1p(void);
   void computeFrequency2p(void);
@@ -33,7 +35,6 @@ public:
   void computeCorrelation2p(void);
   void computeCorrelation3p(void);
   // void computeCorrelation4p(void);
-
 
   void makeFrequency1pHistogram(void);
   void makeFrequency2pHistogram(void);
@@ -54,8 +55,8 @@ private:
   double M_effective_msa; // effect number of sequences from MSA
   double M_effective_mc;  // effect number of sequences from MC
 
-  MSA *msa;
-  MSA *mc;
+  MSA* msa;
+  MSA* mc;
 
   int bins;
 

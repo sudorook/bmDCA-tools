@@ -9,7 +9,9 @@
 #include "msa.hpp"
 #include "msa_stats.hpp"
 
-int main(int argc, char* argv[]) {
+int
+main(int argc, char* argv[])
+{
   std::string infile;
   std::string weight_file;
   bool reweight = false;
@@ -44,20 +46,20 @@ int main(int argc, char* argv[]) {
   std::cout << "reading sequences" << std::endl;
   MSA msa = MSA(infile, weight_file, reweight, is_numeric, threshold);
 
-  int idx = infile.find_last_of("."); 
+  int idx = infile.find_last_of(".");
   std::string prefix = infile.substr(0, idx);
   msa.writeSequenceWeights(prefix + "_weights.txt");
-  
+
   std::cout << "computing stats" << std::endl;
   MSAStats msa_stats = MSAStats(msa);
-  
+
   std::cout << "writing 1p stats" << std::endl;
   msa_stats.writeFrequency1p(prefix + "_freq_1p.bin");
-  
+
   std::cout << "writing 2p stats" << std::endl;
   msa_stats.writeFrequency2p(prefix + "_freq_2p.bin");
   msa_stats.writeCorrelation2p(prefix + "_corr_2p.bin");
-  
+
   // std::cout << "writing 3p stats" << std::endl;
   // msa_stats.writeFrequency3p(prefix + "_freq_3p.bin");
   // msa_stats.writeFrequency3pAscii(prefix + "_freq_3p.txt");

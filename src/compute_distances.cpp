@@ -8,7 +8,9 @@
 
 #include "msa.hpp"
 
-int main(int argc, char* argv[]) {
+int
+main(int argc, char* argv[])
+{
   std::string infile;
   std::string outfile;
   std::string dest;

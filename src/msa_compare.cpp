@@ -44,7 +44,9 @@ MSACompare::MSACompare(MSA* msa, MSA* mc, int bins)
   std::cout << std::endl;
 };
 
-void MSACompare::computeFrequency1p(void) {
+void
+MSACompare::computeFrequency1p(void)
+{
   msa_frequency_1p = arma::Col<double>(Q * N, arma::fill::zeros);
   mc_frequency_1p = arma::Col<double>(Q * N, arma::fill::zeros);
 
@@ -68,12 +70,16 @@ void MSACompare::computeFrequency1p(void) {
   msa_frequency_1p = msa_frequency_1p / M_effective_msa;
   mc_frequency_1p = mc_frequency_1p / M_effective_mc;
 
-  freq_1p_max = std::max(arma::max(msa_frequency_1p), arma::max(mc_frequency_1p));
-  freq_1p_min = std::min(arma::min(msa_frequency_1p), arma::min(mc_frequency_1p));
+  freq_1p_max =
+    std::max(arma::max(msa_frequency_1p), arma::max(mc_frequency_1p));
+  freq_1p_min =
+    std::min(arma::min(msa_frequency_1p), arma::min(mc_frequency_1p));
   frequency_1p_set = true;
 };
 
-void MSACompare::computeFrequency2p(void) {
+void
+MSACompare::computeFrequency2p(void)
+{
 
   if (frequency_1p_set == false) {
     std::cerr << "ERROR: compute the 1p frequencies first" << std::endl;
@@ -94,9 +100,9 @@ void MSACompare::computeFrequency2p(void) {
         int* msa_align_ptr1 = msa->alignment.colptr(i);
         int* msa_align_ptr2 = msa->alignment.colptr(j);
         for (int m = 0; m < M_msa; m++) {
-          msa_frequency_2p(
-            *(msa_align_ptr2 + m) + *(msa_align_ptr1 + m) * Q +
-            Q * Q * (j - i - 1 + i * (N - 1) - i * (i - 1) / 2)) +=
+          msa_frequency_2p(*(msa_align_ptr2 + m) + *(msa_align_ptr1 + m) * Q +
+                           Q * Q *
+                             (j - i - 1 + i * (N - 1) - i * (i - 1) / 2)) +=
             *(msa_weight_ptr + m);
         }
 
@@ -104,9 +110,9 @@ void MSACompare::computeFrequency2p(void) {
         int* mc_align_ptr1 = mc->alignment.colptr(i);
         int* mc_align_ptr2 = mc->alignment.colptr(j);
         for (int m = 0; m < M_mc; m++) {
-          mc_frequency_2p(
-            *(mc_align_ptr2 + m) + *(mc_align_ptr1 + m) * Q +
-            Q * Q * (j - i - 1 + i * (N - 1) - i * (i - 1) / 2)) +=
+          mc_frequency_2p(*(mc_align_ptr2 + m) + *(mc_align_ptr1 + m) * Q +
+                          Q * Q *
+                            (j - i - 1 + i * (N - 1) - i * (i - 1) / 2)) +=
             *(mc_weight_ptr + m);
         }
       }
@@ -115,12 +121,16 @@ void MSACompare::computeFrequency2p(void) {
   msa_frequency_2p = msa_frequency_2p / M_effective_msa;
   mc_frequency_2p = mc_frequency_2p / M_effective_mc;
 
-  freq_2p_max = std::max(arma::max(msa_frequency_2p), arma::max(mc_frequency_2p));
-  freq_2p_min = std::min(arma::min(msa_frequency_2p), arma::min(mc_frequency_2p));
+  freq_2p_max =
+    std::max(arma::max(msa_frequency_2p), arma::max(mc_frequency_2p));
+  freq_2p_min =
+    std::min(arma::min(msa_frequency_2p), arma::min(mc_frequency_2p));
   frequency_2p_set = true;
 };
 
-void MSACompare::computeFrequency3p(void) {
+void
+MSACompare::computeFrequency3p(void)
+{
   msa_frequency_3p = arma::Col<double>(
     (int)N * (N - 1) * (N - 2) / 6 * Q * Q * Q, arma::fill::zeros);
   mc_frequency_3p = arma::Col<double>(
@@ -166,12 +176,16 @@ void MSACompare::computeFrequency3p(void) {
   msa_frequency_3p = msa_frequency_3p / M_effective_msa;
   mc_frequency_3p = mc_frequency_3p / M_effective_mc;
 
-  freq_3p_max = std::max(arma::max(msa_frequency_3p), arma::max(mc_frequency_3p));
-  freq_3p_min = std::min(arma::min(msa_frequency_3p), arma::min(mc_frequency_3p));
+  freq_3p_max =
+    std::max(arma::max(msa_frequency_3p), arma::max(mc_frequency_3p));
+  freq_3p_min =
+    std::min(arma::min(msa_frequency_3p), arma::min(mc_frequency_3p));
   frequency_3p_set = true;
 }
 
-void MSACompare::computeCorrelation2p(void) {
+void
+MSACompare::computeCorrelation2p(void)
+{
   if ((frequency_1p_set == false) | (frequency_2p_set == false)) {
     std::cerr << "ERROR: compute the 1p and 2p frequencies first" << std::endl;
     std::exit(EXIT_FAILURE);
@@ -192,8 +206,8 @@ void MSACompare::computeCorrelation2p(void) {
             int idx = aa2 + aa1 * Q +
                       Q * Q * (j - i - 1 + i * (N - 1) - i * (i - 1) / 2);
             msa_correlation_2p(idx) =
-              msa_frequency_2p(idx) - msa_frequency_1p(i * Q + aa1) *
-                                           msa_frequency_1p(j * Q + aa2);
+              msa_frequency_2p(idx) -
+              msa_frequency_1p(i * Q + aa1) * msa_frequency_1p(j * Q + aa2);
             mc_correlation_2p(idx) =
               mc_frequency_2p(idx) -
               mc_frequency_1p(i * Q + aa1) * mc_frequency_1p(j * Q + aa2);
@@ -202,12 +216,16 @@ void MSACompare::computeCorrelation2p(void) {
       }
     }
   }
-  corr_2p_max = std::max(arma::max(msa_correlation_2p), arma::max(mc_correlation_2p));
-  corr_2p_min = std::min(arma::min(msa_correlation_2p), arma::min(mc_correlation_2p));
+  corr_2p_max =
+    std::max(arma::max(msa_correlation_2p), arma::max(mc_correlation_2p));
+  corr_2p_min =
+    std::min(arma::min(msa_correlation_2p), arma::min(mc_correlation_2p));
   correlation_2p_set = true;
 };
 
-void MSACompare::computeCorrelation3p(void) {
+void
+MSACompare::computeCorrelation3p(void)
+{
   if ((frequency_1p_set == false) | (frequency_2p_set == false) |
       (frequency_3p_set == false)) {
     std::cerr << "ERROR: compute the 1p, 2p, and 3p frequencies first"
@@ -284,7 +302,8 @@ void MSACompare::computeCorrelation3p(void) {
 };
 
 void
-MSACompare::makeFrequency1pHistogram(void) {
+MSACompare::makeFrequency1pHistogram(void)
+{
   if (frequency_1p_set == false) {
     std::cerr << "ERROR: compute the 1p frequencies first" << std::endl;
     std::exit(EXIT_FAILURE);
@@ -295,14 +314,13 @@ MSACompare::makeFrequency1pHistogram(void) {
   timer.tic();
 
   double f = 1. / (double)Q;
-  double xy = arma::accu((msa_frequency_1p - f) %
-                         (mc_frequency_1p - f));
+  double xy = arma::accu((msa_frequency_1p - f) % (mc_frequency_1p - f));
   double xx = arma::accu(arma::pow((msa_frequency_1p - f), 2));
   double yy = arma::accu(arma::pow((mc_frequency_1p - f), 2));
 
   double b = xy / xx;
-  double a = f*(1-b);
-  double r2 = (2*b*xy - b*b*xx)/yy;
+  double a = f * (1 - b);
+  double r2 = (2 * b * xy - b * b * xx) / yy;
   std::cout << timer.toc() << " sec" << std::endl;
   std::cout << "model: y=" << b << "x+" << a << ", R^2=" << r2
             << " (r=" << sqrt(r2) << ")" << std::endl;
@@ -313,13 +331,12 @@ MSACompare::makeFrequency1pHistogram(void) {
   model.R2 = r2;
 
   histogram hist;
-  hist.grid =
-    arma::Mat<unsigned long long int>(BINS, BINS, arma::fill::zeros);
+  hist.grid = arma::Mat<unsigned long long int>(BINS, BINS, arma::fill::zeros);
   double bin_width = 1. / (double)(BINS - 1);
   hist.bin_width = bin_width;
   for (int i = 0; i < Q * N; i++) {
     hist.grid(floor(msa_frequency_1p(i) / bin_width),
-         floor(mc_frequency_1p(i) / bin_width))++;
+              floor(mc_frequency_1p(i) / bin_width))++;
   }
   writeHistogram("freq_1p_hist.tsv", hist);
   writeLinearModel("freq_1p_model.tsv", model);
@@ -327,7 +344,8 @@ MSACompare::makeFrequency1pHistogram(void) {
 };
 
 void
-MSACompare::makeFrequency2pHistogram(void) {
+MSACompare::makeFrequency2pHistogram(void)
+{
   if ((frequency_1p_set == false) | (frequency_2p_set == false)) {
     std::cerr << "ERROR: compute the 1p and 2p frequencies first" << std::endl;
     std::exit(EXIT_FAILURE);
@@ -337,19 +355,17 @@ MSACompare::makeFrequency2pHistogram(void) {
   std::cout << "computing 2p frequency regression... " << std::flush;
   timer.tic();
 
-  double f = 1. / (double)(Q*Q);
-  double xy = arma::accu((msa_frequency_2p - f) %
-                         (mc_frequency_2p - f));
+  double f = 1. / (double)(Q * Q);
+  double xy = arma::accu((msa_frequency_2p - f) % (mc_frequency_2p - f));
   double xx = arma::accu(arma::pow((msa_frequency_2p - f), 2));
   double yy = arma::accu(arma::pow((mc_frequency_2p - f), 2));
 
   double b = xy / xx;
-  double a = f*(1-b);
-  double r2 = (2*b*xy - b*b*xx)/yy;
+  double a = f * (1 - b);
+  double r2 = (2 * b * xy - b * b * xx) / yy;
   std::cout << timer.toc() << " sec" << std::endl;
   std::cout << "model: y=" << b << "x+" << a << ", R^2=" << r2
-            << " (r=" << sqrt(r2) << ")"
-            << std::endl;
+            << " (r=" << sqrt(r2) << ")" << std::endl;
 
   linear_model model;
   model.a = a;
@@ -357,13 +373,12 @@ MSACompare::makeFrequency2pHistogram(void) {
   model.R2 = r2;
 
   histogram hist;
-  hist.grid =
-    arma::Mat<unsigned long long int>(BINS, BINS, arma::fill::zeros);
+  hist.grid = arma::Mat<unsigned long long int>(BINS, BINS, arma::fill::zeros);
   double bin_width = 1. / (double)(BINS - 1);
   hist.bin_width = bin_width;
   for (int i = 0; i < N * (N - 1) / 2 * Q * Q; i++) {
     hist.grid(floor(msa_frequency_2p(i) / bin_width),
-         floor(mc_frequency_2p(i) / bin_width))++;
+              floor(mc_frequency_2p(i) / bin_width))++;
   }
   // hist.grid.print("freq 2p:");
   writeHistogram("freq_2p_hist.tsv", hist);
@@ -372,7 +387,8 @@ MSACompare::makeFrequency2pHistogram(void) {
 };
 
 void
-MSACompare::makeCorrelation2pHistogram(void) {
+MSACompare::makeCorrelation2pHistogram(void)
+{
   if ((frequency_1p_set == false) | (frequency_2p_set == false)) {
     std::cerr << "ERROR: compute the 1p and 2p frequencies first" << std::endl;
     std::exit(EXIT_FAILURE);
@@ -385,14 +401,13 @@ MSACompare::makeCorrelation2pHistogram(void) {
   std::cout << "computing 2p correlation regression... " << std::flush;
   timer.tic();
   if (correlation_2p_set) {
-    double xy = arma::accu((msa_correlation_2p) %
-                           (mc_correlation_2p));
+    double xy = arma::accu((msa_correlation_2p) % (mc_correlation_2p));
     double xx = arma::accu(arma::pow((msa_correlation_2p), 2));
     double yy = arma::accu(arma::pow((mc_correlation_2p), 2));
 
     double b = xy / xx;
     double a = 0;
-    double r2 = (2*b*xy - b*b*xx)/yy;
+    double r2 = (2 * b * xy - b * b * xx) / yy;
     std::cout << timer.toc() << " sec" << std::endl;
     std::cout << "model: y=" << b << "x+" << a << ", R^2=" << r2
               << " (r=" << sqrt(r2) << ")" << std::endl;
@@ -428,26 +443,23 @@ MSACompare::makeCorrelation2pHistogram(void) {
                         Q * Q * (j - i - 1 + i * (N - 1) - i * (i - 1) / 2);
               tmp_msa_correlation_2p(idx) =
                 msa_frequency_2p(idx) -
-                msa_frequency_1p(i * Q + aa1) *
-                  msa_frequency_1p(j * Q + aa2);
+                msa_frequency_1p(i * Q + aa1) * msa_frequency_1p(j * Q + aa2);
               tmp_mc_correlation_2p(idx) =
                 mc_frequency_2p(idx) -
-                mc_frequency_1p(i * Q + aa1) *
-                  mc_frequency_1p(j * Q + aa2);
+                mc_frequency_1p(i * Q + aa1) * mc_frequency_1p(j * Q + aa2);
             }
           }
         }
       }
     }
 
-    double xy = arma::accu((tmp_msa_correlation_2p) %
-                           (tmp_mc_correlation_2p));
+    double xy = arma::accu((tmp_msa_correlation_2p) % (tmp_mc_correlation_2p));
     double xx = arma::accu(arma::pow((tmp_msa_correlation_2p), 2));
     double yy = arma::accu(arma::pow((tmp_mc_correlation_2p), 2));
 
     double b = xy / xx;
     double a = 0;
-    double r2 = (2*b*xy - b*b*xx)/yy;
+    double r2 = (2 * b * xy - b * b * xx) / yy;
     std::cout << timer.toc() << " sec" << std::endl;
     std::cout << "model: y=" << b << "x+" << a << ", R^2=" << r2
               << " (r=" << sqrt(r2) << ")" << std::endl;
@@ -458,9 +470,9 @@ MSACompare::makeCorrelation2pHistogram(void) {
     model.R2 = r2;
 
     corr_2p_max = std::max(arma::max(tmp_msa_correlation_2p),
-                     arma::max(tmp_mc_correlation_2p));
+                           arma::max(tmp_mc_correlation_2p));
     corr_2p_min = std::min(arma::min(tmp_msa_correlation_2p),
-                     arma::min(tmp_mc_correlation_2p));
+                           arma::min(tmp_mc_correlation_2p));
 
     hist.grid =
       arma::Mat<unsigned long long int>(BINS, BINS, arma::fill::zeros);
@@ -470,8 +482,9 @@ MSACompare::makeCorrelation2pHistogram(void) {
     hist.min = 1.05 * corr_2p_min;
 
     for (int i = 0; i < N * (N - 1) / 2 * Q * Q; i++) {
-      hist.grid(floor((tmp_msa_correlation_2p(i) - hist.min) / bin_width + .5),
-                floor((tmp_mc_correlation_2p(i) - hist.min) / bin_width + .5))++;
+      hist.grid(
+        floor((tmp_msa_correlation_2p(i) - hist.min) / bin_width + .5),
+        floor((tmp_mc_correlation_2p(i) - hist.min) / bin_width + .5))++;
     }
   }
   // hist.grid.print("corr 2p:");
@@ -480,7 +493,8 @@ MSACompare::makeCorrelation2pHistogram(void) {
 };
 
 void
-MSACompare::makeEfficient3pHistograms(void) {
+MSACompare::makeEfficient3pHistograms(void)
+{
   if ((frequency_1p_set == false) | (frequency_2p_set == false)) {
     std::cerr << "ERROR: compute the 1p and 2p frequencies first" << std::endl;
     std::exit(EXIT_FAILURE);
@@ -491,19 +505,13 @@ MSACompare::makeEfficient3pHistograms(void) {
             << std::flush;
   timer.tic();
 
-  arma::Col<double> freq_xx_vec =
-    arma::Col<double>(N, arma::fill::zeros);
-  arma::Col<double> freq_xy_vec =
-    arma::Col<double>(N, arma::fill::zeros);
-  arma::Col<double> freq_yy_vec =
-    arma::Col<double>(N, arma::fill::zeros);
+  arma::Col<double> freq_xx_vec = arma::Col<double>(N, arma::fill::zeros);
+  arma::Col<double> freq_xy_vec = arma::Col<double>(N, arma::fill::zeros);
+  arma::Col<double> freq_yy_vec = arma::Col<double>(N, arma::fill::zeros);
 
-  arma::Col<double> corr_xx_vec =
-    arma::Col<double>(N, arma::fill::zeros);
-  arma::Col<double> corr_xy_vec =
-    arma::Col<double>(N, arma::fill::zeros);
-  arma::Col<double> corr_yy_vec =
-    arma::Col<double>(N, arma::fill::zeros);
+  arma::Col<double> corr_xx_vec = arma::Col<double>(N, arma::fill::zeros);
+  arma::Col<double> corr_xy_vec = arma::Col<double>(N, arma::fill::zeros);
+  arma::Col<double> corr_yy_vec = arma::Col<double>(N, arma::fill::zeros);
 
   arma::Col<double> corr_max_vec = arma::Col<double>(N, arma::fill::zeros);
   arma::Col<double> corr_min_vec = arma::Col<double>(N, arma::fill::zeros);
@@ -588,10 +596,8 @@ MSACompare::makeEfficient3pHistograms(void) {
           }
           mc_frequency_3p_ijk = mc_frequency_3p_ijk / M_effective_mc;
 
-          freq_xx_vec(i) +=
-            arma::accu(arma::pow(msa_frequency_3p_ijk - f, 2));
-          freq_yy_vec(i) +=
-            arma::accu(arma::pow(mc_frequency_3p_ijk - f, 2));
+          freq_xx_vec(i) += arma::accu(arma::pow(msa_frequency_3p_ijk - f, 2));
+          freq_yy_vec(i) += arma::accu(arma::pow(mc_frequency_3p_ijk - f, 2));
           freq_xy_vec(i) +=
             arma::accu((msa_frequency_3p_ijk - f) % (mc_frequency_3p_ijk - f));
 
@@ -632,10 +638,8 @@ MSACompare::makeEfficient3pHistograms(void) {
             }
           }
 
-          corr_xx_vec(i) +=
-            arma::accu(arma::pow(msa_correlation_3p_ijk, 2));
-          corr_yy_vec(i) +=
-            arma::accu(arma::pow(mc_correlation_3p_ijk, 2));
+          corr_xx_vec(i) += arma::accu(arma::pow(msa_correlation_3p_ijk, 2));
+          corr_yy_vec(i) += arma::accu(arma::pow(mc_correlation_3p_ijk, 2));
           corr_xy_vec(i) +=
             arma::accu((msa_correlation_3p_ijk) % (mc_correlation_3p_ijk));
 
@@ -645,15 +649,14 @@ MSACompare::makeEfficient3pHistograms(void) {
             arma::Col<double> tmp_mc_frequency_3p_ijk =
               arma::floor(mc_frequency_3p_ijk / freq_bin_width);
 
-            arma::Col<double> tmp_msa_correlation_3p_ijk = arma::floor(
-              (msa_correlation_3p_ijk - min) / corr_bin_width + .5);
-            arma::Col<double> tmp_mc_correlation_3p_ijk = arma::floor(
-              (mc_correlation_3p_ijk - min) / corr_bin_width + .5);
+            arma::Col<double> tmp_msa_correlation_3p_ijk =
+              arma::floor((msa_correlation_3p_ijk - min) / corr_bin_width + .5);
+            arma::Col<double> tmp_mc_correlation_3p_ijk =
+              arma::floor((mc_correlation_3p_ijk - min) / corr_bin_width + .5);
 
             for (int q = 0; q < Q * Q * Q; q++) {
-              freq_hist_i(tmp_msa_frequency_3p_ijk(q),
-                          tmp_mc_frequency_3p_ijk(q),
-                          i)++;
+              freq_hist_i(
+                tmp_msa_frequency_3p_ijk(q), tmp_mc_frequency_3p_ijk(q), i)++;
               corr_hist_i(tmp_msa_correlation_3p_ijk(q),
                           tmp_mc_correlation_3p_ijk(q),
                           i)++;
@@ -702,8 +705,8 @@ MSACompare::makeEfficient3pHistograms(void) {
     double yy = arma::accu(freq_yy_vec);
 
     double b = xy / xx;
-    double a = f*(1-b);
-    double r2 = (2*b*xy - b*b*xx)/yy;
+    double a = f * (1 - b);
+    double r2 = (2 * b * xy - b * b * xx) / yy;
     std::cout << "model: y=" << b << "x+" << a << ", R^2=" << r2
               << " (r=" << sqrt(r2) << ")" << std::endl;
     // std::cout << std::endl;
@@ -725,7 +728,7 @@ MSACompare::makeEfficient3pHistograms(void) {
 
     double b = xy / xx;
     double a = 0;
-    double r2 = (2*b*xy - b*b*xx)/yy;
+    double r2 = (2 * b * xy - b * b * xx) / yy;
     std::cout << "model: y=" << b << "x+" << a << ", R^2=" << r2
               << " (r=" << sqrt(r2) << ")" << std::endl;
     std::cout << std::endl;
@@ -748,7 +751,8 @@ MSACompare::makeEfficient3pHistograms(void) {
 };
 
 void
-MSACompare::makeFrequency3pHistogram(void) {
+MSACompare::makeFrequency3pHistogram(void)
+{
   if ((frequency_1p_set == false) | (frequency_2p_set == false) |
       (frequency_3p_set == false)) {
     std::cerr << "ERROR: compute the 1p, 2p, and 3p frequencies first"
@@ -761,14 +765,13 @@ MSACompare::makeFrequency3pHistogram(void) {
   timer.tic();
 
   double f = 1. / (double)(Q * Q * Q);
-  double xy = arma::accu((msa_frequency_3p - f) %
-                         (mc_frequency_3p - f));
+  double xy = arma::accu((msa_frequency_3p - f) % (mc_frequency_3p - f));
   double xx = arma::accu(arma::pow((msa_frequency_3p - f), 2));
   double yy = arma::accu(arma::pow((mc_frequency_3p - f), 2));
 
   double b = xy / xx;
-  double a = f*(1-b);
-  double r2 = (2*b*xy - b*b*xx)/yy;
+  double a = f * (1 - b);
+  double r2 = (2 * b * xy - b * b * xx) / yy;
   std::cout << timer.toc() << " sec" << std::endl;
   std::cout << "model: y=" << b << "x+" << a << ", R^2=" << r2
             << " (r=" << sqrt(r2) << ")" << std::endl;
@@ -780,13 +783,12 @@ MSACompare::makeFrequency3pHistogram(void) {
   model.R2 = r2;
 
   histogram hist;
-  hist.grid =
-    arma::Mat<unsigned long long int>(BINS, BINS, arma::fill::zeros);
+  hist.grid = arma::Mat<unsigned long long int>(BINS, BINS, arma::fill::zeros);
   double bin_width = 1. / (double)(BINS - 1);
   hist.bin_width = bin_width;
   for (int i = 0; i < N * (N - 1) * (N - 2) / 6 * Q * Q * Q; i++) {
     hist.grid(floor(msa_frequency_3p(i) / bin_width),
-         floor(mc_frequency_3p(i) / bin_width))++;
+              floor(mc_frequency_3p(i) / bin_width))++;
   }
   // hist.grid.print("freq 3p:");
   writeHistogram("freq_3p_hist.tsv", hist);
@@ -794,7 +796,8 @@ MSACompare::makeFrequency3pHistogram(void) {
 };
 
 void
-MSACompare::makeCorrelation3pHistogram(void) {
+MSACompare::makeCorrelation3pHistogram(void)
+{
   if ((frequency_1p_set == false) | (frequency_2p_set == false) |
       (frequency_3p_set == false)) {
     std::cerr << "ERROR: compute the 1p, 2p, and 3p frequencies first"
@@ -802,8 +805,8 @@ MSACompare::makeCorrelation3pHistogram(void) {
     std::exit(EXIT_FAILURE);
   }
 
-  std::cout << "3p corr range (start): " << corr_3p_min << ", " << corr_3p_max <<
-    std::endl;
+  std::cout << "3p corr range (start): " << corr_3p_min << ", " << corr_3p_max
+            << std::endl;
 
   linear_model model;
   histogram hist;
@@ -813,14 +816,13 @@ MSACompare::makeCorrelation3pHistogram(void) {
   timer.tic();
 
   if (correlation_3p_set) {
-    double xy = arma::accu((msa_correlation_3p) %
-                           (mc_correlation_3p));
+    double xy = arma::accu((msa_correlation_3p) % (mc_correlation_3p));
     double xx = arma::accu(arma::pow((msa_correlation_3p), 2));
     double yy = arma::accu(arma::pow((mc_correlation_3p), 2));
 
     double b = xy / xx;
     double a = 0;
-    double r2 = (2*b*xy - b*b*xx)/yy;
+    double r2 = (2 * b * xy - b * b * xx) / yy;
     std::cout << timer.toc() << " sec" << std::endl;
     std::cout << "model: y=" << b << "x+" << a << ", R^2=" << r2
               << " (r=" << sqrt(r2) << ")" << std::endl;
@@ -904,14 +906,13 @@ MSACompare::makeCorrelation3pHistogram(void) {
       }
     }
 
-    double xy = arma::accu((tmp_msa_correlation_3p) %
-                           (tmp_mc_correlation_3p));
+    double xy = arma::accu((tmp_msa_correlation_3p) % (tmp_mc_correlation_3p));
     double xx = arma::accu(arma::pow((tmp_msa_correlation_3p), 2));
     double yy = arma::accu(arma::pow((tmp_mc_correlation_3p), 2));
 
     double b = xy / xx;
     double a = 0;
-    double r2 = (2*b*xy - b*b*xx)/yy;
+    double r2 = (2 * b * xy - b * b * xx) / yy;
     std::cout << timer.toc() << " sec" << std::endl;
     std::cout << "model: y=" << b << "x+" << a << ", R^2=" << r2
               << " (r=" << sqrt(r2) << ")" << std::endl;
@@ -925,12 +926,12 @@ MSACompare::makeCorrelation3pHistogram(void) {
               << std::endl;
 
     corr_3p_max = std::max(arma::max(tmp_msa_correlation_3p),
-                     arma::max(tmp_mc_correlation_3p));
+                           arma::max(tmp_mc_correlation_3p));
     corr_3p_min = std::min(arma::min(tmp_msa_correlation_3p),
-                     arma::min(tmp_mc_correlation_3p));
+                           arma::min(tmp_mc_correlation_3p));
 
-    std::cout << "basic corr 3p (after): " << corr_3p_min << ", "
-              << corr_3p_max << std::endl;
+    std::cout << "basic corr 3p (after): " << corr_3p_min << ", " << corr_3p_max
+              << std::endl;
 
     hist.grid =
       arma::Mat<unsigned long long int>(BINS, BINS, arma::fill::zeros);
@@ -940,8 +941,9 @@ MSACompare::makeCorrelation3pHistogram(void) {
     hist.min = 1.05 * corr_3p_min;
 
     for (int i = 0; i < N * (N - 1) * (N - 2) / 6 * Q * Q * Q; i++) {
-      hist.grid(floor((tmp_msa_correlation_3p(i) - hist.min) / bin_width + .5),
-                floor((tmp_mc_correlation_3p(i) - hist.min) / bin_width + .5))++;
+      hist.grid(
+        floor((tmp_msa_correlation_3p(i) - hist.min) / bin_width + .5),
+        floor((tmp_mc_correlation_3p(i) - hist.min) / bin_width + .5))++;
     }
   }
   // hist.grid.print("corr 3p:");
@@ -950,7 +952,8 @@ MSACompare::makeCorrelation3pHistogram(void) {
 };
 
 void
-MSACompare::makeEfficient4pHistograms(void) {
+MSACompare::makeEfficient4pHistograms(void)
+{
   if ((frequency_1p_set == false) | (frequency_2p_set == false) |
       (frequency_3p_set == false)) {
     std::cerr << "ERROR: compute the 1p, 2p, and 3p frequencies first"
@@ -964,19 +967,13 @@ MSACompare::makeEfficient4pHistograms(void) {
   timer.tic();
 
   // std::cout << "flag 0" << std::endl;
-  arma::Col<double> freq_xx_vec =
-    arma::Col<double>(N, arma::fill::zeros);
-  arma::Col<double> freq_xy_vec =
-    arma::Col<double>(N, arma::fill::zeros);
-  arma::Col<double> freq_yy_vec =
-    arma::Col<double>(N, arma::fill::zeros);
+  arma::Col<double> freq_xx_vec = arma::Col<double>(N, arma::fill::zeros);
+  arma::Col<double> freq_xy_vec = arma::Col<double>(N, arma::fill::zeros);
+  arma::Col<double> freq_yy_vec = arma::Col<double>(N, arma::fill::zeros);
 
-  arma::Col<double> corr_xx_vec =
-    arma::Col<double>(N, arma::fill::zeros);
-  arma::Col<double> corr_xy_vec =
-    arma::Col<double>(N, arma::fill::zeros);
-  arma::Col<double> corr_yy_vec =
-    arma::Col<double>(N, arma::fill::zeros);
+  arma::Col<double> corr_xx_vec = arma::Col<double>(N, arma::fill::zeros);
+  arma::Col<double> corr_xy_vec = arma::Col<double>(N, arma::fill::zeros);
+  arma::Col<double> corr_yy_vec = arma::Col<double>(N, arma::fill::zeros);
 
   arma::Col<double> corr_max_vec = arma::Col<double>(N, arma::fill::zeros);
   arma::Col<double> corr_min_vec = arma::Col<double>(N, arma::fill::zeros);
@@ -1066,7 +1063,7 @@ MSACompare::makeEfficient4pHistograms(void) {
             freq_yy_vec(i) +=
               arma::accu(arma::pow(mc_frequency_4p_ijkl - f, 2));
             freq_xy_vec(i) += arma::accu((msa_frequency_4p_ijkl - f) %
-                                            (mc_frequency_4p_ijkl - f));
+                                         (mc_frequency_4p_ijkl - f));
 
             for (int aa1 = 0; aa1 < Q; aa1++) {
               for (int aa2 = 0; aa2 < Q; aa2++) {
@@ -1175,10 +1172,8 @@ MSACompare::makeEfficient4pHistograms(void) {
               }
             }
 
-            corr_xx_vec(i) +=
-              arma::accu(arma::pow(msa_correlation_4p_ijkl, 2));
-            corr_yy_vec(i) +=
-              arma::accu(arma::pow(mc_correlation_4p_ijkl, 2));
+            corr_xx_vec(i) += arma::accu(arma::pow(msa_correlation_4p_ijkl, 2));
+            corr_yy_vec(i) += arma::accu(arma::pow(mc_correlation_4p_ijkl, 2));
             corr_xy_vec(i) +=
               arma::accu((msa_correlation_4p_ijkl) % (mc_correlation_4p_ijkl));
 
@@ -1246,8 +1241,8 @@ MSACompare::makeEfficient4pHistograms(void) {
     double yy = arma::accu(freq_yy_vec);
 
     double b = xy / xx;
-    double a = f*(1-b);
-    double r2 = (2*b*xy - b*b*xx)/yy;
+    double a = f * (1 - b);
+    double r2 = (2 * b * xy - b * b * xx) / yy;
     std::cout << "model: y=" << b << "x+" << a << ", R^2=" << r2
               << " (r=" << sqrt(r2) << ")" << std::endl;
     // std::cout << std::endl;
@@ -1269,7 +1264,7 @@ MSACompare::makeEfficient4pHistograms(void) {
 
     double b = xy / xx;
     double a = 0;
-    double r2 = (2*b*xy - b*b*xx)/yy;
+    double r2 = (2 * b * xy - b * b * xx) / yy;
     std::cout << "model: y=" << b << "x+" << a << ", R^2=" << r2
               << " (r=" << sqrt(r2) << ")" << std::endl;
     std::cout << std::endl;
@@ -1298,8 +1293,8 @@ MSACompare::writeHistogram(std::string file, histogram hist)
   for (int i = 0; i < BINS; i++) {
     for (int j = 0; j < BINS; j++) {
       output_stream << hist.min + i * hist.bin_width << "\t"
-                    << hist.min + j * hist.bin_width << "\t"
-                    << hist.grid(i, j) << std::endl;
+                    << hist.min + j * hist.bin_width << "\t" << hist.grid(i, j)
+                    << std::endl;
     }
   }
   output_stream.close();
@@ -1321,7 +1316,8 @@ MSACompare::writeLinearModel(std::string file, linear_model model)
 };
 
 void
-MSACompare::writeFrequency1p(void) {
+MSACompare::writeFrequency1p(void)
+{
   std::ofstream msa_output_stream("msa_freq_1p.txt");
   std::ofstream mc_output_stream("mc_freq_1p.txt");
 
@@ -1340,7 +1336,8 @@ MSACompare::writeFrequency1p(void) {
 };
 
 void
-MSACompare::writeFrequency2p(void) {
+MSACompare::writeFrequency2p(void)
+{
   std::ofstream msa_output_stream("msa_freq_2p.txt");
   std::ofstream mc_output_stream("mc_freq_2p.txt");
 

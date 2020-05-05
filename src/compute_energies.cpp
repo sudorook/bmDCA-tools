@@ -9,7 +9,9 @@
 #include "msa.hpp"
 #include "utils.hpp"
 
-int main(int argc, char* argv[]) {
+int
+main(int argc, char* argv[])
+{
   std::string msa_file;
   std::string energy_file = "sequence_energies.txt";
   std::string params_file;
@@ -42,7 +44,7 @@ int main(int argc, char* argv[]) {
     }
   }
 
-  int idx = msa_file.find_last_of("."); 
+  int idx = msa_file.find_last_of(".");
   std::string prefix = msa_file.substr(0, idx);
 
   std::cout << "reading sequences... " << std::flush;

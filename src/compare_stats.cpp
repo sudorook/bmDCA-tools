@@ -4,7 +4,9 @@
 #include "msa.hpp"
 #include "msa_compare.hpp"
 
-int main(int argc, char* argv[]) {
+int
+main(int argc, char* argv[])
+{
   std::string msa1_file;
   std::string msa2_file;
   std::string msa1_weight_file = "";
@@ -66,7 +68,8 @@ int main(int argc, char* argv[]) {
     }
   }
 
-  MSA msa = MSA(msa1_file, msa1_weight_file, reweight1, numeric_msa1, threshold);
+  MSA msa =
+    MSA(msa1_file, msa1_weight_file, reweight1, numeric_msa1, threshold);
   MSA mc = MSA(msa2_file, msa2_weight_file, reweight2, numeric_msa2, threshold);
 
   MSACompare stats = MSACompare(&msa, &mc, bins);

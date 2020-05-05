@@ -5,7 +5,8 @@
 #include <fstream>
 #include <iostream>
 
-MSAStats::MSAStats(MSA msa): msa(msa)
+MSAStats::MSAStats(MSA msa)
+  : msa(msa)
 {
   // Initialize
   N = msa.N;
@@ -23,7 +24,9 @@ MSAStats::MSAStats(MSA msa): msa(msa)
   // computeCorrelation2p();
 };
 
-void MSAStats::computeFrequency1p(void) {
+void
+MSAStats::computeFrequency1p(void)
+{
   arma::wall_clock timer;
   frequency_1p = arma::Col<double>((int)Q * N, arma::fill::zeros);
 
@@ -44,7 +47,9 @@ void MSAStats::computeFrequency1p(void) {
   // std::cout << timer.toc() << " sec" << std::endl;
 };
 
-void MSAStats::computeFrequency2p(void) {
+void
+MSAStats::computeFrequency2p(void)
+{
   arma::wall_clock timer;
   frequency_2p =
     arma::Col<double>((int)N * (N - 1) / 2 * Q * Q, arma::fill::zeros);
@@ -72,9 +77,12 @@ void MSAStats::computeFrequency2p(void) {
   // std::cout << timer.toc() << " sec" << std::endl;
 };
 
-void MSAStats::computeCorrelation2p(void) {
+void
+MSAStats::computeCorrelation2p(void)
+{
   arma::wall_clock timer;
-  correlation_2p = arma::Col<double>((int)N*(N-1)/2*Q*Q, arma::fill::zeros);
+  correlation_2p =
+    arma::Col<double>((int)N * (N - 1) / 2 * Q * Q, arma::fill::zeros);
 
   // std::cout << "computing 2p correlations... " << std::flush;
   // timer.tic();
