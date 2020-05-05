@@ -41,10 +41,19 @@ def main():
 
     J_2d = tools.reduce_J(J, "fro")
     h_1d = tools.reduce_h(h)
-    #  model = J_2d + np.transpose(J_2d) + np.diag(h_1d)
     model = J_2d + np.transpose(J_2d)
 
     # Make plots
+    with sns.axes_style("white"):
+        ax = sns.heatmap(model + np.diag(h_1d), cmap="Blues", linewidths=0.2)
+        fig = ax.get_figure()
+        ax.xaxis.set_ticks_position("top")
+        ax.yaxis.set_ticks_position("left")
+        ax.set(xlabel="Position", ylabel="Position", title="J Parameters")
+        plt.tight_layout()
+        fig.savefig(prefix + "_heatmap.svg")
+        plt.close()
+
     with sns.axes_style("white"):
         ax = sns.heatmap(model, cmap="Blues", linewidths=0.2)
         fig = ax.get_figure()
@@ -52,7 +61,7 @@ def main():
         ax.yaxis.set_ticks_position("left")
         ax.set(xlabel="Position", ylabel="Position", title="J Parameters")
         plt.tight_layout()
-        fig.savefig(prefix + "_heatmap.svg")
+        fig.savefig(prefix + "_heatmap_no-h.svg")
         plt.close()
 
     ref = np.partition(J_2d.flatten(), round(-Npos / 2) - 1)[
