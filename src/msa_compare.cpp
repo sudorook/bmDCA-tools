@@ -87,7 +87,7 @@ void MSACompare::computeFrequency2p(void) {
 
 #pragma omp parallel
   {
-#pragma omp for
+#pragma omp for schedule(dynamic,1)
     for (int i = 0; i < N; i++) {
       for (int j = i + 1; j < N; j++) {
         double* msa_weight_ptr = msa->sequence_weights.memptr();
@@ -128,7 +128,7 @@ void MSACompare::computeFrequency3p(void) {
 
 #pragma omp parallel
   {
-#pragma omp for
+#pragma omp for schedule(dynamic,1)
     for (int i = 0; i < N; i++) {
       for (int j = i + 1; j < N; j++) {
         for (int k = j + 1; k < N; k++) {
@@ -184,7 +184,7 @@ void MSACompare::computeCorrelation2p(void) {
 
 #pragma omp parallel
   {
-#pragma omp for
+#pragma omp for schedule(dynamic,1)
     for (int i = 0; i < N; i++) {
       for (int j = i + 1; j < N; j++) {
         for (int aa1 = 0; aa1 < Q; aa1++) {
@@ -222,7 +222,7 @@ void MSACompare::computeCorrelation3p(void) {
 
 #pragma omp parallel
   {
-#pragma omp for
+#pragma omp for schedule(dynamic,1)
     for (int i = 0; i < N; i++) {
       for (int j = i + 1; j < N; j++) {
         for (int k = j + 1; k < N; k++) {
@@ -419,7 +419,7 @@ MSACompare::makeCorrelation2pHistogram(void) {
       arma::Col<double>((int)N * (N - 1) / 2 * Q * Q, arma::fill::zeros);
 #pragma omp parallel
     {
-#pragma omp for
+#pragma omp for schedule(dynamic,1)
       for (int i = 0; i < N; i++) {
         for (int j = i + 1; j < N; j++) {
           for (int aa1 = 0; aa1 < Q; aa1++) {
@@ -541,14 +541,15 @@ MSACompare::makeEfficient3pHistograms(void) {
 
 #pragma omp parallel
   {
-#pragma omp for
+    double* msa_weight_ptr = msa->sequence_weights.memptr();
+    double* mc_weight_ptr = mc->sequence_weights.memptr();
+#pragma omp for schedule(dynamic,1)
     for (int i = 0; i < N; i++) {
-
-      double* msa_weight_ptr = msa->sequence_weights.memptr();
-      double* mc_weight_ptr = mc->sequence_weights.memptr();
-
       for (int j = i + 1; j < N; j++) {
         for (int k = j + 1; k < N; k++) {
+
+          // double* msa_weight_ptr = msa->sequence_weights.memptr();
+          // double* mc_weight_ptr = mc->sequence_weights.memptr();
 
           // int idx =
           //   (N * (N - 1) * (N - 2) / 6 -
@@ -851,7 +852,7 @@ MSACompare::makeCorrelation3pHistogram(void) {
 
 #pragma omp parallel
     {
-#pragma omp for
+#pragma omp for schedule(dynamic,1)
       for (int i = 0; i < N; i++) {
         for (int j = i + 1; j < N; j++) {
           for (int k = j + 1; k < N; k++) {
@@ -1016,7 +1017,7 @@ MSACompare::makeEfficient4pHistograms(void) {
 
 #pragma omp parallel
   {
-#pragma omp for
+#pragma omp for schedule(dynamic,1)
     for (int i = 0; i < N; i++) {
       double* msa_weight_ptr = msa->sequence_weights.memptr();
       double* mc_weight_ptr = mc->sequence_weights.memptr();
