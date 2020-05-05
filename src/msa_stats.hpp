@@ -16,15 +16,21 @@ public:
 
   void writeFrequency1p(std::string);
   void writeFrequency2p(std::string);
+  void writeFrequency3p(std::string);
   void writeCorrelation2p(std::string);
+  void writeCorrelation3p(std::string);
 
   void writeFrequency1pAscii(std::string);
   void writeFrequency2pAscii(std::string);
+  void writeFrequency3pAscii(std::string);
   void writeCorrelation2pAscii(std::string);
+  void writeCorrelation3pAscii(std::string);
 
   arma::Col<double> frequency_1p;
   arma::Col<double> frequency_2p;
+  arma::Col<double> frequency_3p;
   arma::Col<double> correlation_2p;
+  arma::Col<double> correlation_3p;
 
 private:
   int M;              // number of sequences
@@ -39,7 +45,6 @@ private:
   void computeFrequency3p(void);
   void computeCorrelation2p(void);
   void computeCorrelation3p(void);
-  // void computeCorrelation4p(void);
 };
 
 #endif
