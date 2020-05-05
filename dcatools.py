@@ -76,6 +76,6 @@ def load_model(data_file):
 
 
 def load_energies(energy_file):
-    """ load sequences """
+    """ load sequences energies """
     data = np.loadtxt(energy_file, dtype="double", skiprows=1)
     return data
