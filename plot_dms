@@ -14,8 +14,6 @@ import seaborn as sns
 
 import dcatools as tools
 
-sns.set(rc={"figure.figsize": (16, 6)})
-
 
 def parse_options():
     """ cli parser """
@@ -39,12 +37,11 @@ def main():
 
     data = pd.read_csv(options.dms, sep="\t", index_col=0)
 
-    print(data)
-
     with plt.style.context("fivethirtyeight"):
-        fig, ax = plt.subplots()
+        fig, ax = plt.subplots(figsize=(np.ceil(data.shape[1]/3), 6.5))
         ax = sns.heatmap(data, annot=False, cmap="bwr", center=0, square=True)
         ax.set_yticklabels(ax.get_yticklabels(), rotation=0)
+        ax.set_xticklabels(ax.get_xticklabels(), rotation=45)
         plt.tight_layout()
         fig.savefig(outfile)
         plt.close()
