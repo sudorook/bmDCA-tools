@@ -6,6 +6,8 @@ compare_msa_stats
 compute_energies
 compute_distances
 
+__pycache__/
+
 # Text editor backups
 *~
 *.sw[a-p]
