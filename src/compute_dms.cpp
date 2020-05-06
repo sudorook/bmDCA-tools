@@ -79,14 +79,14 @@ convertAA(int n)
   return aa;
 };
 
-
 void
-writeDMS(arma::Mat<double> dms, std::string filename) {
+writeDMS(arma::Mat<double> dms, std::string filename)
+{
   std::ofstream output_stream(filename);
- 
+
   int Q = dms.n_rows;
   int N = dms.n_cols;
-  
+
   for (int i = 0; i < N; i++) {
     output_stream << "\t" << i;
   }
@@ -104,13 +104,11 @@ writeDMS(arma::Mat<double> dms, std::string filename) {
   return;
 };
 
-
 int
 main(int argc, char* argv[])
 {
   std::string msa_file;
   std::string weight_file;
-  // std::string energy_file = "muence_energies.txt";
   std::string params_file;
   std::string params_J_file;
   bool compat_mode = true;
@@ -207,7 +205,7 @@ main(int argc, char* argv[])
 
   arma::Mat<double> mean_dms = arma::mean(-de, 2);
   writeDMS(mean_dms, prefix + "_dms_mean.tsv");
-  
+
   arma::Mat<double> min_dms = arma::min(-de, 2);
   writeDMS(min_dms, prefix + "_dms_min.tsv");
 
