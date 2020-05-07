@@ -3,7 +3,6 @@
 
 import argparse
 import os
-from itertools import combinations
 import numpy as np
 import matplotlib
 
@@ -88,7 +87,6 @@ def main():
         fig.suptitle(options.msa_label + " vs " + options.mcmc_label)
 
         plt.tight_layout()
-        print(prefix1)
         plt.savefig(prefix1 + "_" + prefix2 + "_energies.png")
         plt.close()
 
