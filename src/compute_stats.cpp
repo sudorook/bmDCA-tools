@@ -51,14 +51,14 @@ main(int argc, char* argv[])
   msa.writeSequenceWeights(prefix + "_weights.txt");
 
   std::cout << "computing stats" << std::endl;
-  MSAStats msa_stats = MSAStats(msa);
+  MSAStats msa_stats = MSAStats(&msa);
 
   std::cout << "writing 1p stats" << std::endl;
-  msa_stats.writeFrequency1p(prefix + "_freq_1p.bin");
+  msa_stats.writeFrequency1pAscii(prefix + "_freq_1p.txt");
 
   std::cout << "writing 2p stats" << std::endl;
-  msa_stats.writeFrequency2p(prefix + "_freq_2p.bin");
-  msa_stats.writeCorrelation2p(prefix + "_corr_2p.bin");
+  msa_stats.writeFrequency2pAscii(prefix + "_freq_2p.txt");
+  msa_stats.writeCorrelation2pAscii(prefix + "_corr_2p.txt");
 
   // std::cout << "writing 3p stats" << std::endl;
   // msa_stats.writeFrequency3p(prefix + "_freq_3p.bin");
