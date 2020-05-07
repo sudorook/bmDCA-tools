@@ -58,7 +58,6 @@ MSAStats::MSAStats(MSA *msa)
     arma::accu(frequency_1p % (1. - frequency_1p)) / (double)(N*Q);
 
   // Compute the 2p statistics
-  std::cout << "computing 2p frequencies... " << std::flush;
   arma::Col<double> mean_2p_var_vec = arma::Col<double>(N, arma::fill::zeros);
 #pragma omp parallel
   {
@@ -84,7 +83,6 @@ MSAStats::MSAStats(MSA *msa)
     arma::accu(mean_2p_var_vec) / (double)(N * (N - 1) / 2 * Q * Q);
   freq_rms = sqrt(mean_1p_var) + sqrt(mean_2p_var);
 
-  std::cout << "computing 2p correlations... " << std::flush;
   // timer.tic();
 #pragma omp parallel
   {
@@ -102,7 +100,6 @@ MSAStats::MSAStats(MSA *msa)
       }
     }
   }
-  // std::cout << timer.toc() << " sec" << std::endl;
 
   // Update the background frequencies based by computing overall gap frequency
   // theta.
@@ -118,7 +115,6 @@ MSAStats::MSAStats(MSA *msa)
 
   // Use the positonal and backgrounds frequencies to estimate the relative
   // entropy gradient for each position.
-  std::cout << "computing 2p correlations... " << std::flush;
   arma::Mat<double> tmp = frequency_1p * (1. - pseudocount);
   tmp.each_col() += pseudocount * aa_background_frequencies;
   for (int i = 0; i < N; i++) {
