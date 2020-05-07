@@ -7,12 +7,15 @@ import sys
 import numpy as np
 import pandas as pd
 import matplotlib
+import statsmodels.formula.api as sm
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import seaborn as sns
 
 import dcatools as tools
+
+plt.rcParams["figure.figsize"] = [10, 7.5]
 
 
 def parse_options():
@@ -24,6 +27,20 @@ def parse_options():
         dest="dms",
         required=True,
         help="input dms file",
+    )
+    parser.add_argument(
+        "-e",
+        "--Dia",
+        dest="dia",
+        required=True,
+        help="relative entropy file for each position, aa pair",
+    )
+    parser.add_argument(
+        "-f",
+        "--Di",
+        dest="di",
+        required=True,
+        help="relative entropy file for each position",
     )
     return parser.parse_args()
 
@@ -37,6 +54,8 @@ def main():
 
     data = pd.read_csv(options.dms, sep="\t", index_col=0)
 
+    Naa, Npos = data.shape
+
     with plt.style.context("fivethirtyeight"):
         fig, ax = plt.subplots(figsize=(np.ceil(data.shape[1]/3), 6.5))
         ax = sns.heatmap(data, annot=False, cmap="bwr", center=0, square=True)
@@ -44,6 +63,84 @@ def main():
         ax.set_xticklabels(ax.get_xticklabels(), rotation=45)
         plt.tight_layout()
         fig.savefig(outfile)
+        plt.close()
+
+    rel_entropy = np.loadtxt(options.dia, delimiter=" ", usecols=range(1, Naa+1))
+
+    df = pd.DataFrame(data={"dE": np.array(data).flatten(),
+                            "Dia": rel_entropy.flatten(),})
+    res = sm.ols(formula="Dia ~ dE", data=df).fit()
+    params = res.params
+
+    with plt.style.context("fivethirtyeight"):
+        fig, ax = plt.subplots()
+        df.plot.scatter(ax=ax, x="dE", y="Dia")
+        x = np.linspace(*(ax).get_xlim())
+        ax.plot(
+            x,
+            params.dE * x + params.Intercept,
+            label=r"y={:.3g}x+{:.3g}, $R^2$={:.3g}".format(
+                params.dE, params.Intercept, res.rsquared
+            ),
+            alpha=0.5,
+        )
+        ax.legend(loc="upper right")
+        plt.tight_layout()
+        plt.savefig(prefix + "_dE_Dia.png")
+        plt.close()
+
+    aa_names = np.array(data.axes[0])
+    pos_names = np.array(data.axes[1])
+    df_frob = pd.DataFrame(data={"dE": tools.reduce_h(np.array(data.T)),
+                                 "Di": np.loadtxt(options.di),
+                                 "Pos": pos_names},)
+    res_frob = sm.ols(formula="Di ~ dE", data=df_frob).fit()
+    params_frob = res_frob.params
+
+    with plt.style.context("fivethirtyeight"):
+        fig, ax = plt.subplots()
+        df_frob.plot.scatter(ax=ax, x="dE", y="Di")
+        x = np.linspace(*(ax).get_xlim())
+        ax.plot(
+            x,
+            params_frob.dE * x + params_frob.Intercept,
+            label=r"y={:.3g}x+{:.3g}, $R^2$={:.3g}".format(
+                params_frob.dE, params_frob.Intercept, res_frob.rsquared
+            ),
+            alpha=0.5,
+        )
+        for i, txt in enumerate(df_frob.Pos):
+            ax.annotate(txt, (df_frob.dE.iat[i]+.01, df_frob.Di.iat[i]+.01))
+        ax.legend(loc="upper right")
+        ax.set_title("Frob-mutational effect (dE) vs position conservation (Di)")
+        plt.tight_layout()
+        plt.savefig(prefix + "_frob-dE_Di.png")
+        plt.close()
+
+    df_mean = pd.DataFrame(data={"dE": tools.reduce_h(np.array(data.T), 0),
+                                 "Di": np.loadtxt(options.di),
+                                 "Pos": pos_names},)
+    res_mean = sm.ols(formula="Di ~ dE", data=df_mean).fit()
+    params_mean = res_mean.params
+
+    with plt.style.context("fivethirtyeight"):
+        fig, ax = plt.subplots()
+        df_mean.plot.scatter(ax=ax, x="dE", y="Di")
+        x = np.linspace(*(ax).get_xlim())
+        ax.plot(
+            x,
+            params_mean.dE * x + params_mean.Intercept,
+            label=r"y={:.3g}x+{:.3g}, $R^2$={:.3g}".format(
+                params_mean.dE, params_mean.Intercept, res_mean.rsquared
+            ),
+            alpha=0.5,
+        )
+        for i, txt in enumerate(df_mean.Pos):
+            ax.annotate(txt, (df_mean.dE.iat[i]+.01, df_mean.Di.iat[i]+.01))
+        ax.legend(loc="upper right")
+        ax.set_title("Mean-mutational effect (dE) vs position conservation (Di)")
+        plt.tight_layout()
+        plt.savefig(prefix + "_mean-dE_Di.png")
         plt.close()
 
 
