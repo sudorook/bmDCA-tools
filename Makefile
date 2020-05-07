@@ -35,8 +35,9 @@ SOURCES_DISTANCE = ${SRCPATH}/compute_distances.cpp \
 OBJECTS_DISTANCE = $(SOURCES_DISTANCE:%.cpp=%.o)
 
 SOURCES_DMS = ${SRCPATH}/compute_dms.cpp \
-                   ${SRCPATH}/msa.cpp \
-                   ${SRCPATH}/utils.cpp
+              ${SRCPATH}/msa.cpp \
+              ${SRCPATH}/msa_stats.cpp \
+              ${SRCPATH}/utils.cpp
 OBJECTS_DMS = $(SOURCES_DMS:%.cpp=%.o)
 
 .PHONY: all

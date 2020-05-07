@@ -5,6 +5,7 @@
 #include <unistd.h>
 
 #include "msa.hpp"
+#include "msa_stats.hpp"
 #include "utils.hpp"
 
 char
@@ -150,6 +151,13 @@ main(int argc, char* argv[])
   std::cout << "reading sequences... " << std::flush;
   MSA msa = MSA(msa_file, weight_file, false, is_numeric, 1.0);
   std::cout << "done" << std::endl;
+
+  std::cout << "computiing sequence stats..." << std::endl;
+  MSAStats msa_stats = MSAStats(&msa);
+
+  std::cout << "writing 1p Dia and Di..." << std::endl;
+  msa_stats.writeRelEntropyAscii(prefix + "_Dia_1p.txt");
+  msa_stats.writeRelEntropyPosAscii(prefix + "_Di_1p.txt");
 
   std::cout << "reading parameters... " << std::flush;
   potts_model params;
