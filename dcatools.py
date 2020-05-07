@@ -14,21 +14,25 @@ def reduce_J(J, norm=2):
     return J_new
 
 
-def reduce_h(h):
+def reduce_h(h, norm=2, gap_pos=-1):
     """ reduce h using Frobenius-norm """
     Npos, Naa = np.shape(h)
-    h_new = np.zeros(Npos)
-    for i in range(Npos):
-        for j in range(Naa):
-            h_new[i] += (h[i, j]) ** 2
-        h_new[i] = h_new[i] ** 0.5
+    pos_range = list(x for x in range(Npos) if x != gap_pos)
+    h_new = np.zeros(len(pos_range))
+    if norm == 2: # frob norm
+        for i, pos in enumerate(pos_range):
+            for aa in range(Naa):
+                h_new[i] += (h[pos, aa]) ** 2
+            h_new[i] = h_new[i] ** 0.5
+    if norm == 0: # mean
+        h_new = np.mean(h[pos_range, :], 1)
     return h_new
 
 
 def compute_energies(seqs, h, J):
     energies = np.zeros(seqs.shape[0])
+    N = len(seqs[0])
     for i, seq in enumerate(seqs):
-        N = len(seq)
         for n1 in range(0, N):
             energies[i] += -h[n1][seq[n1]]
             for n2 in range(n1 + 1, N):
