@@ -42,6 +42,14 @@ def parse_options():
         required=True,
         help="relative entropy file for each position",
     )
+    parser.add_argument(
+        "-a",
+        "--alphabet",
+        dest="alphabet",
+        required=False,
+        default="-ACDEFGHIKLMNPQRSTVWY",
+        help="reorder amino acids",
+    )
     return parser.parse_args()
 
 
@@ -55,6 +63,10 @@ def main():
     data = pd.read_csv(options.dms, sep="\t", index_col=0)
 
     Naa, Npos = data.shape
+
+    if options.alphabet is not None:
+        index = [a for a in options.alphabet]
+        data = data.reindex(index)
 
     with plt.style.context("fivethirtyeight"):
         fig, ax = plt.subplots(figsize=(np.ceil(data.shape[1]/3), 6.5))
