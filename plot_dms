@@ -22,11 +22,7 @@ def parse_options():
     """ cli parser """
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-i",
-        "--input",
-        dest="dms",
-        required=True,
-        help="input dms file",
+        "-i", "--input", dest="dms", required=True, help="input dms file",
     )
     parser.add_argument(
         "-e",
@@ -69,7 +65,7 @@ def main():
         data = data.reindex(index)
 
     with plt.style.context("fivethirtyeight"):
-        fig, ax = plt.subplots(figsize=(np.ceil(data.shape[1]/3), 6.5))
+        fig, ax = plt.subplots(figsize=(np.ceil(data.shape[1] / 3), 6.5))
         ax = sns.heatmap(data, annot=False, cmap="bwr", center=0, square=True)
         ax.set_yticklabels(ax.get_yticklabels(), rotation=0)
         ax.set_xticklabels(ax.get_xticklabels(), rotation=45)
@@ -77,10 +73,13 @@ def main():
         fig.savefig(outfile)
         plt.close()
 
-    rel_entropy = np.loadtxt(options.dia, delimiter=" ", usecols=range(1, Naa+1))
+    rel_entropy = np.loadtxt(
+        options.dia, delimiter=" ", usecols=range(1, Naa + 1)
+    )
 
-    df = pd.DataFrame(data={"dE": np.array(data).flatten(),
-                            "Dia": rel_entropy.flatten(),})
+    df = pd.DataFrame(
+        data={"dE": np.array(data).flatten(), "Dia": rel_entropy.flatten(),}
+    )
     res = sm.ols(formula="Dia ~ dE", data=df).fit()
     params = res.params
 
@@ -103,9 +102,13 @@ def main():
 
     aa_names = np.array(data.axes[0])
     pos_names = np.array(data.axes[1])
-    df_frob = pd.DataFrame(data={"dE": tools.reduce_h(np.array(data.T)),
-                                 "Di": np.loadtxt(options.di),
-                                 "Pos": pos_names},)
+    df_frob = pd.DataFrame(
+        data={
+            "dE": tools.reduce_h(np.array(data.T)),
+            "Di": np.loadtxt(options.di),
+            "Pos": pos_names,
+        },
+    )
     res_frob = sm.ols(formula="Di ~ dE", data=df_frob).fit()
     params_frob = res_frob.params
 
@@ -122,16 +125,24 @@ def main():
             alpha=0.5,
         )
         for i, txt in enumerate(df_frob.Pos):
-            ax.annotate(txt, (df_frob.dE.iat[i]+.01, df_frob.Di.iat[i]+.01))
+            ax.annotate(
+                txt, (df_frob.dE.iat[i] + 0.01, df_frob.Di.iat[i] + 0.01)
+            )
         ax.legend(loc="upper right")
-        ax.set_title("Frob-mutational effect (dE) vs position conservation (Di)")
+        ax.set_title(
+            "Frob-mutational effect (dE) vs position conservation (Di)"
+        )
         plt.tight_layout()
         plt.savefig(prefix + "_frob-dE_Di.png")
         plt.close()
 
-    df_mean = pd.DataFrame(data={"dE": tools.reduce_h(np.array(data.T), 0),
-                                 "Di": np.loadtxt(options.di),
-                                 "Pos": pos_names},)
+    df_mean = pd.DataFrame(
+        data={
+            "dE": tools.reduce_h(np.array(data.T), 0),
+            "Di": np.loadtxt(options.di),
+            "Pos": pos_names,
+        },
+    )
     res_mean = sm.ols(formula="Di ~ dE", data=df_mean).fit()
     params_mean = res_mean.params
 
@@ -148,9 +159,13 @@ def main():
             alpha=0.5,
         )
         for i, txt in enumerate(df_mean.Pos):
-            ax.annotate(txt, (df_mean.dE.iat[i]+.01, df_mean.Di.iat[i]+.01))
+            ax.annotate(
+                txt, (df_mean.dE.iat[i] + 0.01, df_mean.Di.iat[i] + 0.01)
+            )
         ax.legend(loc="upper right")
-        ax.set_title("Mean-mutational effect (dE) vs position conservation (Di)")
+        ax.set_title(
+            "Mean-mutational effect (dE) vs position conservation (Di)"
+        )
         plt.tight_layout()
         plt.savefig(prefix + "_mean-dE_Di.png")
         plt.close()
