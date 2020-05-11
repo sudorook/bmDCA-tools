@@ -114,11 +114,13 @@ main(int argc, char* argv[])
   std::string params_J_file;
   bool compat_mode = true;
   bool is_numeric = false;
+  bool reweight = false;
+  double threshold = 0.8;
 
-  int reference_idx = -1;
+  int reference_seq = -1;
 
   char c;
-  while ((c = getopt(argc, argv, "i:o:n:p:P:r:")) != -1) {
+  while ((c = getopt(argc, argv, "i:o:n:p:P:rs:t:")) != -1) {
     switch (c) {
       case 'i':
         msa_file = optarg;
@@ -138,7 +140,13 @@ main(int argc, char* argv[])
         compat_mode = false;
         break;
       case 'r':
-        reference_idx = std::stoi(optarg);
+        reweight = true;
+        break;
+      case 's':
+        reference_seq = std::stoi(optarg);
+        break;
+      case 't':
+        threshold = std::stod(optarg);
         break;
       case '?':
         std::cerr << "what the fuck?" << std::endl;
@@ -149,11 +157,12 @@ main(int argc, char* argv[])
   std::string prefix = msa_file.substr(0, idx);
 
   std::cout << "reading sequences... " << std::flush;
-  MSA msa = MSA(msa_file, weight_file, false, is_numeric, 1.0);
+  MSA msa = MSA(msa_file, weight_file, reweight, is_numeric, threshold);
   std::cout << "done" << std::endl;
 
   std::cout << "computiing sequence stats..." << std::endl;
   MSAStats msa_stats = MSAStats(&msa);
+  double M_eff = msa_stats.getEffectiveM();
 
   std::cout << "writing 1p Dia and Di..." << std::endl;
   msa_stats.writeRelEntropyAscii(prefix + "_Dia_1p.txt");
@@ -197,7 +206,7 @@ main(int argc, char* argv[])
               e1 -= params.J(i, j)(q1, msa.alignment(m, j));
             }
           }
-          de(q1, i, m) = e1 - e0;
+          de(q1, i, m) = (e1 - e0);
         }
       }
     }
@@ -205,13 +214,19 @@ main(int argc, char* argv[])
   std::cout << "done" << std::endl;
 
   std::cout << "writing output... " << std::flush;
-  if (reference_idx != -1) {
-    arma::Mat<double> ref_dms = -de.slice(reference_idx);
+  if (reference_seq != -1) {
+    arma::Mat<double> ref_dms = -de.slice(reference_seq);
     writeDMS(ref_dms,
-             prefix + "_dms_" + std::to_string(reference_idx) + ".tsv");
+             prefix + "_dms_" + std::to_string(reference_seq) + ".tsv");
   }
 
-  arma::Mat<double> mean_dms = arma::mean(-de, 2);
+  // arma::Mat<double> mean_dms = arma::mean(-de, 2);
+  arma::Cube<double> de_tmp = arma::Cube<double>(Q, N, M, arma::fill::zeros);
+  double* weight_ptr = msa.sequence_weights.memptr();
+  for (int m = 0; m < M; m++) {
+    de_tmp.slice(m) = de.slice(m) * *(weight_ptr+m);
+  }
+  arma::Mat<double> mean_dms = arma::sum(-de_tmp, 2) / M_eff;
   writeDMS(mean_dms, prefix + "_dms_mean.tsv");
 
   arma::Mat<double> min_dms = arma::min(-de, 2);
