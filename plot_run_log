@@ -21,13 +21,20 @@ def parse_options():
     parser.add_argument(
         "-o", "--output", dest="output", required=True, help="figure name",
     )
+    parser.add_argument(
+        "-s", "--start", dest="start", required=False, help="start offset",
+    )
     return parser.parse_args()
 
 
 def main():
     """ do stuff """
     options = parse_options()
-    df = pd.read_csv(options.input, sep="\t")
+    if options.start is not None:
+        offset = int(options.start)
+        df = pd.read_csv(options.input, sep="\t")[offset:]
+    else:
+        df = pd.read_csv(options.input, sep="\t")
     df["log10-burn-in"] = np.log10(df["burn-in"])
     df["log10-burn-between"] = np.log10(df["burn-between"])
 
