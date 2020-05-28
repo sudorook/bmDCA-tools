@@ -1,0 +1,407 @@
+#! /usr/bin/env python3
+""" docstring """
+
+import argparse
+import os
+import sys
+import numpy as np
+import pandas as pd
+import statsmodels.formula.api as sm
+import matplotlib
+
+import dcatools as tools
+
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+
+
+def parse_options():
+    """ cli parser """
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-s",
+        "--steps",
+        dest="steps",
+        action="append",
+        required=True,
+        help="steps",
+    )
+    parser.add_argument(
+        "-d",
+        "--dirs",
+        dest="dirs",
+        action="append",
+        required=False,
+        help="directories",
+    )
+    parser.add_argument(
+        "-l",
+        "--labels",
+        dest="labels",
+        action="append",
+        required=False,
+        help="labels",
+    )
+    parser.add_argument(
+        "-t", "--title", dest="title", required=False, help="figure title",
+    )
+    parser.add_argument(
+        "-p",
+        "--plot_parameters",
+        dest="params",
+        action="store_true",
+        default=False,
+        help="compare param flag",
+    )
+    parser.add_argument(
+        "-g",
+        "--plot_gradient",
+        dest="grad",
+        action="store_true",
+        default=False,
+        help="compare gradient flag",
+    )
+    parser.add_argument(
+        "-r",
+        "--plot_learning_rates",
+        dest="learn",
+        action="store_true",
+        default=False,
+        help="compare learn rates flag",
+    )
+    return parser.parse_args()
+
+
+def main():
+    """ do stuff """
+    options = parse_options()
+
+    if len(options.steps) != 2:
+        sys.exit("Provide two steps to compare. Exiting...")
+    else:
+        step1 = int(options.steps[0])
+        step2 = int(options.steps[1])
+
+    if options.dirs is not None:
+        if len(options.dirs) == 1:
+            if os.path.isdir(options.dirs[0]):
+                dir1 = options.dirs[0]
+                dir2 = options.dirs[0]
+        elif len(options.dirs) == 2:
+            if os.path.isdir(options.dirs[0]):
+                dir1 = options.dirs[0]
+            if os.path.isdir(options.dirs[1]):
+                dir2 = options.dirs[1]
+        else:
+            sys.exit("Invalid number of directories provided. Exiting...")
+    else:
+        dir1 = ""
+        dir2 = ""
+
+    if options.labels is not None:
+        if len(options.labels) != 2:
+            sys.exit("Invalid number of labels provided. Exiting...")
+        else:
+            prefix1 = tools.slugify(options.labels[0] + " " + options.steps[0])
+            prefix2 = tools.slugify(options.labels[1] + " " + options.steps[1])
+            label1 = (
+                "step "
+                + str(options.steps[0])
+                + " ("
+                + options.labels[0]
+                + ")"
+            )
+            label2 = (
+                "step "
+                + str(options.steps[1])
+                + " ("
+                + options.labels[1]
+                + ")"
+            )
+    else:
+        prefix1 = str(options.steps[0])
+        prefix2 = str(options.steps[1])
+        label1 = "step " + str(options.steps[0])
+        label2 = "step " + str(options.steps[1])
+
+    if (
+        options.grad is None
+        and options.params is None
+        and options.learn is None
+    ):
+        sys.exit("Gotta plot something...")
+
+    subplots = []
+
+    if options.params:
+        params1 = os.path.join(dir1, "parameters_" + str(step1) + ".txt")
+        params2 = os.path.join(dir2, "parameters_" + str(step2) + ".txt")
+        subplots.append(("parameters", params1, params2))
+
+        if not os.path.exists(params1):
+            params1_h = os.path.join(
+                dir1, "parameters_h_" + str(step1) + ".bin"
+            )
+            params1_J = os.path.join(
+                dir1, "parameters_J_" + str(step1) + ".bin"
+            )
+            res = tools.arma2ascii(params1_h, params1_J)
+            if res != 0:
+                sys.exit("Error converting " + params1 + ". Exiting...")
+
+        if not os.path.exists(params2):
+            params2_h = os.path.join(
+                dir2, "parameters_h_" + str(step2) + ".bin"
+            )
+            params2_J = os.path.join(
+                dir2, "parameters_J_" + str(step2) + ".bin"
+            )
+            tools.arma2ascii(params2_h, params2_J)
+            if res != 0:
+                sys.exit("Error converting " + params2 + ". Exiting...")
+
+    if options.grad:
+        grad1 = os.path.join(dir1, "gradients_" + str(step1) + ".txt")
+        grad2 = os.path.join(dir2, "gradients_" + str(step2) + ".txt")
+        subplots.append(("gradient", grad1, grad2))
+
+        if not os.path.exists(grad1):
+            grad1_h = os.path.join(dir1, "gradients_h_" + str(step1) + ".bin")
+            grad1_J = os.path.join(dir1, "gradients_J_" + str(step1) + ".bin")
+            tools.arma2ascii(grad1_h, grad1_J)
+
+        if not os.path.exists(grad2):
+            grad2_h = os.path.join(dir2, "gradients_h_" + str(step2) + ".bin")
+            grad2_J = os.path.join(dir2, "gradients_J_" + str(step2) + ".bin")
+            tools.arma2ascii(grad2_h, grad2_J)
+
+    if options.learn:
+        learn1 = os.path.join(dir1, "learning_rates_" + str(step1) + ".txt")
+        learn2 = os.path.join(dir2, "learning_rates_" + str(step2) + ".txt")
+        subplots.append(("learning rate", learn1, learn2))
+
+        if not os.path.exists(learn1):
+            learn1_h = os.path.join(
+                dir1, "learning_rates_h_" + str(step1) + ".bin"
+            )
+            learn1_J = os.path.join(
+                dir1, "learning_rates_J_" + str(step1) + ".bin"
+            )
+            tools.arma2ascii(learn1_h, learn1_J)
+
+        if not os.path.exists(learn2):
+            learn2_h = os.path.join(
+                dir2, "learning_rates_h_" + str(step2) + ".bin"
+            )
+            learn2_J = os.path.join(
+                dir2, "learning_rates_J_" + str(step2) + ".bin"
+            )
+            tools.arma2ascii(learn2_h, learn2_J)
+
+    subplots_count = len(subplots)
+
+    with plt.style.context("fivethirtyeight"):
+        fig = plt.figure(figsize=[8 * subplots_count, 12])
+        axes = fig.add_subplot(111)
+        axes.tick_params(
+            axis="both",
+            which="both",
+            labelcolor="none",
+            top=False,
+            bottom=False,
+            left=False,
+            right=False,
+        )
+        axes.grid(False)
+        axes.set_title("")
+        axes.set_xlabel(label1, fontsize=plt.rcParams["axes.titlesize"])
+        axes.set_ylabel(label2, fontsize=plt.rcParams["axes.titlesize"])
+
+        fig_f = plt.figure(figsize=[8 * subplots_count, 12])
+        axes_f = fig_f.add_subplot(111)
+        axes_f.tick_params(
+            axis="both",
+            which="both",
+            labelcolor="none",
+            top=False,
+            bottom=False,
+            left=False,
+            right=False,
+        )
+        axes_f.grid(False)
+        axes_f.set_title("")
+        axes_f.set_xlabel(label1, fontsize=plt.rcParams["axes.titlesize"])
+        axes_f.set_ylabel(label2, fontsize=plt.rcParams["axes.titlesize"])
+
+        for idx, s in enumerate(subplots):
+            h1, J1 = tools.load_model(s[1])
+            h2, J2 = tools.load_model(s[2])
+
+            h1_1d = h1.flatten()
+            h2_1d = h2.flatten()
+            J1_1d = J1.flatten()
+            J2_1d = J2.flatten()
+
+            df_h = pd.DataFrame(data={"h1": h1_1d, "h2": h2_1d,})
+            res_h = sm.ols(formula="h2 ~ h1", data=df_h).fit()
+            params_h = res_h.params
+
+            df_J = pd.DataFrame(data={"J1": J1_1d, "J2": J2_1d,})
+            res_J = sm.ols(formula="J2 ~ J1", data=df_J).fit()
+            params_J = res_J.params
+
+            h1_1d_f = tools.reduce_h(h1).flatten()
+            h2_1d_f = tools.reduce_h(h2).flatten()
+            J1_1d_f = tools.reduce_J(J1).flatten()
+            J2_1d_f = tools.reduce_J(J2).flatten()
+
+            df_h_f = pd.DataFrame(data={"h1": h1_1d_f, "h2": h2_1d_f,})
+            res_h_f = sm.ols(formula="h2 ~ h1", data=df_h_f).fit()
+            params_h_f = res_h_f.params
+
+            df_J_f = pd.DataFrame(data={"J1": J1_1d_f, "J2": J2_1d_f,})
+            res_J_f = sm.ols(formula="J2 ~ J1", data=df_J_f).fit()
+            params_J_f = res_J_f.params
+
+            ax = fig.add_subplot("2" + str(subplots_count) + str(idx + 1))
+            df_h.plot.hexbin(
+                ax=ax, x="h1", y="h2", mincnt=1, cmap="viridis", zorder=1
+            )
+            xmin, xmax = (ax).get_xlim()
+            ymin, ymax = (ax).get_ylim()
+            ax.set_xlim([min(xmin, ymin), max(xmax, ymax)])
+            ax.set_ylim([min(xmin, ymin), max(xmax, ymax)])
+            x = np.linspace(min(xmin, ymin), max(xmax, ymax))
+            ax.plot(
+                x,
+                params_h.h1 * x + params_h.Intercept,
+                label=r"y={:.3g}x+{:.3g}, $R^2$={:.3g}".format(
+                    params_h.h1, params_h.Intercept, res_h.rsquared
+                ),
+                alpha=0.5,
+            )
+            ax.plot(x, x, "--k", alpha=0.25, zorder=0, label=r"y=x")
+            ax.text(
+                0.05,
+                0.95,
+                s[0] + " h",
+                transform=ax.transAxes,
+                fontsize=plt.rcParams["axes.titlesize"],
+            )
+            ax.set_xlabel("")
+            ax.set_ylabel("")
+            ax.legend(loc="lower right")
+
+            ax = fig.add_subplot(
+                "2" + str(subplots_count) + str(idx + 1 + subplots_count)
+            )
+            df_J.plot.hexbin(
+                ax=ax,
+                x="J1",
+                y="J2",
+                bins="log",
+                mincnt=1,
+                cmap="viridis",
+                zorder=1,
+            )
+
+            xmin, xmax = (ax).get_xlim()
+            ymin, ymax = (ax).get_ylim()
+            ax.set_xlim([min(xmin, ymin), max(xmax, ymax)])
+            ax.set_ylim([min(xmin, ymin), max(xmax, ymax)])
+            x = np.linspace(min(xmin, ymin), max(xmax, ymax))
+            ax.plot(
+                x,
+                params_J.J1 * x + params_J.Intercept,
+                label=r"y={:.3g}x+{:.3g}, $R^2$={:.3g}".format(
+                    params_J.J1, params_J.Intercept, res_J.rsquared
+                ),
+                alpha=0.5,
+            )
+            ax.plot(x, x, "--k", alpha=0.25, zorder=0, label=r"y=x")
+            ax.text(
+                0.05,
+                0.95,
+                s[0] + " J",
+                transform=ax.transAxes,
+                fontsize=plt.rcParams["axes.titlesize"],
+            )
+            ax.set_xlabel("")
+            ax.set_ylabel("")
+            ax.legend(loc="lower right")
+
+            ax_f = fig_f.add_subplot("2" + str(subplots_count) + str(idx + 1))
+            df_h_f.plot.hexbin(
+                ax=ax_f, x="h1", y="h2", mincnt=1, cmap="viridis", zorder=1
+            )
+            xmin, xmax = (ax_f).get_xlim()
+            ymin, ymax = (ax_f).get_ylim()
+            ax_f.set_xlim([min(xmin, ymin), max(xmax, ymax)])
+            ax_f.set_ylim([min(xmin, ymin), max(xmax, ymax)])
+            x = np.linspace(min(xmin, ymin), max(xmax, ymax))
+            ax_f.plot(
+                x,
+                params_h_f.h1 * x + params_h_f.Intercept,
+                label=r"y={:.3g}x+{:.3g}, $R^2$={:.3g}".format(
+                    params_h_f.h1, params_h_f.Intercept, res_h_f.rsquared
+                ),
+                alpha=0.5,
+            )
+            ax_f.plot(x, x, "--k", alpha=0.25, zorder=0, label=r"y=x")
+            ax_f.text(
+                0.05,
+                0.95,
+                s[0] + " h (frob)",
+                transform=ax_f.transAxes,
+                fontsize=plt.rcParams["axes.titlesize"],
+            )
+            ax_f.set_xlabel("")
+            ax_f.set_ylabel("")
+            ax_f.legend(loc="lower right")
+
+            ax_f = fig_f.add_subplot(
+                "2" + str(subplots_count) + str(idx + 1 + subplots_count)
+            )
+            df_J_f.plot.hexbin(
+                ax=ax_f,
+                x="J1",
+                y="J2",
+                bins="log",
+                mincnt=1,
+                cmap="viridis",
+                zorder=1,
+            )
+            xmin, xmax = (ax_f).get_xlim()
+            ymin, ymax = (ax_f).get_ylim()
+            ax_f.set_xlim([min(xmin, ymin), max(xmax, ymax)])
+            ax_f.set_ylim([min(xmin, ymin), max(xmax, ymax)])
+            x = np.linspace(min(xmin, ymin), max(xmax, ymax))
+            ax_f.plot(
+                x,
+                params_J_f.J1 * x + params_J_f.Intercept,
+                label=r"y={:.3g}x+{:.3g}, $R^2$={:.3g}".format(
+                    params_J_f.J1, params_J_f.Intercept, res_J_f.rsquared
+                ),
+                alpha=0.5,
+            )
+            ax_f.plot(x, x, "--k", alpha=0.25, zorder=0, label=r"y=x")
+            ax_f.text(
+                0.05,
+                0.95,
+                s[0] + " J (frob)",
+                transform=ax_f.transAxes,
+                fontsize=plt.rcParams["axes.titlesize"],
+            )
+            ax_f.set_xlabel("")
+            ax_f.set_ylabel("")
+            ax_f.legend(loc="lower right")
+
+        fig.tight_layout()
+        fig.savefig(prefix1 + "_" + prefix2 + ".png")
+
+        fig_f.tight_layout()
+        fig_f.savefig(prefix1 + "_" + prefix2 + "_frob.png")
+
+
+if __name__ == "__main__":
+    main()
