@@ -69,6 +69,14 @@ def parse_options():
         default=False,
         help="compare learn rates flag",
     )
+    parser.add_argument(
+        "-v",
+        "--vertical",
+        dest="vertical",
+        action="store_true",
+        default=False,
+        help="orient plots vertically",
+    )
     return parser.parse_args()
 
 
@@ -201,7 +209,10 @@ def main():
     subplots_count = len(subplots)
 
     with plt.style.context("fivethirtyeight"):
-        fig = plt.figure(figsize=[8 * subplots_count, 12])
+        if options.vertical:
+            fig = plt.figure(figsize=[20, 8 * subplots_count])
+        else:
+            fig = plt.figure(figsize=[8 * subplots_count, 14])
         axes = fig.add_subplot(111)
         axes.tick_params(
             axis="both",
@@ -217,7 +228,10 @@ def main():
         axes.set_xlabel(label1, fontsize=plt.rcParams["axes.titlesize"])
         axes.set_ylabel(label2, fontsize=plt.rcParams["axes.titlesize"])
 
-        fig_f = plt.figure(figsize=[8 * subplots_count, 12])
+        if options.vertical:
+            fig_f = plt.figure(figsize=[20, 8 * subplots_count])
+        else:
+            fig_f = plt.figure(figsize=[8 * subplots_count, 14])
         axes_f = fig_f.add_subplot(111)
         axes_f.tick_params(
             axis="both",
@@ -263,7 +277,13 @@ def main():
             res_J_f = sm.ols(formula="J2 ~ J1", data=df_J_f).fit()
             params_J_f = res_J_f.params
 
-            ax = fig.add_subplot("2" + str(subplots_count) + str(idx + 1))
+            if options.vertical:
+                ax = fig.add_subplot(
+                    str(subplots_count) + "2" + str(2 * idx + 1)
+                )
+            else:
+                ax = fig.add_subplot("2" + str(subplots_count) + str(idx + 1))
+
             df_h.plot.hexbin(
                 ax=ax, x="h1", y="h2", mincnt=1, cmap="viridis", zorder=1
             )
@@ -292,9 +312,15 @@ def main():
             ax.set_ylabel("")
             ax.legend(loc="lower right")
 
-            ax = fig.add_subplot(
-                "2" + str(subplots_count) + str(idx + 1 + subplots_count)
-            )
+            if options.vertical:
+                ax = fig.add_subplot(
+                    str(subplots_count) + "2" + str(2 * idx + 2)
+                )
+            else:
+                ax = fig.add_subplot(
+                    "2" + str(subplots_count) + str(idx + 1 + subplots_count)
+                )
+
             df_J.plot.hexbin(
                 ax=ax,
                 x="J1",
@@ -330,7 +356,15 @@ def main():
             ax.set_ylabel("")
             ax.legend(loc="lower right")
 
-            ax_f = fig_f.add_subplot("2" + str(subplots_count) + str(idx + 1))
+            if options.vertical:
+                ax_f = fig_f.add_subplot(
+                    str(subplots_count) + "2" + str(idx * 2 + 1)
+                )
+            else:
+                ax_f = fig_f.add_subplot(
+                    "2" + str(subplots_count) + str(idx + 1)
+                )
+
             df_h_f.plot.hexbin(
                 ax=ax_f, x="h1", y="h2", mincnt=1, cmap="viridis", zorder=1
             )
@@ -359,9 +393,15 @@ def main():
             ax_f.set_ylabel("")
             ax_f.legend(loc="lower right")
 
-            ax_f = fig_f.add_subplot(
-                "2" + str(subplots_count) + str(idx + 1 + subplots_count)
-            )
+            if options.vertical:
+                ax_f = fig_f.add_subplot(
+                    str(subplots_count) + "2" + str(2 * idx + 2)
+                )
+            else:
+                ax_f = fig_f.add_subplot(
+                    "2" + str(subplots_count) + str(idx + 1 + subplots_count)
+                )
+
             df_J_f.plot.hexbin(
                 ax=ax_f,
                 x="J1",
