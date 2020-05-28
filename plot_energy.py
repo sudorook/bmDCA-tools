@@ -27,7 +27,7 @@ def parse_options():
     )
     parser.add_argument(
         "-e",
-        "--emergoes",
+        "--energies",
         dest="energies",
         action="append",
         required=False,
