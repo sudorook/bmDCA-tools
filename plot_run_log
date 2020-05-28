@@ -43,7 +43,11 @@ def main():
         "log10-burn-between",
         "log10-burn-in",
         "energy-err",
+        "auto-corr",
+        "cross-corr",
         "error-tot",
+        "error-h",
+        "error-J",
         "step-time",
     ]
     fields = [field for field in wants if field in df.columns]
