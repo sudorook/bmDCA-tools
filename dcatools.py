@@ -2,6 +2,9 @@
 """ docstring """
 
 import numpy as np
+import unidecode
+import re
+import subprocess
 
 
 def reduce_J(J, norm=2):
@@ -84,3 +87,17 @@ def load_energies(energy_file):
     """ load sequences energies """
     data = np.loadtxt(energy_file, dtype="double", skiprows=1)
     return data
+
+
+def slugify(text):
+    """ convert text string to slug """
+    text = unidecode.unidecode(text).lower()
+    return re.sub(r"[\W_]+", "_", text)
+
+
+def arma2ascii(h_file, J_file):
+    """ convert armadillo binary to text file """
+
+    command = ["arma2ascii", "-p", h_file, "-P", J_file]
+    res = subprocess.call(command)
+    return res

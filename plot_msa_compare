@@ -3,16 +3,16 @@
 
 import os
 import sys
-import re
 import subprocess
 import argparse
-import unidecode
 import numpy as np
 import pandas as pd
 import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+
+import dcatools as tools
 
 plt.rcParams["figure.figsize"] = [10, 7.5]
 
@@ -176,12 +176,6 @@ def load_grid(filename, names):
     return data_df
 
 
-def slugify(text):
-    """ convert text string to slug """
-    text = unidecode.unidecode(text).lower()
-    return re.sub(r"[\W_]+", "_", text)
-
-
 def cleanup(filenames):
     """ delete list of files """
     for f in filenames:
@@ -235,14 +229,12 @@ def main():
     command.append("-t")
     command.append(str(options.threshold))
 
-    #  print(command)
-
     if options.skip is False:
         res = subprocess.call(command)
         if res != 0:
             sys.exit(1)
 
-    prefix = slugify(options.title)
+    prefix = tools.slugify(options.title)
 
     filenames = []
     for i in range(1, options.n + 1):
@@ -294,7 +286,6 @@ def main():
             plt.title(files[0] + ": " + options.title)
             plt.tight_layout()
             plt.savefig(outputname)
-            #  plt.savefig(prefix + "_freq_" + str(i) + "p.png")
             plt.close()
 
     if options.cleanup:
