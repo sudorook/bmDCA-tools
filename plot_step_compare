@@ -227,6 +227,8 @@ def main():
         axes.set_title("")
         axes.set_xlabel(label1, fontsize=plt.rcParams["axes.titlesize"])
         axes.set_ylabel(label2, fontsize=plt.rcParams["axes.titlesize"])
+        if options.title:
+            axes.set_title(options.title)
 
         if options.vertical:
             fig_f = plt.figure(figsize=[20, 8 * subplots_count])
@@ -246,6 +248,8 @@ def main():
         axes_f.set_title("")
         axes_f.set_xlabel(label1, fontsize=plt.rcParams["axes.titlesize"])
         axes_f.set_ylabel(label2, fontsize=plt.rcParams["axes.titlesize"])
+        if options.title:
+            axes_f.set_title(options.title)
 
         for idx, s in enumerate(subplots):
             h1, J1 = tools.load_model(s[1])
