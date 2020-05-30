@@ -133,9 +133,9 @@ def main():
         label2 = "step " + str(options.steps[1])
 
     if (
-        options.grad is None
-        and options.params is None
-        and options.learn is None
+        options.grad is False
+        and options.params is False
+        and options.learn is False
     ):
         sys.exit("Gotta plot something...")
 
