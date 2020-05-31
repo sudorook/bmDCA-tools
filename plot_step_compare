@@ -288,7 +288,7 @@ def main():
                 ax = fig.add_subplot("2" + str(subplots_count) + str(idx + 1))
 
             df_h.plot.hexbin(
-                ax=ax, x="h1", y="h2", mincnt=1, cmap="viridis", zorder=1, bins="log"
+                ax=ax, x="h1", y="h2", mincnt=1, cmap="viridis", zorder=1
             )
             xmin, xmax = (ax).get_xlim()
             ymin, ymax = (ax).get_ylim()
@@ -325,7 +325,6 @@ def main():
                 ax=ax,
                 x="J1",
                 y="J2",
-                bins="log",
                 mincnt=1,
                 cmap="viridis",
                 zorder=1,
@@ -363,7 +362,7 @@ def main():
                 )
 
             df_h_f.plot.hexbin(
-                ax=ax_f, x="h1", y="h2", mincnt=1, cmap="viridis", zorder=1, bins="log"
+                ax=ax_f, x="h1", y="h2", mincnt=1, cmap="viridis", zorder=1
             )
             xmin, xmax = (ax_f).get_xlim()
             ymin, ymax = (ax_f).get_ylim()
@@ -400,7 +399,6 @@ def main():
                 ax=ax_f,
                 x="J1",
                 y="J2",
-                bins="log",
                 mincnt=1,
                 cmap="viridis",
                 zorder=1,
