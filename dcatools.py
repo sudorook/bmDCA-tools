@@ -1,10 +1,11 @@
 #! /usr/bin/env python3
 """ docstring """
 
-import numpy as np
-import unidecode
 import re
 import subprocess
+import numpy as np
+import pandas as pd
+import unidecode
 
 
 def reduce_J(J, norm=2):
@@ -101,3 +102,18 @@ def arma2ascii(h_file, J_file):
     command = ["arma2ascii", "-p", h_file, "-P", J_file]
     res = subprocess.call(command)
     return res
+
+
+def load_run_log(log_file, offset=None):
+    """ load the run log """
+
+    if offset is not None:
+        offset = int(offset)
+        df = pd.read_csv(log_file, sep="\t")[offset:]
+    else:
+        df = pd.read_csv(log_file, sep="\t")
+
+    df["log10-burn-in"] = np.log10(df["burn-in"])
+    df["log10-burn-between"] = np.log10(df["burn-between"])
+
+    return df
