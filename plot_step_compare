@@ -112,14 +112,8 @@ def main():
         else:
             prefix1 = tools.slugify(options.labels[0] + " " + options.steps[0])
             prefix2 = tools.slugify(options.labels[1] + " " + options.steps[1])
-            label1 = (
-                "step "
-                + str(options.steps[0])
-            )
-            label2 = (
-                "step "
-                + str(options.steps[1])
-            )
+            label1 = "step " + str(options.steps[0])
+            label2 = "step " + str(options.steps[1])
     else:
         prefix1 = str(options.steps[0])
         prefix2 = str(options.steps[1])
@@ -129,7 +123,16 @@ def main():
     if options.title is not None:
         title = options.title
     elif len(options.labels) == 2:
-        title = options.labels[0] + " (step "+ str(options.steps[0]) + ") vs " + options.labels[1] + " (step "+ str(options.steps[1]) + ")"
+        title = (
+            options.labels[0]
+            + " (step "
+            + str(options.steps[0])
+            + ") vs "
+            + options.labels[1]
+            + " (step "
+            + str(options.steps[1])
+            + ")"
+        )
 
     if (
         options.grad is False
@@ -224,8 +227,12 @@ def main():
         )
         axes.grid(False)
         axes.set_title(title, pad=25)
-        axes.set_xlabel(label1, fontsize=plt.rcParams["axes.titlesize"], x=0.475, y=0)
-        axes.set_ylabel(label2, fontsize=plt.rcParams["axes.titlesize"], x=0, y=0.5)
+        axes.set_xlabel(
+            label1, fontsize=plt.rcParams["axes.titlesize"], x=0.475, y=0
+        )
+        axes.set_ylabel(
+            label2, fontsize=plt.rcParams["axes.titlesize"], x=0, y=0.5
+        )
         if options.vertical:
             axes.yaxis.labelpad = 20
 
@@ -245,8 +252,12 @@ def main():
         )
         axes_f.grid(False)
         axes_f.set_title(title + " (Frobenius)", pad=30)
-        axes_f.set_xlabel(label1, fontsize=plt.rcParams["axes.titlesize"], x=0.475, y=0)
-        axes_f.set_ylabel(label2, fontsize=plt.rcParams["axes.titlesize"], x=0, y=0.5)
+        axes_f.set_xlabel(
+            label1, fontsize=plt.rcParams["axes.titlesize"], x=0.475, y=0
+        )
+        axes_f.set_ylabel(
+            label2, fontsize=plt.rcParams["axes.titlesize"], x=0, y=0.5
+        )
         if options.vertical:
             axes_f.yaxis.labelpad = 20
 
@@ -288,7 +299,13 @@ def main():
                 ax = fig.add_subplot("2" + str(subplots_count) + str(idx + 1))
 
             df_h.plot.hexbin(
-                ax=ax, x="h1", y="h2", mincnt=1, cmap="viridis", zorder=1
+                ax=ax,
+                x="h1",
+                y="h2",
+                mincnt=1,
+                cmap="viridis",
+                zorder=1,
+                bins="log",
             )
             xmin, xmax = (ax).get_xlim()
             ymin, ymax = (ax).get_ylim()
@@ -305,8 +322,7 @@ def main():
             )
             ax.plot(x, x, "--k", alpha=0.25, zorder=0, label=r"y=x")
             ax.set_title(
-                s[0] + " h",
-                fontsize=plt.rcParams["axes.titlesize"],
+                s[0] + " h", fontsize=plt.rcParams["axes.titlesize"],
             )
             ax.set_xlabel("")
             ax.set_ylabel("")
@@ -325,6 +341,7 @@ def main():
                 ax=ax,
                 x="J1",
                 y="J2",
+                bins="log",
                 mincnt=1,
                 cmap="viridis",
                 zorder=1,
@@ -345,8 +362,7 @@ def main():
             )
             ax.plot(x, x, "--k", alpha=0.25, zorder=0, label=r"y=x")
             ax.set_title(
-                s[0] + " J",
-                fontsize=plt.rcParams["axes.titlesize"],
+                s[0] + " J", fontsize=plt.rcParams["axes.titlesize"],
             )
             ax.set_xlabel("")
             ax.set_ylabel("")
@@ -362,7 +378,13 @@ def main():
                 )
 
             df_h_f.plot.hexbin(
-                ax=ax_f, x="h1", y="h2", mincnt=1, cmap="viridis", zorder=1
+                ax=ax_f,
+                x="h1",
+                y="h2",
+                mincnt=1,
+                cmap="viridis",
+                zorder=1,
+                bins="log",
             )
             xmin, xmax = (ax_f).get_xlim()
             ymin, ymax = (ax_f).get_ylim()
@@ -379,8 +401,7 @@ def main():
             )
             ax_f.plot(x, x, "--k", alpha=0.25, zorder=0, label=r"y=x")
             ax_f.set_title(
-                s[0] + " h (frob)",
-                fontsize=plt.rcParams["axes.titlesize"],
+                s[0] + " h (frob)", fontsize=plt.rcParams["axes.titlesize"],
             )
             ax_f.set_xlabel("")
             ax_f.set_ylabel("")
@@ -399,6 +420,7 @@ def main():
                 ax=ax_f,
                 x="J1",
                 y="J2",
+                bins="log",
                 mincnt=1,
                 cmap="viridis",
                 zorder=1,
@@ -418,8 +440,7 @@ def main():
             )
             ax_f.plot(x, x, "--k", alpha=0.25, zorder=0, label=r"y=x")
             ax_f.set_title(
-                s[0] + " J (frob)",
-                fontsize=plt.rcParams["axes.titlesize"],
+                s[0] + " J (frob)", fontsize=plt.rcParams["axes.titlesize"],
             )
             ax_f.set_xlabel("")
             ax_f.set_ylabel("")
