@@ -115,22 +115,21 @@ def main():
             label1 = (
                 "step "
                 + str(options.steps[0])
-                + " ("
-                + options.labels[0]
-                + ")"
             )
             label2 = (
                 "step "
                 + str(options.steps[1])
-                + " ("
-                + options.labels[1]
-                + ")"
             )
     else:
         prefix1 = str(options.steps[0])
         prefix2 = str(options.steps[1])
         label1 = "step " + str(options.steps[0])
         label2 = "step " + str(options.steps[1])
+
+    if options.title is not None:
+        title = options.title
+    elif len(options.labels) == 2:
+        title = options.labels[0] + " (step "+ str(options.steps[0]) + ") vs " + options.labels[1] + " (step "+ str(options.steps[1]) + ")"
 
     if (
         options.grad is False
@@ -224,11 +223,11 @@ def main():
             right=False,
         )
         axes.grid(False)
-        axes.set_title("")
-        axes.set_xlabel(label1, fontsize=plt.rcParams["axes.titlesize"])
-        axes.set_ylabel(label2, fontsize=plt.rcParams["axes.titlesize"])
-        if options.title:
-            axes.set_title(options.title)
+        axes.set_title(title, pad=25)
+        axes.set_xlabel(label1, fontsize=plt.rcParams["axes.titlesize"], x=0.475, y=0)
+        axes.set_ylabel(label2, fontsize=plt.rcParams["axes.titlesize"], x=0, y=0.5)
+        if options.vertical:
+            axes.yaxis.labelpad = 20
 
         if options.vertical:
             fig_f = plt.figure(figsize=[20, 8 * subplots_count])
@@ -245,11 +244,11 @@ def main():
             right=False,
         )
         axes_f.grid(False)
-        axes_f.set_title("")
-        axes_f.set_xlabel(label1, fontsize=plt.rcParams["axes.titlesize"])
-        axes_f.set_ylabel(label2, fontsize=plt.rcParams["axes.titlesize"])
-        if options.title:
-            axes_f.set_title(options.title)
+        axes_f.set_title(title + " (Frobenius)", pad=30)
+        axes_f.set_xlabel(label1, fontsize=plt.rcParams["axes.titlesize"], x=0.475, y=0)
+        axes_f.set_ylabel(label2, fontsize=plt.rcParams["axes.titlesize"], x=0, y=0.5)
+        if options.vertical:
+            axes_f.yaxis.labelpad = 20
 
         for idx, s in enumerate(subplots):
             h1, J1 = tools.load_model(s[1])
@@ -289,7 +288,7 @@ def main():
                 ax = fig.add_subplot("2" + str(subplots_count) + str(idx + 1))
 
             df_h.plot.hexbin(
-                ax=ax, x="h1", y="h2", mincnt=1, cmap="viridis", zorder=1
+                ax=ax, x="h1", y="h2", mincnt=1, cmap="viridis", zorder=1, bins="log"
             )
             xmin, xmax = (ax).get_xlim()
             ymin, ymax = (ax).get_ylim()
@@ -305,11 +304,8 @@ def main():
                 alpha=0.5,
             )
             ax.plot(x, x, "--k", alpha=0.25, zorder=0, label=r"y=x")
-            ax.text(
-                0.05,
-                0.95,
+            ax.set_title(
                 s[0] + " h",
-                transform=ax.transAxes,
                 fontsize=plt.rcParams["axes.titlesize"],
             )
             ax.set_xlabel("")
@@ -349,11 +345,8 @@ def main():
                 alpha=0.5,
             )
             ax.plot(x, x, "--k", alpha=0.25, zorder=0, label=r"y=x")
-            ax.text(
-                0.05,
-                0.95,
+            ax.set_title(
                 s[0] + " J",
-                transform=ax.transAxes,
                 fontsize=plt.rcParams["axes.titlesize"],
             )
             ax.set_xlabel("")
@@ -370,7 +363,7 @@ def main():
                 )
 
             df_h_f.plot.hexbin(
-                ax=ax_f, x="h1", y="h2", mincnt=1, cmap="viridis", zorder=1
+                ax=ax_f, x="h1", y="h2", mincnt=1, cmap="viridis", zorder=1, bins="log"
             )
             xmin, xmax = (ax_f).get_xlim()
             ymin, ymax = (ax_f).get_ylim()
@@ -386,11 +379,8 @@ def main():
                 alpha=0.5,
             )
             ax_f.plot(x, x, "--k", alpha=0.25, zorder=0, label=r"y=x")
-            ax_f.text(
-                0.05,
-                0.95,
+            ax_f.set_title(
                 s[0] + " h (frob)",
-                transform=ax_f.transAxes,
                 fontsize=plt.rcParams["axes.titlesize"],
             )
             ax_f.set_xlabel("")
@@ -429,11 +419,8 @@ def main():
                 alpha=0.5,
             )
             ax_f.plot(x, x, "--k", alpha=0.25, zorder=0, label=r"y=x")
-            ax_f.text(
-                0.05,
-                0.95,
+            ax_f.set_title(
                 s[0] + " J (frob)",
-                transform=ax_f.transAxes,
                 fontsize=plt.rcParams["axes.titlesize"],
             )
             ax_f.set_xlabel("")
