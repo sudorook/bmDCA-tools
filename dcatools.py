@@ -24,12 +24,12 @@ def reduce_h(h, norm=2, gap_pos=-1):
     Npos, Naa = np.shape(h)
     pos_range = list(x for x in range(Npos) if x != gap_pos)
     h_new = np.zeros(len(pos_range))
-    if norm == 2: # frob norm
+    if norm == 2:  # frob norm
         for i, pos in enumerate(pos_range):
             for aa in range(Naa):
                 h_new[i] += (h[pos, aa]) ** 2
             h_new[i] = h_new[i] ** 0.5
-    if norm == 0: # mean
+    if norm == 0:  # mean
         h_new = np.mean(h[pos_range, :], 1)
     return h_new
 
