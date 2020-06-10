@@ -6,6 +6,7 @@ import subprocess
 import numpy as np
 import pandas as pd
 import unidecode
+from scipy.io import loadmat
 
 
 def reduce_J(J, norm=2):
@@ -84,10 +85,44 @@ def load_model(data_file):
     return h, J
 
 
+def load_model_mat(data_file):
+    """ load mat file with alignment, fields, and couplings """
+    data = loadmat(data_file)
+    alignment = data["align"]
+    params_h = data["h"]
+    params_J = data["J"]
+    return alignment, params_h, params_J
+
+
 def load_energies(energy_file):
     """ load sequences energies """
     data = np.loadtxt(energy_file, dtype="double", skiprows=1)
     return data
+
+
+def save_alignment(alignment, M, N, Q, filename):
+    """ save numerical alignment """
+    with open(filename, "w") as handle:
+        handle.write("%d %d %d\n" % (M, N, Q))
+        for i in range(0, M):
+            line = " ".join([str(x) for x in alignment[i, :]])
+            handle.write(line)
+            handle.write("\n")
+
+
+def save_parameters(h, J, M, N, Q, filename):
+    """ save parameters (h, J) to file """
+    with open(filename, "w") as handle:
+        for i in range(N):
+            for j in range(i + 1, N):
+                for a in range(Q):
+                    for b in range(Q):
+                        handle.write(
+                            "J %d %d %d %d %lf\n" % (i, j, a, b, J[a, b, i, j])
+                        )
+        for i in range(N):
+            for a in range(Q):
+                handle.write("h %d %d %lf\n" % (i, a, h[a, i]))
 
 
 def slugify(text):
