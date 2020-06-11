@@ -93,6 +93,8 @@ def main():
         else:
             step1 = int(options.steps[0])
             step2 = int(options.steps[1])
+            file1 = None
+            file2 = None
     elif options.input is not None:
         if len(options.input) != 2:
             sys.exit("Provide two input files to compare. Exiting...")
