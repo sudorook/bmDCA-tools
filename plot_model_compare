@@ -189,7 +189,7 @@ def main():
                 params2_J = os.path.join(
                     dir2, "parameters_J_" + str(step2) + ".bin"
                 )
-                tools.arma2ascii(params2_h, params2_J)
+                res = tools.arma2ascii(params2_h, params2_J)
                 if res != 0:
                     sys.exit("Error converting " + params2 + ". Exiting...")
 
