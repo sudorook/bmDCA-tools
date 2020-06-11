@@ -160,8 +160,9 @@ def main():
         options.grad is False
         and options.params is False
         and options.learn is False
-    ) and (file1 is None or file2 is None):
-        sys.exit("Gotta plot something...")
+    ):
+        if file1 is None or file2 is None:
+            sys.exit("Gotta plot something...")
 
     subplots = []
 
