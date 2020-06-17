@@ -9,7 +9,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-plt.rcParams["figure.figsize"] = [12, 16]
+plt.rcParams["figure.figsize"] = [13.5, 24]
 
 
 def parse_options():
@@ -21,13 +21,21 @@ def parse_options():
     parser.add_argument(
         "-o", "--output", dest="output", required=True, help="figure name",
     )
+    parser.add_argument(
+        "-s", "--start", dest="start", required=False, help="start offset",
+    )
     return parser.parse_args()
 
 
 def main():
     """ do stuff """
     options = parse_options()
-    df = pd.read_csv(options.input, sep=",")
+    if options.start is not None:
+        offset = int(options.start)
+        df = pd.read_csv(options.input, sep=",")[offset:]
+    else:
+        df = pd.read_csv(options.input, sep=",")
+
     df.columns = [
         "step",
         "step_importance",
@@ -51,18 +59,22 @@ def main():
     df["log10-burn-in"] = np.log10(df["burn-in"])
     df["log10-burn-between"] = np.log10(df["burn-between"])
 
+    # collect fields
+    wants = [
+        "log10-burn-between",
+        "log10-burn-in",
+        "energy-err",
+        "auto-corr",
+        "cross-corr",
+        "error-tot",
+        "error-h",
+        "error-j",
+        "step-time",
+    ]
+    fields = [field for field in wants if field in df.columns]
+
     with plt.style.context("fivethirtyeight"):
-        ax = df.plot(
-            x="step",
-            y=[
-                "log10-burn-between",
-                "log10-burn-in",
-                "energy-err",
-                "error-tot",
-            ],
-            linewidth=1.0,
-            subplots=True,
-        )
+        ax = df.plot(x="step", y=fields, linewidth=1.0, subplots=True,)
         plt.tight_layout()
         plt.savefig(options.output)
 
