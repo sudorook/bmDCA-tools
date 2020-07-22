@@ -331,10 +331,12 @@ def main():
 
             if options.vertical:
                 ax = fig.add_subplot(
-                    str(subplots_count) + "2" + str(2 * idx + 1)
+                    int(str(subplots_count) + "2" + str(2 * idx + 1))
                 )
             else:
-                ax = fig.add_subplot("2" + str(subplots_count) + str(idx + 1))
+                ax = fig.add_subplot(
+                    int("2" + str(subplots_count) + str(idx + 1))
+                )
 
             df_h.plot.hexbin(
                 ax=ax,
@@ -368,11 +370,15 @@ def main():
 
             if options.vertical:
                 ax = fig.add_subplot(
-                    str(subplots_count) + "2" + str(2 * idx + 2)
+                    int(str(subplots_count) + "2" + str(2 * idx + 2))
                 )
             else:
                 ax = fig.add_subplot(
-                    "2" + str(subplots_count) + str(idx + 1 + subplots_count)
+                    int(
+                        "2"
+                        + str(subplots_count)
+                        + str(idx + 1 + subplots_count)
+                    )
                 )
 
             df_J.plot.hexbin(
@@ -408,11 +414,11 @@ def main():
 
             if options.vertical:
                 ax_f = fig_f.add_subplot(
-                    str(subplots_count) + "2" + str(idx * 2 + 1)
+                    int(str(subplots_count) + "2" + str(idx * 2 + 1))
                 )
             else:
                 ax_f = fig_f.add_subplot(
-                    "2" + str(subplots_count) + str(idx + 1)
+                    int("2" + str(subplots_count) + str(idx + 1))
                 )
 
             df_h_f.plot.hexbin(
@@ -447,11 +453,15 @@ def main():
 
             if options.vertical:
                 ax_f = fig_f.add_subplot(
-                    str(subplots_count) + "2" + str(2 * idx + 2)
+                    int(str(subplots_count) + "2" + str(2 * idx + 2))
                 )
             else:
                 ax_f = fig_f.add_subplot(
-                    "2" + str(subplots_count) + str(idx + 1 + subplots_count)
+                    int(
+                        "2"
+                        + str(subplots_count)
+                        + str(idx + 1 + subplots_count)
+                    )
                 )
 
             df_J_f.plot.hexbin(
