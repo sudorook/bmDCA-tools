@@ -41,11 +41,12 @@ def parse_options():
         "-w", "--weights_input", dest="weights_input", help="msa basis weights"
     )
     parser.add_argument(
-        "-W", "--weights_proj", dest="weights_proj", help="msa projection weights"
+        "-W",
+        "--weights_proj",
+        dest="weights_proj",
+        help="msa projection weights",
     )
-    parser.add_argument(
-        "-t", "--title", dest="title", help="figure title"
-    )
+    parser.add_argument("-t", "--title", dest="title", help="figure title")
     return parser.parse_args()
 
 
@@ -105,7 +106,10 @@ def sample_msa_weighted(msa, weights_input, N):
     Ntot = min(int(sum(weights_input)), N)
     wlist = [w for w in weights_input]
     selection2 = np.random.choice(
-        range(msa.shape[0]), Ntot, replace=False, p=weights_input / sum(weights_input)
+        range(msa.shape[0]),
+        Ntot,
+        replace=False,
+        p=weights_input / sum(weights_input),
     )
     return msa[selection2, :]
 
@@ -125,7 +129,7 @@ def main():
         msa_weights_basis = load_sequence_weights_input(options.weights_input)
     else:
         msa_weights_basis = np.ones(M)
-    
+
     [M2, N2] = msa_proj.shape
     if options.weights_proj is not None:
         msa_weights_proj = load_sequence_weights_input(options.weights_proj)
