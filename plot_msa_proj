@@ -166,10 +166,10 @@ def main():
         )
         [left, right] = ax.get_xlim()
         [top, bottom] = ax.get_ylim()
-        plt.title("Projection of MSA samples onto top eigenvectors")
-        plt.tight_layout()
-        plt.savefig(outfile_basis)
-        plt.close()
+        #  plt.title("Projection of MSA samples onto top eigenvectors")
+        #  plt.tight_layout()
+        #  plt.savefig(outfile_basis)
+        #  plt.close()
 
     # project new mcmc onto msa eigenvectors
     X2d_new = sca.alg2bin(msa_proj, 21)
@@ -183,7 +183,7 @@ def main():
         ax = data_df_new.plot.hexbin(
             x="PC1", y="PC2", mincnt=1, cmap="viridis", zorder=1
         )
-        plt.title("Projection of new MCMC onto MSA space")
+        plt.title("Projection of samples onto MSA space")
         ax.set_xlim(left, right)
         ax.set_ylim(top, bottom)
         plt.tight_layout()
