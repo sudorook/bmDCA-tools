@@ -144,16 +144,7 @@ def main():
         title = options.title
         title_prefix = tools.slugify(title) + "_"
     elif len(options.labels) == 2:
-        title = (
-            options.labels[0]
-            + " (step "
-            + str(options.steps[0])
-            + ") vs "
-            + options.labels[1]
-            + " (step "
-            + str(options.steps[1])
-            + ")"
-        )
+        title = options.labels[0] + " vs " + options.labels[1]
         title_prefix = ""
 
     if (
