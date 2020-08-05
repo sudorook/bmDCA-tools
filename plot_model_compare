@@ -421,84 +421,84 @@ def main():
                     int("2" + str(subplots_count) + str(idx + 1))
                 )
 
-            df_h_f.plot.hexbin(
-                ax=ax_f,
-                x="h1",
-                y="h2",
-                mincnt=1,
-                cmap="viridis",
-                zorder=1,
-                bins="log",
-            )
-            xmin, xmax = (ax_f).get_xlim()
-            ymin, ymax = (ax_f).get_ylim()
-            ax_f.set_xlim([min(xmin, ymin), max(xmax, ymax)])
-            ax_f.set_ylim([min(xmin, ymin), max(xmax, ymax)])
-            x = np.linspace(min(xmin, ymin), max(xmax, ymax))
-            ax_f.plot(
-                x,
-                params_h_f.h1 * x + params_h_f.Intercept,
-                label=r"y={:.3g}x+{:.3g}, $R^2$={:.3g}".format(
-                    params_h_f.h1, params_h_f.Intercept, res_h_f.rsquared
-                ),
-                alpha=0.5,
-            )
-            ax_f.plot(x, x, "--k", alpha=0.25, zorder=0, label=r"y=x")
-            ax_f.set_title(
-                s[0] + " h (frob)", fontsize=plt.rcParams["axes.titlesize"],
-            )
-            ax_f.set_xlabel("")
-            ax_f.set_ylabel("")
-            ax_f.legend(loc="lower right")
-
-            if options.vertical:
-                ax_f = fig_f.add_subplot(
-                    int(str(subplots_count) + "2" + str(2 * idx + 2))
-                )
-            else:
-                ax_f = fig_f.add_subplot(
-                    int(
-                        "2"
-                        + str(subplots_count)
-                        + str(idx + 1 + subplots_count)
-                    )
-                )
-
-            df_J_f.plot.hexbin(
-                ax=ax_f,
-                x="J1",
-                y="J2",
-                bins="log",
-                mincnt=1,
-                cmap="viridis",
-                zorder=1,
-            )
-            xmin, xmax = (ax_f).get_xlim()
-            ymin, ymax = (ax_f).get_ylim()
-            ax_f.set_xlim([min(xmin, ymin), max(xmax, ymax)])
-            ax_f.set_ylim([min(xmin, ymin), max(xmax, ymax)])
-            x = np.linspace(min(xmin, ymin), max(xmax, ymax))
-            ax_f.plot(
-                x,
-                params_J_f.J1 * x + params_J_f.Intercept,
-                label=r"y={:.3g}x+{:.3g}, $R^2$={:.3g}".format(
-                    params_J_f.J1, params_J_f.Intercept, res_J_f.rsquared
-                ),
-                alpha=0.5,
-            )
-            ax_f.plot(x, x, "--k", alpha=0.25, zorder=0, label=r"y=x")
-            ax_f.set_title(
-                s[0] + " J (frob)", fontsize=plt.rcParams["axes.titlesize"],
-            )
-            ax_f.set_xlabel("")
-            ax_f.set_ylabel("")
-            ax_f.legend(loc="lower right")
+        #      df_h_f.plot.hexbin(
+        #          ax=ax_f,
+        #          x="h1",
+        #          y="h2",
+        #          mincnt=1,
+        #          cmap="viridis",
+        #          zorder=1,
+        #          bins="log",
+        #      )
+        #      xmin, xmax = (ax_f).get_xlim()
+        #      ymin, ymax = (ax_f).get_ylim()
+        #      ax_f.set_xlim([min(xmin, ymin), max(xmax, ymax)])
+        #      ax_f.set_ylim([min(xmin, ymin), max(xmax, ymax)])
+        #      x = np.linspace(min(xmin, ymin), max(xmax, ymax))
+        #      ax_f.plot(
+        #          x,
+        #          params_h_f.h1 * x + params_h_f.Intercept,
+        #          label=r"y={:.3g}x+{:.3g}, $R^2$={:.3g}".format(
+        #              params_h_f.h1, params_h_f.Intercept, res_h_f.rsquared
+        #          ),
+        #          alpha=0.5,
+        #      )
+        #      ax_f.plot(x, x, "--k", alpha=0.25, zorder=0, label=r"y=x")
+        #      ax_f.set_title(
+        #          s[0] + " h (frob)", fontsize=plt.rcParams["axes.titlesize"],
+        #      )
+        #      ax_f.set_xlabel("")
+        #      ax_f.set_ylabel("")
+        #      ax_f.legend(loc="lower right")
+        #
+        #      if options.vertical:
+        #          ax_f = fig_f.add_subplot(
+        #              int(str(subplots_count) + "2" + str(2 * idx + 2))
+        #          )
+        #      else:
+        #          ax_f = fig_f.add_subplot(
+        #              int(
+        #                  "2"
+        #                  + str(subplots_count)
+        #                  + str(idx + 1 + subplots_count)
+        #              )
+        #          )
+        #
+        #      df_J_f.plot.hexbin(
+        #          ax=ax_f,
+        #          x="J1",
+        #          y="J2",
+        #          bins="log",
+        #          mincnt=1,
+        #          cmap="viridis",
+        #          zorder=1,
+        #      )
+        #      xmin, xmax = (ax_f).get_xlim()
+        #      ymin, ymax = (ax_f).get_ylim()
+        #      ax_f.set_xlim([min(xmin, ymin), max(xmax, ymax)])
+        #      ax_f.set_ylim([min(xmin, ymin), max(xmax, ymax)])
+        #      x = np.linspace(min(xmin, ymin), max(xmax, ymax))
+        #      ax_f.plot(
+        #          x,
+        #          params_J_f.J1 * x + params_J_f.Intercept,
+        #          label=r"y={:.3g}x+{:.3g}, $R^2$={:.3g}".format(
+        #              params_J_f.J1, params_J_f.Intercept, res_J_f.rsquared
+        #          ),
+        #          alpha=0.5,
+        #      )
+        #      ax_f.plot(x, x, "--k", alpha=0.25, zorder=0, label=r"y=x")
+        #      ax_f.set_title(
+        #          s[0] + " J (frob)", fontsize=plt.rcParams["axes.titlesize"],
+        #      )
+        #      ax_f.set_xlabel("")
+        #      ax_f.set_ylabel("")
+        #      ax_f.legend(loc="lower right")
 
         fig.tight_layout()
         fig.savefig(title_prefix + prefix1 + "_" + prefix2 + ".png")
 
-        fig_f.tight_layout()
-        fig_f.savefig(title_prefix + prefix1 + "_" + prefix2 + "_frob.png")
+        #  fig_f.tight_layout()
+        #  fig_f.savefig(title_prefix + prefix1 + "_" + prefix2 + "_frob.png")
 
 
 if __name__ == "__main__":
