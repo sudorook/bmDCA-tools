@@ -15,6 +15,14 @@ function make_figures() {
   for i in $(seq 2 1 "$nproc"); do
     cpulist="${cpulist},${i}"
   done
+  local prev_step
+  for i in $(ls -t learning_rates_h*.bin | \
+               cut -d "_" -f4 | cut -d"." -f1); do
+    if [[ "$i" -lt "$step" ]]; then
+      prev_step="$i"
+      break
+    fi
+  done
   
   echo "run log"
   plot_runlog -i bmdca_run.log -o "${name}_${basedir}.png"
@@ -30,9 +38,6 @@ function make_figures() {
     -T "${title}, step ${step}" -p 3 -c
 
   echo "previous model comparison"
-  prev_step="$(ls -t learning_rates_h*.bin | \
-                 head -n 3 | tail -n 1 | \
-                 sed -n "s/.*_\([0-9]\+\)\.bin/\1/p")"
   plot_model_compare \
     -s "$prev_step" -s "$step" \
     -l "step $prev_step" -l "step $step" \
