@@ -1,0 +1,111 @@
+#! /bin/bash
+set -eu
+
+# export OMP_NUM_THREADS=4
+
+function make_figures() {
+  local name="$1"
+  local description="$2"
+  local step="$3"
+  local basedir="$4"
+  local title="$name, $description"
+  
+  echo "run log"
+  plot_runlog -i bmdca_run.log -o "${name}_${basedir}.png"
+  echo
+
+  echo "stats comparison"
+  plot_msa_compare \
+    -n msa_numerical.txt \
+    -w sequence_weights.txt \
+    -N "MC_samples_${step}.txt" \
+    -l "MSA" \
+    -L "MC" \
+    -T "${title}, step ${step}" -p 3 -c
+
+  echo "previous model comparison"
+  prev_step="$(ls -t learning_rates_h*.bin | \
+                 head -n 3 | tail -n 1 | \
+                 sed -n "s/.*_\([0-9]\+\)\.bin/\1/p")"
+  plot_model_compare \
+    -s "$prev_step" -s "$step" \
+    -l "step $prev_step" -l "step $step" \
+    -t "$title" -p -g -v
+  echo
+
+  echo "pca projection"
+  taskset --cpu-list 0,1 plot_msa_proj \
+    -n msa_numerical.txt \
+    -w sequence_weights.txt \
+    -N "MC_samples_${step}.txt" \
+    -t "${title}, step ${step}"
+  echo
+
+  echo "sequence energies"
+  compute_energies \
+    -n msa_numerical.txt \
+    -p "parameters_h_${step}.bin" \
+    -P "parameters_J_${step}.bin" \
+    -o "msa_energies_${step}.txt"
+  taskset --cpu-list 0,1 plot_energy.py \
+    -e "msa_energies_${step}.txt" \
+    -e "MC_energies_${step}.txt" \
+    -l "msa" \
+    -l "mcmc" \
+    -t "${title}, step ${step}" \
+    -o "${name}_energy_${basedir}_${step}.png"
+  echo
+}
+
+function get_step() {
+  local STEP
+  STEP=$(wc -l bmdca_run.log | cut -d" " -f1)
+  echo $(( STEP - 1 ))
+}
+
+#
+# Parse command line options
+#
+
+OPTIONS=n:d:s:
+LONGOPTIONS=name:,description:,step:
+PARSED=$(getopt -o ${OPTIONS} --long ${LONGOPTIONS} -n "$0" -- "$@")
+eval set -- "$PARSED"
+while [ $# -ge 1 ]; do
+  case "$1" in
+    -n|--name)
+      NAME="${2}"
+      shift 2
+      ;;
+    -d|--description)
+      DESCRIPTION="${2}"
+      shift 2
+      ;;
+    -s|--step)
+      STEP="${2}"
+      shift 2
+      ;;
+    --)
+      shift
+      break
+      ;;
+    *)
+      show_error "Error: unknown command line option."
+      print_usage
+      exit 3
+      ;;
+  esac
+done
+
+# NAME="${1}"
+# DESCRIPTION="${2}"
+
+if ! [[ -v STEP ]]; then
+  STEP="$(get_step)"
+  echo "plotting step $STEP"
+fi
+
+DIR="$(basename "$(pwd)")"
+
+# echo "$DIR: $STEP $NAME $DIR"
+make_figures "$NAME" "$DESCRIPTION" "$STEP" "$DIR"
