@@ -4,10 +4,18 @@ set -eu
 function make_figures() {
   local name="$1"
   local description="$2"
-  local step="$3"
-  local basedir="$4"
   local title="$name, $description"
-  local nproc="$5"
+
+  local slug
+  slug="$(echo "$description" | \
+          iconv -t ascii//TRANSLIT | \
+          sed -r s/λ/l/g | \
+          sed -r s/[~\^]+//g | \
+          sed -r s/[^a-zA-Z0-9]+/_/g | \
+          sed -r s/^-+\|-+$//g | tr A-Z a-z)"
+
+  local step="$3"
+  local nproc="$4"
 
   export OMP_NUM_THREADS="$nproc"
 
@@ -15,6 +23,7 @@ function make_figures() {
   for i in $(seq 2 1 "$nproc"); do
     cpulist="${cpulist},${i}"
   done
+
   local prev_step
   for i in $(ls -t learning_rates_h*.bin | \
                cut -d "_" -f4 | cut -d"." -f1); do
@@ -23,9 +32,9 @@ function make_figures() {
       break
     fi
   done
-  
+
   echo "run log"
-  plot_runlog -i bmdca_run.log -o "${name}_${basedir}.png"
+  plot_runlog -i bmdca_run.log -o "${name}_${slug}.png"
   echo
 
   echo "stats comparison"
@@ -39,8 +48,10 @@ function make_figures() {
 
   echo "previous model comparison"
   plot_model_compare \
-    -s "$prev_step" -s "$step" \
-    -l "step $prev_step" -l "step $step" \
+    -s "$prev_step" \
+    -s "$step" \
+    -l "step $prev_step" \
+    -l "step $step" \
     -t "$title" -p -g -v
   echo
 
@@ -64,7 +75,7 @@ function make_figures() {
     -l "msa" \
     -l "mcmc" \
     -t "${title}, step ${step}" \
-    -o "${name}_energy_${basedir}_${step}.png"
+    -o "${name}_energy_${slug}_${step}.png"
   echo
 
   echo "sequence energy comparisons"
@@ -79,22 +90,22 @@ function make_figures() {
     -l "msa step $step" \
     -l "msa step $prev_step" \
     -t "${title}, msa $step vs $prev_step" \
-    -o "${name}_msa_energy_${basedir}_${step}_vs_${prev_step}.png"
+    -o "${name}_msa_energy_${slug}_${step}_vs_${prev_step}.png"
   taskset --cpu-list "$cpulist" plot_energy.py \
     -e "MC_energies_${step}.txt" \
     -e "MC_energies_${prev_step}.txt" \
     -l "mc step $step" \
     -l "mc step $prev_step" \
     -t "${title}, mc $step vs $prev_step" \
-    -o "${name}_mc_energy_${basedir}_${step}_vs_${prev_step}.png"
+    -o "${name}_mc_energy_${slug}_${step}_vs_${prev_step}.png"
   taskset --cpu-list "$cpulist" plot_energy_compare.py \
     -s "msa_energies_$step.txt" \
     -c "msa_energies_$prev_step.txt" \
     -S "msa step $step"\
     -C "msa step $prev_step"
   taskset --cpu-list "$cpulist" plot_energy_compare.py \
-    -s "MC_energies_$step.txt" \
-    -c "MC_energies_$prev_step.txt" \
+    -s "MC_energies_${step}.txt" \
+    -c "MC_energies_${prev_step}.txt" \
     -S "mc step $step"\
     -C "mc step $prev_step"
   echo
@@ -153,6 +164,4 @@ if ! [[ -v NPROC ]]; then
   NPROC=$(nproc)
 fi
 
-DIR="$(basename "$(pwd)")"
-
-make_figures "$TITLE" "$DESCRIPTION" "$STEP" "$DIR" "$NPROC"
+make_figures "$TITLE" "$DESCRIPTION" "$STEP" "$NPROC"
