@@ -75,7 +75,7 @@ function make_figures() {
     -l "msa" \
     -l "mcmc" \
     -t "${title}, step ${step}" \
-    -o "${name}_energy_${slug}_${step}.png"
+    -o "${name}_${slug}_${step}_energy.png"
   echo
 
   echo "sequence energy comparisons"
