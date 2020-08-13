@@ -3,6 +3,7 @@
 
 import argparse
 import os
+import sys
 import numpy as np
 import matplotlib
 import pandas as pd
@@ -15,43 +16,53 @@ import dcatools as tools
 
 plt.rcParams["figure.figsize"] = [10, 8]
 
-
 def parse_options():
     """ cli parser """
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-s", "--msa", dest="msa", required=True, help="msa file"
+        "-n",
+        "--msa",
+        dest="msa",
+        action="append",
+        required=False,
+        help="numerical msa file(s)",
     )
     parser.add_argument(
-        "-c", "--mcmc", dest="mcmc", required=True, help="mcmc file"
+        "-e",
+        "--energies",
+        dest="energies",
+        action="append",
+        required=False,
+        help="msa energy file(s)",
     )
     parser.add_argument(
-        "-S",
-        "--msa_label",
-        dest="msa_label",
+        "-p",
+        "--parameters",
+        dest="params",
+        required=False,
+        help="msa energy file(s)",
+    )
+    parser.add_argument(
+        "-l",
+        "--labels",
+        dest="labels",
+        action="append",
         required=True,
-        help="msa plot label",
+        help="labels",
     )
     parser.add_argument(
-        "-C",
-        "--mcmc_label",
-        dest="mcmc_label",
-        required=True,
-        help="mcmc plot label",
+        "-t", "--title", dest="title", required=False, help="title"
     )
-    #  parser.add_argument(
-    #      "-t", "--title", dest="title", required=True, help="title prefix"
-    #  )
-    #  parser.add_argument(
-    #      "-m",
-    #      "--offset_mode",
-    #      dest="mode",
-    #      default=0,
-    #      help="offset type (default none)",
-    #  )
-    #  parser.add_argument(
-    #      "-o", "--output", dest="output", required=True, help="output file name"
-    #  )
+    parser.add_argument(
+        "-o", "--output", dest="output", required=True, help="output file name"
+    )
+    parser.add_argument(
+        "-m",
+        "--offset_mode",
+        dest="mode",
+        default=0,
+        help="offset type (default none)",
+    )
     return parser.parse_args()
 
 
@@ -59,16 +70,35 @@ def main():
     """ do stuff """
     options = parse_options()
 
-    prefix1 = os.path.splitext((options.msa).replace("/", "_"))[0]
-    prefix2 = os.path.splitext((options.mcmc).replace("/", "_"))[0]
+    if options.energies is not None:
+        energies = [
+            tools.load_energies(msa_file) for msa_file in options.energies
+        ]
+    elif options.msa is not None and options.params is not None:
+        h, J = tools.load_model(options.params)
+        energies = [
+            tools.compute_energies(tools.load_sequences(msa_file), h, J)
+            for msa_file in options.msa
+        ]
+    else:
+        sys.exit("ERROR: missing input data")
 
-    energies1 = tools.load_energies(options.msa)
-    energies2 = tools.load_energies(options.mcmc)
+    msa_labels = options.labels
+
+    if len(energies) != 2:
+        sys.exit("ERROR: only comparison of 2 energies supported.")
+
+    #  prefix1 = os.path.splitext((options.msa).replace("/", "_"))[0]
+    #  prefix2 = os.path.splitext((options.mcmc).replace("/", "_"))[0]
+
+    #  energies1 = tools.load_energies(options.msa)
+    #  energies2 = tools.load_energies(options.mcmc)
 
     #  energies1_sorted = np.sort(energies1)
     #  energies2_sorted = np.sort(energies2)
 
-    df_e = pd.DataFrame(data={"e1": energies1, "e2": energies2,})
+    #  df_e = pd.DataFrame(data={"e1": energies1, "e2": energies2,})
+    df_e = pd.DataFrame(data={"e1": energies[0], "e2": energies[1],})
     res_e = sm.ols(formula="e2 ~ e1", data=df_e).fit()
     params_e = res_e.params
 
@@ -82,7 +112,7 @@ def main():
         #  fig, ax = plt.subplots(2, 1)
         fig, ax = plt.subplots(1, 1)
 
-        ax.scatter(x=energies1, y=energies2, color="midnightblue", s=5)
+        ax.scatter(x=energies[0], y=energies[1], color="midnightblue", s=5)
         x = np.linspace(*(ax).get_xlim())
 
         ax.plot(x, x, "--k", alpha=0.25, zorder=0)
@@ -95,8 +125,8 @@ def main():
             alpha=0.5,
         )
 
-        ax.set_xlabel(options.msa_label)
-        ax.set_ylabel(options.mcmc_label)
+        ax.set_xlabel(options.labels[0])
+        ax.set_ylabel(options.labels[1])
         ax.legend(loc="lower right")
 
         #  ax[0].scatter(x=energies1, y=energies2, color="midnightblue", s=5)
@@ -134,10 +164,14 @@ def main():
         #  ax[1].set_ylabel(options.mcmc_label + " (sorted)")
         #  ax[1].legend(loc="lower right")
 
-        fig.suptitle(options.msa_label + " vs " + options.mcmc_label)
+        if options.title is None:
+            fig.suptitle(options.labels[0] + " vs " + options.labels[1])
+        else:
+            fig.suptitle(options.title)
 
         plt.tight_layout()
-        plt.savefig(prefix1 + "_" + prefix2 + "_energies.png")
+        #  plt.savefig(prefix1 + "_" + prefix2 + "_energies.png")
+        plt.savefig(options.output)
         plt.close()
 
 
