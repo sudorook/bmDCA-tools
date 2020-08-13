@@ -151,7 +151,7 @@ def main():
     X2d = sca.alg2bin(msa_basis, 21)
     #  X2dw = sparsify(np.diag(np.sqrt(msa_weights_basis[0]))).dot(X2d)
     X2dw = sparsify(np.diag(np.sqrt(msa_weights_basis))).dot(X2d)
-    u, s, v = sca.svdss(X2dw, k=250)
+    u, s, v = sca.svdss(X2dw, k=6)
 
     #  print(s)
     #  print((s[0] ** 2 + s[1] ** 2) / sum(s ** 2))
