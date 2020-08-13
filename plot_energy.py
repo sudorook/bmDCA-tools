@@ -72,8 +72,8 @@ def main():
         msa_energies = [
             tools.load_energies(msa_file) for msa_file in options.energies
         ]
-    elif options.msa is not None and options.parameters is not None:
-        h, J = tools.load_model(options.parameters)
+    elif options.msa is not None and options.params is not None:
+        h, J = tools.load_model(options.params)
         msa_energies = [
             tools.compute_energies(tools.load_sequences(msa_file), h, J)
             for msa_file in options.msa
