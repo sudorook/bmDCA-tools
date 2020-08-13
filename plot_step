@@ -34,7 +34,7 @@ function make_figures() {
   done
 
   echo "run log"
-  plot_runlog -i bmdca_run.log -o "${name}_${slug}.png"
+  plot_runlog -i bmdca_run.log -o "${name}_${slug}_runlog.png"
   echo
 
   echo "stats comparison"
