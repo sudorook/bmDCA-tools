@@ -224,7 +224,7 @@ main(int argc, char* argv[])
   arma::Cube<double> de_tmp = arma::Cube<double>(Q, N, M, arma::fill::zeros);
   double* weight_ptr = msa.sequence_weights.memptr();
   for (int m = 0; m < M; m++) {
-    de_tmp.slice(m) = de.slice(m) * *(weight_ptr+m);
+    de_tmp.slice(m) = de.slice(m) * *(weight_ptr + m);
   }
   arma::Mat<double> mean_dms = arma::sum(-de_tmp, 2) / M_eff;
   writeDMS(mean_dms, prefix + "_dms_mean.tsv");

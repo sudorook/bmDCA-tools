@@ -5,7 +5,7 @@
 #include <fstream>
 #include <iostream>
 
-MSAStats::MSAStats(MSA *msa)
+MSAStats::MSAStats(MSA* msa)
 {
   // Initialize
   N = msa->N;
@@ -55,7 +55,7 @@ MSAStats::MSAStats(MSA *msa)
   frequency_1p = frequency_1p / M_effective;
 
   double mean_1p_var =
-    arma::accu(frequency_1p % (1. - frequency_1p)) / (double)(N*Q);
+    arma::accu(frequency_1p % (1. - frequency_1p)) / (double)(N * Q);
 
   // Compute the 2p statistics
   arma::Col<double> mean_2p_var_vec = arma::Col<double>(N, arma::fill::zeros);
