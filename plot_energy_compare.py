@@ -16,6 +16,7 @@ import dcatools as tools
 
 plt.rcParams["figure.figsize"] = [10, 8]
 
+
 def parse_options():
     """ cli parser """
     parser = argparse.ArgumentParser()

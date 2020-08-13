@@ -97,9 +97,7 @@ def main():
 
     with plt.style.context("fivethirtyeight"):
         for i, msa_energy in enumerate(msa_energies):
-            plt.hist(
-                msa_energy, alpha=0.5, label=msa_labels[i], density=True,
-            )
+            plt.hist(msa_energy, alpha=0.5, label=msa_labels[i], density=True)
         plt.legend(loc="upper right")
         plt.xlabel("Sequence Energy")
         #  plt.xlim(-270, -110)
