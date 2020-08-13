@@ -121,8 +121,8 @@ def main():
     msa_basis = load_sequences(options.msa_basis) + 1
     msa_proj = load_sequences(options.msa_proj) + 1
 
-    outfile_basis = "msa_basis_" + tools.slugify(options.title) + ".png"
-    outfile_proj = "msa_proj_" + tools.slugify(options.title) + ".png"
+    outfile_basis = tools.slugify(options.title) + "_basis.png"
+    outfile_proj = tools.slugify(options.title) + "_proj.png"
 
     [M, N] = msa_basis.shape
     if options.weights_input is not None:
