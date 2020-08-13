@@ -99,10 +99,12 @@ function make_figures() {
   #   -t "${title}, mc $step vs $prev_step" \
   #   -o "${name}_mc_energy_${slug}_${step}_vs_${prev_step}.png"
   taskset --cpu-list "$cpulist" plot_energy_compare.py \
-    -s "msa_energies_$step.txt" \
-    -c "msa_energies_$prev_step.txt" \
-    -S "msa step $step"\
-    -C "msa step $prev_step"
+    -e "msa_energies_${step}.txt" \
+    -e "msa_energies_${prev_step}.txt" \
+    -l "msa step $step" \
+    -l "mcmc step $prev_step" \
+    -t "${title}, step ${step} vs step ${prev_step}" \
+    -o "${name}_${slug}_${step}-vs-${prev_step}_energy.png"
   # taskset --cpu-list "$cpulist" plot_energy_compare.py \
   #   -s "MC_energies_${step}.txt" \
   #   -c "MC_energies_${prev_step}.txt" \
