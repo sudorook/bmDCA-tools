@@ -3,6 +3,7 @@ ENERGY := compute_energies
 DISTANCE := compute_distances
 COMPARE := compare_msa_stats
 DMS := compute_dms
+PATHFINDER := compute_paths
 
 CC := g++
 
@@ -40,9 +41,14 @@ SOURCES_DMS = ${SRCPATH}/compute_dms.cpp \
               ${SRCPATH}/utils.cpp
 OBJECTS_DMS = $(SOURCES_DMS:%.cpp=%.o)
 
+SOURCES_PATHFINDER = ${SRCPATH}/compute_paths.cpp \
+                     ${SRCPATH}/msa.cpp \
+                     ${SRCPATH}/utils.cpp
+OBJECTS_PATHFINDER = $(SOURCES_PATHFINDER:%.cpp=%.o)
+
 .PHONY: all
 
-all: $(COMPUTE) $(COMPARE) $(ENERGY) $(DISTANCE) $(DMS)
+all: $(COMPUTE) $(COMPARE) $(ENERGY) $(DISTANCE) $(DMS) $(PATHFINDER)
 
 $(COMPUTE): $(OBJECTS_COMPUTE)
 	$(CC) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
@@ -59,6 +65,9 @@ $(DISTANCE): $(OBJECTS_DISTANCE)
 $(DMS): $(OBJECTS_DMS)
 	$(CC) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
+$(PATHFINDER): $(OBJECTS_PATHFINDER)
+	$(CC) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
+
 .PHONY: clean
 
 clean:
@@ -67,8 +76,10 @@ clean:
 	rm -f $(ENERGY)
 	rm -f $(DISTANCE)
 	rm -f $(DMS)
+	rm -f $(PATHFINDER)
 	rm -f $(OBJECTS_COMPUTE)
 	rm -f $(OBJECTS_COMPARE)
 	rm -f $(OBJECTS_ENERGY)
 	rm -f $(OBJECTS_DISTANCE)
 	rm -f $(OBJECTS_DMS)
+	rm -f $(OBJECTS_PATHFINDER)
