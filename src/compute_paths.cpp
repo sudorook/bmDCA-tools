@@ -83,7 +83,7 @@ find_the_fucker(potts_model* params,
       (*mutations_before)(step) = q0;
       (*mutations_after)(step) = q1;
       (*energies)(step) = E;
-      (*positions)(step) = i;
+      (*positions)(step) = i+1;
       // distance = 0;
       // for (size_t i = 0; i < n; ++i) {
       //   if ((int)conf(i) != stop(i)) {
