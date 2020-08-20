@@ -46,6 +46,14 @@ def parse_options():
         dest="weights_proj",
         help="msa projection weights",
     )
+    parser.add_argument(
+        "-b",
+        "--basis",
+        dest="plot_basis",
+        action="store_true",
+        default=False,
+        help="flag to include basis data in projection",
+    )
     parser.add_argument("-t", "--title", dest="title", help="figure title")
     return parser.parse_args()
 
@@ -169,7 +177,7 @@ def main():
         #  plt.title("Projection of MSA samples onto top eigenvectors")
         #  plt.tight_layout()
         #  plt.savefig(outfile_basis)
-        #  plt.close()
+        plt.close()
 
     # project new mcmc onto msa eigenvectors
     X2d_new = sca.alg2bin(msa_proj, 21)
@@ -180,8 +188,13 @@ def main():
     )
 
     with plt.style.context("fivethirtyeight"):
-        ax = data_df_new.plot.hexbin(
-            x="PC1", y="PC2", mincnt=1, cmap="viridis", zorder=1
+        ax = plt.gca()
+        if (options.plot_basis):
+            data_df.plot.scatter(
+                x="PC1", y="PC2", zorder=0, alpha=0.33, ax=ax, s=5, color="gray"
+            )
+        data_df_new.plot.hexbin(
+            x="PC1", y="PC2", mincnt=1, cmap="viridis", zorder=1, ax=ax
         )
         plt.title("Projection of samples onto MSA space")
         ax.set_xlim(left, right)
