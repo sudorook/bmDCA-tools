@@ -68,6 +68,7 @@ find_the_fucker(potts_model* params,
     double de_bias = bias_field->at(q0, i) - bias_field->at(q1, i);
     // double de = dE * (1 - bias) + bias * de_bias;
     double de = dE + bias * de_bias;
+    // double de = bias * de_bias;
     if ((de < 0) || (uniform(rng) < exp(-de / temperature))) {
       conf(i) = q1;
       E += dE;
@@ -91,13 +92,19 @@ find_the_fucker(potts_model* params,
       //   }
       // }
       step++;
-    }
-    if (step % 10000) {
-      std::cout << "distance: " << distance << std::endl;
+
+      if ( (step % 10000) == 0) {
+        std::cout << "distance: " << distance << std::endl;
+      }
     }
   }
-  std::cout << "found the fucker in " << step << " steps" << std::endl;
-  return step;
+  if (distance == 0) {
+    std::cout << "found the fucker in " << step << " steps" << std::endl;
+    return step;
+  } else {
+    std::cerr << "gave up after " << max_iter << " steps" << std::endl;
+    return -1;
+  }
 };
 
 char
@@ -185,9 +192,14 @@ main(int argc, char* argv[])
   bool compat_mode = true;
   bool is_start_numeric = false;
   bool is_stop_numeric = false;
+  bool seed_given = false;
+  bool temperature_given = false;
+  long int seed = 1;
+  double temperature = 1.0;
+  std::string temperature_string = "1.0";
 
   char c;
-  while ((c = getopt(argc, argv, "b:i:I:n:N:p:P:")) != -1) {
+  while ((c = getopt(argc, argv, "b:i:I:n:N:p:P:s:t:")) != -1) {
     switch (c) {
       case 'i':
         msa_start_file = optarg;
@@ -213,6 +225,15 @@ main(int argc, char* argv[])
         params_J_file = optarg;
         compat_mode = false;
         break;
+      case 's':
+        seed = std::stol(optarg);
+        seed_given = true;
+        break;
+      case 't':
+        temperature = std::stod(optarg);
+        temperature_string = optarg;
+        temperature_given = true;
+        break;
       case '?':
         std::cerr << "what the fuck?" << std::endl;
     }
@@ -222,13 +243,13 @@ main(int argc, char* argv[])
   MSA msa_start = MSA(msa_start_file, "", false, is_start_numeric, 0.8);
   std::cout << "done" << std::endl;
   arma::Col<int> seq_start = msa_start.alignment.row(0);
-  seq_start.print("start:");
+  // seq_start.print("start:");
 
   std::cout << "reading end sequence... " << std::flush;
   MSA msa_stop = MSA(msa_stop_file, "", false, is_stop_numeric, 0.8);
   std::cout << "done" << std::endl;
   arma::Col<int> seq_stop = msa_stop.alignment.row(0);
-  seq_stop.print("stop:");
+  // seq_stop.print("stop:");
 
   int M = msa_start.M;
   int Q = msa_start.Q;
@@ -295,6 +316,7 @@ main(int argc, char* argv[])
   arma::Col<double> energies = arma::Col<double>(max_iter, arma::fill::zeros);
 
   std::cout << "searching..." << std::endl;
+  bool success = false;
   int steps = find_the_fucker(&params,
                               &bias_field,
                               seq_start,
@@ -308,14 +330,26 @@ main(int argc, char* argv[])
                               M,
                               N,
                               Q,
-                              10,
+                              seed,
                               bias,
                               E_start,
-                              1.0);
+                              temperature);
 
+  if (steps == -1) {
+    steps = max_iter;
+  }
   std::cout << "writing output... " << std::flush;
   {
-    std::ofstream output_stream("path_numerical.txt");
+    // std::ofstream output_stream("path_numerical.txt");
+    std::string out_name = "path_numerical";
+    if (seed_given) {
+      out_name = out_name + "_seed=" + std::to_string(seed);
+    }
+    if (temperature_given) {
+      out_name = out_name + "_T=" + temperature_string;
+    }
+    out_name = out_name + ".txt";
+    std::ofstream output_stream(out_name);
     output_stream << steps << " " << N << " " << Q << std::endl;
     for (int i = 0; i < steps; i++) {
       for (int j = 0; j < N; j++) {
@@ -329,32 +363,71 @@ main(int argc, char* argv[])
     output_stream.close();
   }
   {
-    std::ofstream output_stream("path_energies.txt");
+    std::string out_name = "path_energies";
+    if (seed_given) {
+      out_name = out_name + "_seed=" + std::to_string(seed);
+    }
+    if (temperature_given) {
+      out_name = out_name + "_T=" + temperature_string;
+    }
+    out_name = out_name + ".txt";
+    std::ofstream output_stream(out_name);
     for (int i = 0; i < steps; i++) {
       output_stream << energies(i) << std::endl;
     }
     output_stream.close();
   }
   {
-    std::ofstream output_stream("path_mutations_before.txt");
+    // std::ofstream output_stream("path_mutations_before.txt");
+    std::string out_name = "path_mutations_before";
+    if (seed_given) {
+      out_name = out_name + "_seed=" + std::to_string(seed);
+    }
+    if (temperature_given) {
+      out_name = out_name + "_T=" + temperature_string;
+    }
+    out_name = out_name + ".txt";
+    std::ofstream output_stream(out_name);
     for (int i = 0; i < steps; i++) {
       output_stream << convertAA(mutations_before(i)) << std::endl;
     }
     output_stream.close();
   }
   {
-    std::ofstream output_stream("path_mutations_after.txt");
+    // std::ofstream output_stream("path_mutations_after.txt");
+    std::string out_name = "path_mutations_after";
+    if (seed_given) {
+      out_name = out_name + "_seed=" + std::to_string(seed);
+    }
+    if (temperature_given) {
+      out_name = out_name + "_T=" + temperature_string;
+    }
+    out_name = out_name + ".txt";
+    std::ofstream output_stream(out_name);
     for (int i = 0; i < steps; i++) {
       output_stream << convertAA(mutations_after(i)) << std::endl;
     }
     output_stream.close();
   }
   {
-    std::ofstream output_stream("path_positions.txt");
+    // std::ofstream output_stream("path_positions.txt");
+    std::string out_name = "path_positions";
+    if (seed_given) {
+      out_name = out_name + "_seed=" + std::to_string(seed);
+    }
+    if (temperature_given) {
+      out_name = out_name + "_T=" + temperature_string;
+    }
+    out_name = out_name + ".txt";
+    std::ofstream output_stream(out_name);
     for (int i = 0; i < steps; i++) {
       output_stream << positions(i) << std::endl;
     }
     output_stream.close();
   }
-  std::cout << "done" << std::endl;
+  if (steps == -1) {
+    std::exit(EXIT_FAILURE);
+  } else {
+    std::cout << "done" << std::endl;
+  }
 }
