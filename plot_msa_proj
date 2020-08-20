@@ -25,7 +25,7 @@ def parse_options():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-n",
-        "--msa_input",
+        "--msa_basis",
         dest="msa_basis",
         required=True,
         help="numerical msa alignment for basis",
@@ -38,7 +38,7 @@ def parse_options():
         help="numerical msa to project",
     )
     parser.add_argument(
-        "-w", "--weights_input", dest="weights_input", help="msa basis weights"
+        "-w", "--weights_basis", dest="weights_basis", help="msa basis weights"
     )
     parser.add_argument(
         "-W",
@@ -125,8 +125,8 @@ def main():
     outfile_proj = tools.slugify(options.title) + "_proj.png"
 
     [M, N] = msa_basis.shape
-    if options.weights_input is not None:
-        msa_weights_basis = load_sequence_weights_input(options.weights_input)
+    if options.weights_basis is not None:
+        msa_weights_basis = load_sequence_weights_input(options.weights_basis)
     else:
         msa_weights_basis = np.ones(M)
 
@@ -138,7 +138,7 @@ def main():
 
     if M > 10000:
         # too many sequences, so subset the alignment and recompute the
-        # weights_input
+        # weights_basis
         print("subsetting the alignment...")
         msa_basis = sample_msa_weighted(msa_basis, msa_weights_basis, 10000)
         msa_weights_basis = compute_sequence_weights_input(msa_basis)
