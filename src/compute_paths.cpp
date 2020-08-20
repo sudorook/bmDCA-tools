@@ -7,8 +7,8 @@
 #include <vector>
 
 #include "msa.hpp"
-#include "utils.hpp"
 #include "pcg_random.hpp"
+#include "utils.hpp"
 
 int
 find_the_fucker(potts_model* params,
@@ -84,7 +84,7 @@ find_the_fucker(potts_model* params,
       (*mutations_before)(step) = q0;
       (*mutations_after)(step) = q1;
       (*energies)(step) = E;
-      (*positions)(step) = i+1;
+      (*positions)(step) = i + 1;
       // distance = 0;
       // for (size_t i = 0; i < n; ++i) {
       //   if ((int)conf(i) != stop(i)) {
@@ -93,7 +93,7 @@ find_the_fucker(potts_model* params,
       // }
       step++;
 
-      if ( (step % 10000) == 0) {
+      if ((step % 10000) == 0) {
         std::cout << "distance: " << distance << std::endl;
       }
     }
@@ -109,7 +109,7 @@ find_the_fucker(potts_model* params,
 
 char
 convertAA(int n)
-{ 
+{
   char aa = '\0';
   switch (n) {
     case 0:
@@ -178,8 +178,6 @@ convertAA(int n)
   }
   return aa;
 };
-  
-
 
 int
 main(int argc, char* argv[])
