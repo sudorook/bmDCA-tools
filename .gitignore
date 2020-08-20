@@ -5,6 +5,7 @@ compute_msa_stats
 compare_msa_stats
 compute_energies
 compute_distances
+compute_paths
 
 __pycache__/
 
