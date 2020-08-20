@@ -196,7 +196,10 @@ def main():
         data_df_new.plot.hexbin(
             x="PC1", y="PC2", mincnt=1, cmap="viridis", zorder=1, ax=ax
         )
-        plt.title("Projection of samples onto MSA space")
+        if options.title is None:
+            plt.title("Projection of samples onto MSA space")
+        else:
+            plt.title(options.title)
         ax.set_xlim(left, right)
         ax.set_ylim(top, bottom)
         plt.tight_layout()
