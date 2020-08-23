@@ -1,6 +1,7 @@
 # Generated files and directries
 relic/
 compute_dms
+compute_dcs
 compute_msa_stats
 compare_msa_stats
 compute_energies
