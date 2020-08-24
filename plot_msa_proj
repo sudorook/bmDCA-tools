@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 from pysca import scaTools as sca
 import dcatools as tools
 
-plt.rcParams["figure.figsize"] = [10, 7.5]
+plt.rcParams["figure.figsize"] = [12, 10]
 
 random.seed(0)
 np.random.seed(0)
@@ -53,6 +53,9 @@ def parse_options():
         action="store_true",
         default=False,
         help="flag to include basis data in projection",
+    )
+    parser.add_argument(
+        "-o", "--output", dest="output", required=False, help="output file name"
     )
     parser.add_argument("-t", "--title", dest="title", help="figure title")
     return parser.parse_args()
@@ -129,8 +132,11 @@ def main():
     msa_basis = load_sequences(options.msa_basis) + 1
     msa_proj = load_sequences(options.msa_proj) + 1
 
-    outfile_basis = tools.slugify(options.title) + "_basis.png"
-    outfile_proj = tools.slugify(options.title) + "_proj.png"
+    if options.output is not None:
+        outfile_proj = options.output
+    else:
+        outfile_proj = tools.slugify(options.title) + "_proj.png"
+
 
     [M, N] = msa_basis.shape
     if options.weights_basis is not None:
@@ -153,16 +159,9 @@ def main():
 
     # compute eignvectors for the msa
     msa_sim = compute_sim_mat(msa_basis)
-    #  posw, Dia, Di = sca.posWeights(
-    #      msa_basis, msa_weights_basis, 0, 21, np.ones(21) / 21
-    #  )
     X2d = sca.alg2bin(msa_basis, 21)
-    #  X2dw = sparsify(np.diag(np.sqrt(msa_weights_basis[0]))).dot(X2d)
     X2dw = sparsify(np.diag(np.sqrt(msa_weights_basis))).dot(X2d)
     u, s, v = sca.svdss(X2dw, k=6)
-
-    #  print(s)
-    #  print((s[0] ** 2 + s[1] ** 2) / sum(s ** 2))
 
     tmp = X2d.dot(v).dot(np.diag(1 / s))
     data_df = pd.DataFrame(data={"PC1": tmp[:, 0], "PC2": tmp[:, 1]})
@@ -174,9 +173,6 @@ def main():
         )
         [left, right] = ax.get_xlim()
         [top, bottom] = ax.get_ylim()
-        #  plt.title("Projection of MSA samples onto top eigenvectors")
-        #  plt.tight_layout()
-        #  plt.savefig(outfile_basis)
         plt.close()
 
     # project new mcmc onto msa eigenvectors

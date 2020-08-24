@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 import dcatools as tools
 
-plt.rcParams["figure.figsize"] = [10, 7.5]
+plt.rcParams["figure.figsize"] = [12, 9]
 
 
 def parse_options():
@@ -103,6 +103,7 @@ def main():
         #  plt.xlim(-270, -110)
         plt.ylabel("Probability")
         plt.title(options.title)
+        plt.tight_layout()
         plt.savefig(options.output)
         plt.close()
 

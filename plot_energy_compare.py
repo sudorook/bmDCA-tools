@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 
 import dcatools as tools
 
-plt.rcParams["figure.figsize"] = [10, 8]
+plt.rcParams["figure.figsize"] = [12, 9]
 
 
 def parse_options():
@@ -166,9 +166,9 @@ def main():
         #  ax[1].legend(loc="lower right")
 
         if options.title is None:
-            fig.suptitle(options.labels[0] + " vs " + options.labels[1])
+            plt.title(options.labels[0] + " vs " + options.labels[1])
         else:
-            fig.suptitle(options.title)
+            plt.title(options.title)
 
         plt.tight_layout()
         #  plt.savefig(prefix1 + "_" + prefix2 + "_energies.png")

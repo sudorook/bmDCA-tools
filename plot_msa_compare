@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 
 import dcatools as tools
 
-plt.rcParams["figure.figsize"] = [10, 7.5]
+plt.rcParams["figure.figsize"] = [12, 10]
 
 
 def parse_options():

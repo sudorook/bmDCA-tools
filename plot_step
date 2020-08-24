@@ -8,8 +8,9 @@ function make_figures() {
 
   local slug
   slug="$(echo "$description" | \
-          iconv -t ascii//TRANSLIT | \
           sed -r s/λ/l/g | \
+          sed -r s/α/a/g | \
+          iconv -t ascii//TRANSLIT | \
           sed -r s/[~\^]+//g | \
           sed -r s/[^a-zA-Z0-9]+/_/g | \
           sed -r s/^-+\|-+$//g | tr A-Z a-z)"
@@ -51,7 +52,8 @@ function make_figures() {
     -n msa_numerical.txt \
     -w sequence_weights.txt \
     -N "MC_samples_${step}.txt" \
-    -t "${title}, step ${step}"
+    -t "${title}, step ${step}" \
+    -o "${name}_${slug}_proj_${step}.png"
   echo
 
   echo "sequence energies"
@@ -66,7 +68,7 @@ function make_figures() {
     -l "msa" \
     -l "mcmc" \
     -t "${title}, step ${step}" \
-    -o "${name}_${slug}_${step}_energy.png"
+    -o "${name}_${slug}_energy_${step}.png"
   echo
 
   if [[ -v prev_step ]]; then
@@ -86,35 +88,13 @@ function make_figures() {
       -P "parameters_J_${prev_step}.bin" \
       -o "msa_energies_${prev_step}.txt"
 
-    # taskset --cpu-list "$cpulist" plot_energy.py \
-    #   -e "msa_energies_${step}.txt" \
-    #   -e "msa_energies_${prev_step}.txt" \
-    #   -l "msa step $step" \
-    #   -l "msa step $prev_step" \
-    #   -t "${title}, msa $step vs $prev_step" \
-    #   -o "${name}_msa_energy_${slug}_${step}_vs_${prev_step}.png"
-
-    # taskset --cpu-list "$cpulist" plot_energy.py \
-    #   -e "MC_energies_${step}.txt" \
-    #   -e "MC_energies_${prev_step}.txt" \
-    #   -l "mc step $step" \
-    #   -l "mc step $prev_step" \
-    #   -t "${title}, mc $step vs $prev_step" \
-    #   -o "${name}_mc_energy_${slug}_${step}_vs_${prev_step}.png"
-
     taskset --cpu-list "$cpulist" plot_energy_compare.py \
-      -e "msa_energies_${step}.txt" \
       -e "msa_energies_${prev_step}.txt" \
-      -l "msa step $step" \
+      -e "msa_energies_${step}.txt" \
       -l "mcmc step $prev_step" \
-      -t "${title}, step ${step} vs step ${prev_step}" \
-      -o "${name}_${slug}_${step}-vs-${prev_step}_energy.png"
-
-    # taskset --cpu-list "$cpulist" plot_energy_compare.py \
-    #   -s "MC_energies_${step}.txt" \
-    #   -c "MC_energies_${prev_step}.txt" \
-    #   -S "mc step $step"\
-    #   -C "mc step $prev_step"
+      -l "msa step $step" \
+      -t "${title}, step ${prev_step} vs step ${step}" \
+      -o "${name}_${slug}_energy_${prev_step}-vs-${step}.png"
   fi
   echo
 }

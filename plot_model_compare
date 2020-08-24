@@ -126,10 +126,10 @@ def main():
             label2 = options.labels[1]
             if options.steps is not None:
                 prefix1 = tools.slugify(
-                    options.labels[0] + " " + options.steps[0]
+                    options.labels[0]
                 )
                 prefix2 = tools.slugify(
-                    options.labels[1] + " " + options.steps[1]
+                    options.labels[1]
                 )
             else:
                 prefix1 = tools.slugify(options.labels[0])
@@ -142,7 +142,7 @@ def main():
 
     if options.title is not None:
         title = options.title
-        title_prefix = tools.slugify(title) + "_"
+        title_prefix = tools.slugify(title) + "_model_"
     elif len(options.labels) == 2:
         title = options.labels[0] + " vs " + options.labels[1]
         title_prefix = ""
@@ -486,7 +486,7 @@ def main():
         #      ax_f.legend(loc="lower right")
 
         fig.tight_layout()
-        fig.savefig(title_prefix + prefix1 + "_" + prefix2 + ".png")
+        fig.savefig(title_prefix + prefix1 + "_vs_" + prefix2 + ".png")
 
         #  fig_f.tight_layout()
         #  fig_f.savefig(title_prefix + prefix1 + "_" + prefix2 + "_frob.png")
