@@ -94,7 +94,7 @@ function make_figures() {
       -l "mcmc step $prev_step" \
       -l "msa step $step" \
       -t "${title}, step ${prev_step} vs step ${step}" \
-      -o "${name}_${slug}_energy_${prev_step}-vs-${step}.png"
+      -o "${name}_${slug}_energy_compare_${prev_step}-vs-${step}.png"
   fi
   echo
 }
