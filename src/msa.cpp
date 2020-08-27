@@ -365,6 +365,9 @@ MSA::computeHammingDistances(void)
       if (id > hamming_distances(i)) {
         hamming_distances(i) = id;
       }
+      if (id > hamming_distances(j)) {
+        hamming_distances(j) = id;
+      }
     }
   }
 };
