@@ -1,11 +1,19 @@
 #include "msa_stats.hpp"
 
+#include <algorithm>
 #include <armadillo>
 #include <cmath>
 #include <fstream>
 #include <iostream>
+#include <numeric>
+#include <random>
+#include <unordered_set>
+#include <vector>
+
+#include "pcg_random.hpp"
 
 MSAStats::MSAStats(MSA* msa)
+  : msa(msa)
 {
   // Initialize
   N = msa->N;
@@ -23,10 +31,8 @@ MSAStats::MSAStats(MSA* msa)
   correlation_2p = arma::field<arma::Mat<double>>(N, N);
 
   rel_entropy_1p = arma::Mat<double>(Q, N, arma::fill::zeros);
-  rel_entropy_1p_pos = arma::Col<double>(N, arma::fill::zeros);
+  rel_entropy_pos_1p = arma::Col<double>(N, arma::fill::zeros);
   rel_entropy_grad_1p = arma::Mat<double>(Q, N, arma::fill::zeros);
-
-  pseudocount = 0.03;
   aa_background_frequencies = arma::Col<double>(Q, arma::fill::ones);
 
   if (Q == 21) {
@@ -37,6 +43,7 @@ MSAStats::MSAStats(MSA* msa)
   } else {
     aa_background_frequencies = aa_background_frequencies / (double)Q;
   }
+  pseudocount = 0.03;
 
   // Compute the frequecies (1p statistics) for amino acids (and gaps) for each
   // position. Use pointers to make things speedier.
@@ -61,7 +68,7 @@ MSAStats::MSAStats(MSA* msa)
   arma::Col<double> mean_2p_var_vec = arma::Col<double>(N, arma::fill::zeros);
 #pragma omp parallel
   {
-#pragma omp for schedule(dynamic,1)
+#pragma omp for schedule(dynamic, 1)
     for (int i = 0; i < N; i++) {
       for (int j = i + 1; j < N; j++) {
         double* weight_ptr = msa->sequence_weights.memptr();
@@ -79,14 +86,14 @@ MSAStats::MSAStats(MSA* msa)
       }
     }
   }
+
   double mean_2p_var =
     arma::accu(mean_2p_var_vec) / (double)(N * (N - 1) / 2 * Q * Q);
   freq_rms = sqrt(mean_1p_var) + sqrt(mean_2p_var);
 
-  // timer.tic();
 #pragma omp parallel
   {
-#pragma omp for schedule(dynamic,1)
+#pragma omp for schedule(dynamic, 1)
     for (int i = 0; i < N; i++) {
       for (int j = i + 1; j < N; j++) {
         correlation_2p(i, j) = arma::Mat<double>(Q, Q, arma::fill::zeros);
@@ -122,7 +129,7 @@ MSAStats::MSAStats(MSA* msa)
       double pos_freq = tmp(aa, i);
       double background_freq = aa_background_frequencies(aa);
       if (pos_freq < 1. && pos_freq > 0.) {
-        rel_entropy_1p_pos(i) += pos_freq * log(pos_freq / background_freq);
+        rel_entropy_pos_1p(i) += pos_freq * log(pos_freq / background_freq);
         rel_entropy_1p(aa, i) =
           pos_freq * log(pos_freq / background_freq) +
           (1 - pos_freq) * log((1 - pos_freq) / (1 - background_freq));
@@ -132,6 +139,176 @@ MSAStats::MSAStats(MSA* msa)
     }
   }
 };
+
+void
+MSAStats::computeErrorMSA(int reps, long int seed)
+{
+  const bool reweight = msa->reweight;
+  const double threshold = msa->threshold;
+  msa_rms = arma::Col<double>(reps, arma::fill::zeros);
+
+  int M_1 = (int)((M + 1) / 2);
+  int M_2 = (int)(M / 2);
+
+  arma::Mat<int> alignment_T = (msa->alignment).t();
+
+  pcg32 rng;
+  rng.seed(seed);
+
+  for (int rep = 0; rep < reps; rep++) {
+    std::unordered_set<int> elems;
+
+    for (int r = M - M_1; r < M; ++r) {
+      std::uniform_int_distribution<int> dist(0, r);
+      int v = dist(rng);
+      if (!elems.insert(v).second) {
+        elems.insert(r);
+      }
+    }
+
+    std::vector<int> idx_1(elems.begin(), elems.end());
+    std::vector<int> idx_2(M_2);
+    int counter = 0;
+    for (int i = 0; i < M; i++) {
+      if (elems.find(i) == elems.end()) {
+        idx_2.at(counter) = i;
+        counter++;
+      }
+    }
+
+    arma::Col<int> idx_1_v2 = arma::conv_to<arma::Col<int>>::from(idx_1);
+    arma::Col<int> idx_2_v2 = arma::conv_to<arma::Col<int>>::from(idx_2);
+
+    arma::Mat<int> alignment_1 = arma::Mat<int>(N, M_1, arma::fill::zeros);
+    arma::Mat<int> alignment_2 = arma::Mat<int>(N, M_1, arma::fill::zeros);
+
+#pragma omp parallel
+    {
+#pragma omp for
+      for (int i = 0; i < M_1; i++) {
+        alignment_1.col(i) = alignment_T.col(idx_1.at(i));
+      }
+    }
+
+#pragma omp parallel
+    {
+#pragma omp for
+      for (int i = 0; i < M_2; i++) {
+        alignment_2.col(i) = alignment_T.col(idx_2.at(i));
+      }
+    }
+
+    MSA msa_1 = MSA(alignment_1.t(), M_1, N, Q, reweight, threshold);
+    MSA msa_2 = MSA(alignment_2.t(), M_2, N, Q, reweight, threshold);
+
+    double M_1_effective = arma::sum(msa_1.sequence_weights);
+    double M_2_effective = arma::sum(msa_2.sequence_weights);
+
+    arma::Mat<double> msa_1_frequency_1p =
+      arma::Mat<double>(Q, N, arma::fill::zeros);
+    arma::field<arma::Mat<double>> msa_1_frequency_2p =
+      arma::field<arma::Mat<double>>(N, N);
+
+    arma::Mat<double> msa_2_frequency_1p =
+      arma::Mat<double>(Q, N, arma::fill::zeros);
+    arma::field<arma::Mat<double>> msa_2_frequency_2p =
+      arma::field<arma::Mat<double>>(N, N);
+
+    // Compute the frequecies (1p statistics) for amino acids (and gaps) for
+    // each position. Use pointers to make things speedier.
+#pragma omp parallel
+    {
+#pragma omp for
+      for (int i = 0; i < N; i++) {
+        int* align_ptr = msa_1.alignment.colptr(i);
+        double* freq_ptr = msa_1_frequency_1p.colptr(i);
+        double* weight_ptr = msa_1.sequence_weights.memptr();
+        for (int m = 0; m < M_1; m++) {
+          *(freq_ptr + *(align_ptr + m)) += *(weight_ptr + m);
+        }
+      }
+    }
+    msa_1_frequency_1p = msa_1_frequency_1p / M_1_effective;
+
+#pragma omp parallel
+    {
+#pragma omp for
+      for (int i = 0; i < N; i++) {
+        int* align_ptr = msa_2.alignment.colptr(i);
+        double* freq_ptr = msa_2_frequency_1p.colptr(i);
+        double* weight_ptr = msa_2.sequence_weights.memptr();
+        for (int m = 0; m < M_2; m++) {
+          *(freq_ptr + *(align_ptr + m)) += *(weight_ptr + m);
+        }
+      }
+    }
+    msa_2_frequency_1p = msa_2_frequency_1p / M_2_effective;
+
+    // Compute the 2p statistics
+#pragma omp parallel
+    {
+#pragma omp for schedule(dynamic, 1)
+      for (int i = 0; i < N; i++) {
+        for (int j = i + 1; j < N; j++) {
+          double* weight_ptr = msa_1.sequence_weights.memptr();
+          msa_1_frequency_2p(i, j) = arma::Mat<double>(Q, Q, arma::fill::zeros);
+
+          int* align_ptr1 = msa_1.alignment.colptr(i);
+          int* align_ptr2 = msa_1.alignment.colptr(j);
+          for (int m = 0; m < M_1; m++) {
+            msa_1_frequency_2p(i, j)(*(align_ptr1 + m), *(align_ptr2 + m)) +=
+              *(weight_ptr + m);
+          }
+          msa_1_frequency_2p(i, j) = msa_1_frequency_2p(i, j) / M_1_effective;
+        }
+      }
+    }
+#pragma omp parallel
+    {
+#pragma omp for schedule(dynamic, 1)
+      for (int i = 0; i < N; i++) {
+        for (int j = i + 1; j < N; j++) {
+          double* weight_ptr = msa_2.sequence_weights.memptr();
+          msa_2_frequency_2p(i, j) = arma::Mat<double>(Q, Q, arma::fill::zeros);
+
+          int* align_ptr1 = msa_2.alignment.colptr(i);
+          int* align_ptr2 = msa_2.alignment.colptr(j);
+          for (int m = 0; m < M_2; m++) {
+            msa_2_frequency_2p(i, j)(*(align_ptr1 + m), *(align_ptr2 + m)) +=
+              *(weight_ptr + m);
+          }
+          msa_2_frequency_2p(i, j) = msa_2_frequency_2p(i, j) / M_2_effective;
+        }
+      }
+    }
+
+    double error_1p =
+      arma::accu(arma::pow(msa_1_frequency_1p - msa_2_frequency_1p, 2));
+    error_1p = sqrt(error_1p / (N * Q));
+
+    arma::Col<double> error_2p_vec = arma::Col<double>(N, arma::fill::zeros);
+#pragma omp parallel
+    {
+#pragma omp for schedule(dynamic, 1)
+      for (int i = 0; i < N; i++) {
+        for (int j = i + 1; j < N; j++) {
+          error_2p_vec(i) = arma::accu(
+            arma::pow(msa_1_frequency_2p(i, j) - msa_2_frequency_2p(i, j), 2));
+        }
+      }
+    }
+    double error_2p = sqrt(arma::accu(error_2p_vec) / (N * (N - 1) * Q * Q));
+
+    if (reweight) {
+      msa_rms(rep) = (error_1p + error_2p) /
+                     sqrt(M_effective / (M_1_effective + M_2_effective) * 2);
+    } else {
+      msa_rms(rep) = (error_1p + error_2p) / sqrt(2);
+    }
+  }
+
+  return;
+}
 
 double
 MSAStats::getQ(void)
@@ -179,7 +356,7 @@ MSAStats::writeRelEntropyGradientAscii(std::string output_file)
 // void
 // MSAStats::writeRelEntropyPos(std::string output_file)
 // {
-//   rel_entropy_1p_pos.save(output_file, arma::arma_binary);
+//   rel_entropy_pos_1p.save(output_file, arma::arma_binary);
 // };
 
 void
@@ -187,7 +364,7 @@ MSAStats::writeRelEntropyPosAscii(std::string output_file)
 {
   std::ofstream output_stream(output_file);
   for (int i = 0; i < N; i++) {
-    output_stream << " " << rel_entropy_1p_pos(i) << std::endl;
+    output_stream << " " << rel_entropy_pos_1p(i) << std::endl;
   }
 };
 

@@ -9,10 +9,14 @@ class MSAStats
 {
 public:
   MSAStats(MSA*);
+
   double getEffectiveM();
   double getN();
   double getM();
   double getQ();
+
+  void computeErrorMSA(int = 100, long int = 0);
+
   void writeRelEntropy(std::string);
   void writeRelEntropyAscii(std::string);
   // void writeRelEntropyPos(std::string);
@@ -30,10 +34,11 @@ public:
   arma::field<arma::Mat<double>> frequency_2p;
   arma::field<arma::Mat<double>> correlation_2p;
   arma::Mat<double> rel_entropy_1p;
-  arma::Col<double> rel_entropy_1p_pos;
+  arma::Col<double> rel_entropy_pos_1p;
   arma::Mat<double> rel_entropy_grad_1p;
 
   double freq_rms;
+  arma::Col<double> msa_rms;
 
 private:
   double pseudocount;
@@ -41,6 +46,8 @@ private:
   int N;              // number of positions
   int Q;              // amino acid alphabet size
   double M_effective; // effect number of sequences
+
+  MSA* msa;
 
   arma::Col<double> aa_background_frequencies;
 };

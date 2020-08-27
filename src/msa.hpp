@@ -15,14 +15,19 @@ public:
   int M;                              // number of sequences
   int N;                              // number of positions
   int Q;                              // number of amino acids
+  const bool reweight;                // whether reweighting performed
+  const double threshold;             // reweighting threshold
 
   arma::Col<double> hamming_distances;
 
   MSA(std::string, std::string = "", bool = true, bool = false, double = 0.8);
+  MSA(arma::Mat<int>, int, int, int, bool = true, double = 0.8);
   void printAlignment();
   void writeMatrix(std::string);
   void writeSequenceWeights(std::string);
   void writeHammingDistances(std::string);
+
+  void computeHammingDistances(void);
 
 private:
   std::vector<SeqRecord> seq_records;
@@ -32,7 +37,6 @@ private:
   void readSequenceWeights(std::string);
   void makeNumericalMatrix(void);
   void computeSequenceWeights(double);
-  void computeHammingDistances(void);
 };
 
 #endif

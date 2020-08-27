@@ -16,6 +16,8 @@ MSA::MSA(std::string msa_file,
          bool reweight,
          bool is_numeric_msa,
          double threshold)
+  : reweight(reweight)
+  , threshold(threshold)
 {
   if (is_numeric_msa) {
     readInputNumericMSA(msa_file);
@@ -31,7 +33,27 @@ MSA::MSA(std::string msa_file,
   } else if (!weight_file.empty()) {
     readSequenceWeights(weight_file);
   } else {
-    sequence_weights = arma::vec(M, arma::fill::ones);
+    sequence_weights = arma::Col<double>(M, arma::fill::ones);
+  }
+};
+
+MSA::MSA(arma::Mat<int> alignment,
+         int M,
+         int N,
+         int Q,
+         bool reweight,
+         double threshold)
+  : alignment(alignment)
+  , M(M)
+  , N(N)
+  , Q(Q)
+  , reweight(reweight)
+  , threshold(threshold)
+{
+  if (reweight) {
+    computeSequenceWeights(threshold);
+  } else {
+    sequence_weights = arma::Col<double>(M, arma::fill::ones);
   }
 };
 
@@ -98,7 +120,7 @@ MSA::readInputMSA(std::string msa_file)
   std::ifstream input_stream(msa_file);
 
   if (!input_stream) {
-    std::cerr << "ERROR: cannot write to '" << msa_file << "'." << std::endl;
+    std::cerr << "ERROR: cannot read from '" << msa_file << "'." << std::endl;
     exit(2);
   }
 

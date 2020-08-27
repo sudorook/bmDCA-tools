@@ -99,7 +99,7 @@ main(int argc, char* argv[])
   std::cout << "reading parameters... " << std::flush;
   potts_model params;
   if (compat_mode) {
-    params = loadPottsModelCompat(params_file);
+    params = loadPottsModelAscii(params_file);
   } else {
     params = loadPottsModel(params_file, params_J_file);
   }
