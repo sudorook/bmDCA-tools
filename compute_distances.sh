@@ -1,28 +1,36 @@
 #! /bin/bash
 set -eu
 
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-
-OPTIONS=s:c:S:C:d:
+OPTIONS=i:n:l:I:N:L:d:
 LONGOPTIONS=msa:,msa_label:,mcmc:,mcmc_label:,description:
 PARSED=$(getopt -o ${OPTIONS} --long ${LONGOPTIONS} -n "$0" -- "$@")
 eval set -- "$PARSED"
 
 while [ $# -ge 1 ]; do
   case "$1" in
-    -s|--msa)
+    -i|--msa)
       MSA="$2"
       shift 2
       ;;
-    -S|--msa_label)
+    -n|--msa_numeric)
+      MSA="$2"
+      MSA_NUMERIC=true
+      shift 2
+      ;;
+    -l|--msa_label)
       MSA_LABEL="$2"
       shift 2
       ;;
-    -c|--mcmc)
+    -I|--mcmc)
       MCMC="$2"
       shift 2
       ;;
-    -C|--mcmc_label)
+    -N|--mcmc_numeric)
+      MCMC="$2"
+      MCMC_NUMERIC=true
+      shift 2
+      ;;
+    -L|--mcmc_label)
       MCMC_LABEL="$2"
       shift 2
       ;;
@@ -47,29 +55,29 @@ SLUG=$(echo "$MSA_LABEL $MCMC_LABEL $DESCRIPTION" | \
        sed -e "s/,//g" -e "s/(//g" -e "s/)//g")
 
 echo "computing pairwise distances for $MSA"
-if [[ "${MSA}" =~ "numeric" ]]; then
-  "${SCRIPT_DIR}/compute_distances" \
-    -n "$MSA" \
+if ! [[ "${MSA_NUMERIC}" == true ]]; then
+  compute_distances \
+    -i "$MSA" \
     -o "${MSA%.*}_distances.txt"
 else
-  "${SCRIPT_DIR}/compute_distances" \
-    -i "$MSA" \
+  compute_distances \
+    -n "$MSA" \
     -o "${MSA%.*}_distances.txt"
 fi
 
 echo "computing pairwise distances for $MCMC"
-if [[ "${MCMC}" =~ "numeric" ]]; then
-  "${SCRIPT_DIR}/compute_distances" \
-    -n "$MCMC" \
+if ! [[ "${MCMC_NUMERIC}" == true ]]; then
+  compute_distances \
+    -i "$MCMC" \
     -o "${MCMC%.*}_distances.txt"
 else
-  "${SCRIPT_DIR}/compute_distances" \
-    -i "$MCMC" \
+  compute_distances \
+    -n "$MCMC" \
     -o "${MCMC%.*}_distances.txt"
 fi
 
 echo "plotting distances"
-"${SCRIPT_DIR}/plot_distances.py" \
+plot_distances.py \
   -s "${MSA%.*}_distances.txt" \
   -c "${MCMC%.*}_distances.txt" \
   -S "${MSA_LABEL}" \

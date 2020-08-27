@@ -37,6 +37,7 @@ main(int argc, char* argv[])
 
   std::cout << "reading sequences" << std::endl;
   MSA msa = MSA(infile, "", false, is_numeric, 0.8);
+  msa.computeHammingDistances();
 
   msa.writeHammingDistances(outfile);
 }
