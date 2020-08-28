@@ -71,6 +71,15 @@ function make_figures() {
     -o "${name}_${slug}_energy_${step}.png"
   echo
 
+  echo "compare sequence similarities"
+  taskset --cpu-list "$cpulist" plot_distances.py \
+    -n msa_numerical.txt \
+    -l "msa" \
+    -N "MC_samples_${step}.txt" \
+    -L "samples" \
+    -T "${title}, step ${step}" -c
+  echo
+
   if [[ -v prev_step ]]; then
     echo "previous model comparison"
     plot_model_compare \
