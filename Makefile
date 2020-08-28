@@ -1,7 +1,7 @@
-COMPUTE := compute_msa_stats
+MSACOMPUTE := compute_msa_stats
 ENERGY := compute_energies
-DISTANCE := compute_distances
-COMPARE := compare_msa_stats
+DISTANCE := compare_distances
+MSACOMPARE := compare_msa_stats
 DMS := compute_dms
 DCS := compute_dcs
 PATHFINDER := compute_paths
@@ -14,24 +14,24 @@ LDFLAGS = -lm $(shell pkg-config --libs armadillo)
 
 SRCPATH = src
 
-SOURCES_COMPUTE = ${SRCPATH}/compute_stats.cpp \
+SOURCES_MSACOMPUTE = ${SRCPATH}/compute_stats.cpp \
                   ${SRCPATH}/msa.cpp \
                   ${SRCPATH}/msa_stats.cpp \
                   ${SRCPATH}/utils.cpp
-OBJECTS_COMPUTE = $(SOURCES_COMPUTE:%.cpp=%.o)
+OBJECTS_MSACOMPUTE = $(SOURCES_MSACOMPUTE:%.cpp=%.o)
 
-SOURCES_COMPARE = ${SRCPATH}/compare_stats.cpp \
+SOURCES_MSACOMPARE = ${SRCPATH}/compare_stats.cpp \
                   ${SRCPATH}/msa.cpp \
                   ${SRCPATH}/msa_compare.cpp \
                   ${SRCPATH}/utils.cpp
-OBJECTS_COMPARE = $(SOURCES_COMPARE:%.cpp=%.o)
+OBJECTS_MSACOMPARE = $(SOURCES_MSACOMPARE:%.cpp=%.o)
 
 SOURCES_ENERGY = ${SRCPATH}/compute_energies.cpp \
                  ${SRCPATH}/msa.cpp \
                  ${SRCPATH}/utils.cpp
 OBJECTS_ENERGY = $(SOURCES_ENERGY:%.cpp=%.o)
 
-SOURCES_DISTANCE = ${SRCPATH}/compute_distances.cpp \
+SOURCES_DISTANCE = ${SRCPATH}/compare_distances.cpp \
                    ${SRCPATH}/msa.cpp \
                    ${SRCPATH}/utils.cpp
 OBJECTS_DISTANCE = $(SOURCES_DISTANCE:%.cpp=%.o)
@@ -55,12 +55,12 @@ OBJECTS_PATHFINDER = $(SOURCES_PATHFINDER:%.cpp=%.o)
 
 .PHONY: all
 
-all: $(COMPUTE) $(COMPARE) $(ENERGY) $(DISTANCE) $(DMS) $(DCS) $(PATHFINDER)
+all: $(MSACOMPUTE) $(MSACOMPARE) $(ENERGY) $(DISTANCE) $(DMS) $(DCS) $(PATHFINDER)
 
-$(COMPUTE): $(OBJECTS_COMPUTE)
+$(MSACOMPUTE): $(OBJECTS_MSACOMPUTE)
 	$(CC) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
-$(COMPARE): $(OBJECTS_COMPARE)
+$(MSACOMPARE): $(OBJECTS_MSACOMPARE)
 	$(CC) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
 $(ENERGY): $(OBJECTS_ENERGY)
@@ -81,15 +81,15 @@ $(PATHFINDER): $(OBJECTS_PATHFINDER)
 .PHONY: clean
 
 clean:
-	rm -f $(COMPUTE)
-	rm -f $(COMPARE)
+	rm -f $(MSACOMPUTE)
+	rm -f $(MSACOMPARE)
 	rm -f $(ENERGY)
 	rm -f $(DISTANCE)
 	rm -f $(DMS)
 	rm -f $(DCS)
 	rm -f $(PATHFINDER)
-	rm -f $(OBJECTS_COMPUTE)
-	rm -f $(OBJECTS_COMPARE)
+	rm -f $(OBJECTS_MSACOMPUTE)
+	rm -f $(OBJECTS_MSACOMPARE)
 	rm -f $(OBJECTS_ENERGY)
 	rm -f $(OBJECTS_DISTANCE)
 	rm -f $(OBJECTS_DMS)
