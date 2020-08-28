@@ -1,0 +1,194 @@
+#! /usr/bin/env python3
+""" docstring """
+
+import argparse
+import os
+import sys
+import subprocess
+import matplotlib
+
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+
+import dcatools as tools
+
+plt.rcParams["figure.figsize"] = [12, 9]
+
+
+def parse_options():
+    """ cli parser """
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-i",
+        "--msa1",
+        dest="msa1",
+        required=False,
+        default="",
+        help="input msa 1",
+    )
+    parser.add_argument(
+        "-I",
+        "--msa2",
+        dest="msa2",
+        required=False,
+        default="",
+        help="input msa 2",
+    )
+    parser.add_argument(
+        "-n",
+        "--numeric_msa1",
+        dest="num_msa1",
+        default="",
+        required=False,
+        help="numeric msa 1",
+    )
+    parser.add_argument(
+        "-N",
+        "--numeric_msa2",
+        dest="num_msa2",
+        default="",
+        required=False,
+        help="numeric msa 2",
+    )
+    parser.add_argument(
+        "-l",
+        "--msa1_label",
+        dest="msa1_label",
+        required=True,
+        help="msa 1 label",
+    )
+    parser.add_argument(
+        "-L",
+        "--msa2_label",
+        dest="msa2_label",
+        required=True,
+        help="msa 2 label",
+    )
+    parser.add_argument("-T", "--title", dest="title", required=True, help="title")
+    parser.add_argument(
+        "-c",
+        "--cleanup",
+        dest="cleanup",
+        action="store_true",
+        default=False,
+        help="delete intermediate files",
+    )
+    parser.add_argument(
+        "-s",
+        "--skip",
+        dest="skip",
+        action="store_true",
+        default=False,
+        help="skip processing and plot existing output",
+    )
+    return parser.parse_args()
+
+
+def main():
+    """ do stuff """
+    options = parse_options()
+
+    command = ["compare_distances"]
+
+    if options.num_msa1:
+        command.append("-n")
+        command.append(options.num_msa1)
+    elif options.msa1:
+        command.append("-i")
+        command.append(options.msa1)
+
+    if options.num_msa2:
+        command.append("-N")
+        command.append(options.num_msa2)
+    elif options.msa2:
+        command.append("-I")
+        command.append(options.msa2)
+
+    if options.skip is False:
+        res = subprocess.call(command)
+        if res != 0:
+            sys.exit(1)
+
+    msa1_distances = tools.load_distances("msa1_distances.txt")
+    msa2_distances = tools.load_distances("msa2_distances.txt")
+    msa1_msa2_distances = tools.load_distances("msa1_msa2_distances.txt")
+    msa2_msa1_distances = tools.load_distances("msa2_msa1_distances.txt")
+
+    prefix = tools.slugify(options.title)
+    slug1 = tools.slugify(options.msa1_label)
+    slug2 = tools.slugify(options.msa2_label)
+    if "_step_" in prefix:
+        prefix1, prefix2 = prefix.split("_step_")
+        outname1 = (
+            prefix1
+            + "_similarity_within_"
+            + slug1
+            + "_"
+            + slug2
+            + "_step_"
+            + prefix2
+            + ".png"
+        )
+        outname2 = (
+            prefix1
+            + "_similarity_between_"
+            + slug1
+            + "_"
+            + slug2
+            + "_step_"
+            + prefix2
+            + ".png"
+        )
+    else:
+        outname1 = prefix + "_similarity_within_" + slug1 + "_" + slug2 + ".png"
+        outname2 = prefix + "_similarity_between_" + slug1 + "_" + slug2 + ".png"
+
+    with plt.style.context("fivethirtyeight"):
+        plt.hist(
+            msa1_distances,
+            alpha=0.5,
+            label=options.msa1_label,
+            density=True,
+        )
+        plt.hist(
+            msa2_distances,
+            alpha=0.5,
+            label=options.msa2_label,
+            density=True,
+        )
+        plt.legend(loc="upper right")
+        #  plt.xlim(0, 1)
+        plt.xlabel("Nearest Sequence Similarity")
+        plt.title("Within-Group: " + options.title)
+        plt.savefig(outname1)
+        plt.close()
+
+    with plt.style.context("fivethirtyeight"):
+        plt.hist(
+            msa1_msa2_distances,
+            alpha=0.5,
+            label=options.msa1_label + "-to-" + options.msa2_label,
+            density=True,
+        )
+        plt.hist(
+            msa2_msa1_distances,
+            alpha=0.5,
+            label=options.msa2_label + "-to-" + options.msa1_label,
+            density=True,
+        )
+        plt.legend(loc="upper right")
+        plt.xlabel("Nearest Sequence Similarity")
+        #  plt.xlim(0, 1)
+        plt.title("Between-Group: " + options.title)
+        plt.savefig(outname2)
+        plt.close()
+
+    if options.cleanup:
+        os.remove("msa1_distances.txt")
+        os.remove("msa2_distances.txt")
+        os.remove("msa1_msa2_distances.txt")
+        os.remove("msa2_msa1_distances.txt")
+
+
+if __name__ == "__main__":
+    main()
