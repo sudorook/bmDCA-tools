@@ -100,6 +100,12 @@ def load_energies(energy_file):
     return data
 
 
+def load_distances(distance_file):
+    """ load sequence distances """
+    data = np.loadtxt(distance_file, dtype="double", skiprows=1)
+    return data
+
+
 def save_alignment(alignment, M, N, Q, filename):
     """ save numerical alignment """
     with open(filename, "w") as handle:
