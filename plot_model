@@ -19,7 +19,10 @@ def parse_options():
     """ cli parser """
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-s", "--step", dest="step", help="steps",
+        "-s",
+        "--step",
+        dest="step",
+        help="steps",
     )
     parser.add_argument(
         "-i",
@@ -43,7 +46,11 @@ def parse_options():
         help="label",
     )
     parser.add_argument(
-        "-t", "--title", dest="title", required=False, help="figure title",
+        "-t",
+        "--title",
+        dest="title",
+        required=False,
+        help="figure title",
     )
     parser.add_argument(
         "-p",
@@ -101,9 +108,7 @@ def main():
     if options.label is not None:
         label = options.label
         if options.step is not None:
-            prefix = tools.slugify(
-                options.label
-            )
+            prefix = tools.slugify(options.label)
         else:
             prefix = tools.slugify(options.label)
     elif options.step is not None:
@@ -159,9 +164,7 @@ def main():
                 tools.arma2ascii(grad_h, grad_J)
 
         if options.learn:
-            learn = os.path.join(
-                indir, "learning_rates_" + str(step) + ".txt"
-            )
+            learn = os.path.join(indir, "learning_rates_" + str(step) + ".txt")
             subplots.append(("learning rate", learn))
 
             if not os.path.exists(learn):
@@ -204,7 +207,11 @@ def main():
             h_1d = h.flatten()
             J_1d = J.flatten()
 
-            df_h = pd.DataFrame(data={"h": h_1d,})
+            df_h = pd.DataFrame(
+                data={
+                    "h": h_1d,
+                }
+            )
             df_J = pd.DataFrame(data={"J": J_1d})
 
             if options.vertical:
@@ -222,7 +229,8 @@ def main():
                 zorder=1,
             )
             ax.set_title(
-                s[0] + " h", fontsize=plt.rcParams["axes.titlesize"],
+                s[0] + " h",
+                fontsize=plt.rcParams["axes.titlesize"],
             )
 
             if options.vertical:
@@ -244,11 +252,12 @@ def main():
                 zorder=1,
             )
             ax.set_title(
-                s[0] + " J", fontsize=plt.rcParams["axes.titlesize"],
+                s[0] + " J",
+                fontsize=plt.rcParams["axes.titlesize"],
             )
 
         fig.tight_layout()
-        fig.savefig(title_prefix + prefix +".png")
+        fig.savefig(title_prefix + prefix + ".png")
 
 
 if __name__ == "__main__":
