@@ -1,0 +1,255 @@
+#! /usr/bin/env python3
+""" docstring """
+
+import argparse
+import os
+import sys
+import numpy as np
+import pandas as pd
+import statsmodels.formula.api as sm
+import matplotlib
+
+import dcatools as tools
+
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+
+
+def parse_options():
+    """ cli parser """
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-s", "--step", dest="step", help="steps",
+    )
+    parser.add_argument(
+        "-i",
+        "--input",
+        dest="input",
+        required=False,
+        help="input",
+    )
+    parser.add_argument(
+        "-d",
+        "--dir",
+        dest="dir",
+        required=False,
+        help="directory",
+    )
+    parser.add_argument(
+        "-l",
+        "--label",
+        dest="label",
+        required=False,
+        help="label",
+    )
+    parser.add_argument(
+        "-t", "--title", dest="title", required=False, help="figure title",
+    )
+    parser.add_argument(
+        "-p",
+        "--plot_parameters",
+        dest="params",
+        action="store_true",
+        default=False,
+        help="compare param flag",
+    )
+    parser.add_argument(
+        "-g",
+        "--plot_gradient",
+        dest="grad",
+        action="store_true",
+        default=False,
+        help="compare gradient flag",
+    )
+    parser.add_argument(
+        "-r",
+        "--plot_learning_rates",
+        dest="learn",
+        action="store_true",
+        default=False,
+        help="compare learn rates flag",
+    )
+    parser.add_argument(
+        "-v",
+        "--vertical",
+        dest="vertical",
+        action="store_true",
+        default=False,
+        help="orient plots vertically",
+    )
+    return parser.parse_args()
+
+
+def main():
+    """ do stuff """
+    options = parse_options()
+
+    if options.step is not None:
+        step = int(options.step)
+        infile = None
+    elif options.input is not None:
+        infile = options.input
+
+    if options.dir is not None:
+        if os.path.isdir(options.dir):
+            indir = options.dir
+        else:
+            sys.exit("Missing directory. Exiting...")
+    else:
+        indir = ""
+
+    if options.label is not None:
+        label = options.label
+        if options.step is not None:
+            prefix = tools.slugify(
+                options.label
+            )
+        else:
+            prefix = tools.slugify(options.label)
+    elif options.step is not None:
+        prefix = str(options.step)
+        label = "step " + str(options.step)
+
+    if options.title is not None:
+        title = options.title
+        title_prefix = tools.slugify(title) + "_model_"
+    elif options.label is not None:
+        title = options.label
+        title_prefix = ""
+
+    if (
+        options.grad is False
+        and options.params is False
+        and options.learn is False
+    ):
+        if infile is None:
+            sys.exit("Gotta plot something...")
+
+    subplots = []
+
+    if infile is not None:
+        subplots.append(("values", infile))
+    else:
+        if options.params:
+            params = os.path.join(indir, "parameters_" + str(step) + ".txt")
+            subplots.append(("parameters", params))
+
+            if not os.path.exists(params):
+                params_h = os.path.join(
+                    indir, "parameters_h_" + str(step) + ".bin"
+                )
+                params_J = os.path.join(
+                    indir, "parameters_J_" + str(step) + ".bin"
+                )
+                res = tools.arma2ascii(params_h, params_J)
+                if res != 0:
+                    sys.exit("Error converting " + params + ". Exiting...")
+
+        if options.grad:
+            grad = os.path.join(indir, "gradients_" + str(step) + ".txt")
+            subplots.append(("gradient", grad))
+
+            if not os.path.exists(grad):
+                grad_h = os.path.join(
+                    indir, "gradients_h_" + str(step) + ".bin"
+                )
+                grad_J = os.path.join(
+                    indir, "gradients_J_" + str(step) + ".bin"
+                )
+                tools.arma2ascii(grad_h, grad_J)
+
+        if options.learn:
+            learn = os.path.join(
+                indir, "learning_rates_" + str(step) + ".txt"
+            )
+            subplots.append(("learning rate", learn))
+
+            if not os.path.exists(learn):
+                learn_h = os.path.join(
+                    indir, "learning_rates_h_" + str(step) + ".bin"
+                )
+                learn_J = os.path.join(
+                    indir, "learning_rates_J_" + str(step) + ".bin"
+                )
+                tools.arma2ascii(learn_h, learn_J)
+
+    subplots_count = len(subplots)
+
+    with plt.style.context("fivethirtyeight"):
+        if options.vertical:
+            fig = plt.figure(figsize=[20, 8 * subplots_count])
+        else:
+            fig = plt.figure(figsize=[8 * subplots_count, 14])
+        axes = fig.add_subplot(111)
+        axes.tick_params(
+            axis="both",
+            which="both",
+            labelcolor="none",
+            top=False,
+            bottom=False,
+            left=False,
+            right=False,
+        )
+        axes.grid(False)
+        axes.set_title(title, pad=25)
+        axes.set_xlabel(
+            label, fontsize=plt.rcParams["axes.titlesize"], x=0.475, y=0
+        )
+        if options.vertical:
+            axes.yaxis.labelpad = 20
+
+        for idx, s in enumerate(subplots):
+            h, J = tools.load_model(s[1])
+
+            h_1d = h.flatten()
+            J_1d = J.flatten()
+
+            df_h = pd.DataFrame(data={"h": h_1d,})
+            df_J = pd.DataFrame(data={"J": J_1d})
+
+            if options.vertical:
+                ax = fig.add_subplot(
+                    int(str(subplots_count) + "2" + str(2 * idx + 1))
+                )
+            else:
+                ax = fig.add_subplot(
+                    int("2" + str(subplots_count) + str(idx + 1))
+                )
+
+            df_h.hist(
+                ax=ax,
+                alpha=0.5,
+                zorder=1,
+            )
+            ax.set_title(
+                s[0] + " h", fontsize=plt.rcParams["axes.titlesize"],
+            )
+
+            if options.vertical:
+                ax = fig.add_subplot(
+                    int(str(subplots_count) + "2" + str(2 * idx + 2))
+                )
+            else:
+                ax = fig.add_subplot(
+                    int(
+                        "2"
+                        + str(subplots_count)
+                        + str(idx + 1 + subplots_count)
+                    )
+                )
+
+            df_J.hist(
+                ax=ax,
+                alpha=0.5,
+                zorder=1,
+            )
+            ax.set_title(
+                s[0] + " J", fontsize=plt.rcParams["axes.titlesize"],
+            )
+
+        fig.tight_layout()
+        fig.savefig(title_prefix + prefix +".png")
+
+
+if __name__ == "__main__":
+    main()
