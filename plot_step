@@ -72,7 +72,7 @@ function make_figures() {
   echo
 
   echo "compare sequence similarities"
-  taskset --cpu-list "$cpulist" plot_distances.py \
+  taskset --cpu-list "$cpulist" plot_distances \
     -n msa_numerical.txt \
     -l "msa" \
     -N "MC_samples_${step}.txt" \
