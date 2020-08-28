@@ -142,7 +142,7 @@ def main():
 
     if options.title is not None:
         title = options.title
-        title_prefix = tools.slugify(title) + "_model_"
+        title_prefix = tools.slugify(title) + "_model_compare_"
     elif len(options.labels) == 2:
         title = options.labels[0] + " vs " + options.labels[1]
         title_prefix = ""
