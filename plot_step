@@ -66,7 +66,7 @@ function make_figures() {
     -e "msa_energies_${step}.txt" \
     -e "MC_energies_${step}.txt" \
     -l "msa" \
-    -l "mcmc" \
+    -l "samples" \
     -t "${title}, step ${step}" \
     -o "${name}_${slug}_energy_${step}.png"
   echo
@@ -100,7 +100,7 @@ function make_figures() {
     taskset --cpu-list "$cpulist" plot_energy_compare.py \
       -e "msa_energies_${prev_step}.txt" \
       -e "msa_energies_${step}.txt" \
-      -l "mcmc step $prev_step" \
+      -l "samples step $prev_step" \
       -l "msa step $step" \
       -t "${title}, step ${prev_step} vs step ${step}" \
       -o "${name}_${slug}_energy_compare_${prev_step}-vs-${step}.png"
