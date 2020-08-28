@@ -56,6 +56,13 @@ function make_figures() {
     -o "${name}_${slug}_proj_${step}.png"
   echo
 
+  echo "model parameters"
+  plot_model \
+    -s "$step" \
+    -l "step $step" \
+    -t "$title" -p -g -v
+  echo
+
   echo "sequence energies"
   compute_energies \
     -n msa_numerical.txt \
