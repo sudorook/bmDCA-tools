@@ -64,7 +64,9 @@ def parse_options():
         required=True,
         help="msa 2 label",
     )
-    parser.add_argument("-T", "--title", dest="title", required=True, help="title")
+    parser.add_argument(
+        "-T", "--title", dest="title", required=True, help="title"
+    )
     parser.add_argument(
         "-c",
         "--cleanup",
@@ -80,6 +82,18 @@ def parse_options():
         action="store_true",
         default=False,
         help="skip processing and plot existing output",
+    )
+    parser.add_argument(
+        "-r",
+        "--reference_msa1",
+        dest="ref1",
+        help="reference sequence in msa 1 for comparison",
+    )
+    parser.add_argument(
+        "-R",
+        "--reference_msa2",
+        dest="ref2",
+        help="reference sequence in msa 2 for comparison",
     )
     return parser.parse_args()
 
@@ -103,6 +117,12 @@ def main():
     elif options.msa2:
         command.append("-I")
         command.append(options.msa2)
+    if options.ref1 is not None:
+        command.append("-r")
+        command.append(options.ref1)
+    if options.ref2 is not None:
+        command.append("-R")
+        command.append(options.ref2)
 
     if options.skip is False:
         res = subprocess.call(command)
@@ -113,10 +133,33 @@ def main():
     msa2_distances = tools.load_distances("msa2_distances.txt")
     msa1_msa2_distances = tools.load_distances("msa1_msa2_distances.txt")
     msa2_msa1_distances = tools.load_distances("msa2_msa1_distances.txt")
+    if options.ref1 is not None:
+        msa1_ref1_distances = tools.load_distances(
+            "msa1_msa1-ref" + options.ref1 + "_distances.txt"
+        )
+        msa2_ref1_distances = tools.load_distances(
+            "msa2_msa1-ref" + options.ref1 + "_distances.txt"
+        )
+    if options.ref2 is not None:
+        msa1_ref2_distances = tools.load_distances(
+            "msa1_msa1-ref" + options.ref2 + "_distances.txt"
+        )
+        msa2_ref2_distances = tools.load_distances(
+            "msa2_msa1-ref" + options.ref2 + "_distances.txt"
+        )
 
     prefix = tools.slugify(options.title)
     slug1 = tools.slugify(options.msa1_label)
     slug2 = tools.slugify(options.msa2_label)
+    if options.ref1 is not None:
+        slug_ref1 = tools.slugify(
+            options.msa1_label + " (Seq " + options.ref1 + ")"
+        )
+    if options.ref2 is not None:
+        slug_ref2 = tools.slugify(
+            options.msa2_label + " (Seq " + options.ref2 + ")"
+        )
+
     if "_step_" in prefix:
         prefix1, prefix2 = prefix.split("_step_")
         outname1 = (
@@ -139,9 +182,61 @@ def main():
             + prefix2
             + ".png"
         )
+        if options.ref1 is not None:
+            outname_ref1 = (
+                prefix1
+                + "_similarity_reference_"
+                + slug1
+                + "_"
+                + slug2
+                + "_"
+                + slug_ref1
+                + "_step_"
+                + prefix2
+                + ".png"
+            )
+        if options.ref2 is not None:
+            outname_ref2 = (
+                prefix1
+                + "_similarity_reference_"
+                + slug1
+                + "_"
+                + slug2
+                + "_"
+                + slug_ref2
+                + "_step_"
+                + prefix2
+                + ".png"
+            )
     else:
-        outname1 = prefix + "_similarity_within_" + slug1 + "_" + slug2 + ".png"
-        outname2 = prefix + "_similarity_between_" + slug1 + "_" + slug2 + ".png"
+        outname1 = (
+            prefix + "_similarity_within_" + slug1 + "_" + slug2 + ".png"
+        )
+        outname2 = (
+            prefix + "_similarity_between_" + slug1 + "_" + slug2 + ".png"
+        )
+        if options.ref1 is not None:
+            outname_ref1 = (
+                prefix
+                + "_similarity_reference_"
+                + slug1
+                + "_"
+                + slug2
+                + "_"
+                + slug_ref1
+                + ".png"
+            )
+        if options.ref2 is not None:
+            outname_ref2 = (
+                prefix
+                + "_similarity_reference_"
+                + slug1
+                + "_"
+                + slug2
+                + "_"
+                + slug_ref2
+                + ".png"
+            )
 
     with plt.style.context("fivethirtyeight"):
         plt.hist(
@@ -149,12 +244,14 @@ def main():
             alpha=0.5,
             label=options.msa1_label,
             density=True,
+            bins=20,
         )
         plt.hist(
             msa2_distances,
             alpha=0.5,
             label=options.msa2_label,
             density=True,
+            bins=20,
         )
         plt.legend(loc="upper right")
         #  plt.xlim(0, 1)
@@ -169,12 +266,14 @@ def main():
             alpha=0.5,
             label=options.msa1_label + "-to-" + options.msa2_label,
             density=True,
+            bins=20,
         )
         plt.hist(
             msa2_msa1_distances,
             alpha=0.5,
             label=options.msa2_label + "-to-" + options.msa1_label,
             density=True,
+            bins=20,
         )
         plt.legend(loc="upper right")
         plt.xlabel("Nearest Sequence Similarity")
@@ -183,11 +282,99 @@ def main():
         plt.savefig(outname2)
         plt.close()
 
+    if options.ref1 is not None:
+        with plt.style.context("fivethirtyeight"):
+            plt.hist(
+                msa1_ref1_distances,
+                alpha=0.5,
+                label=options.msa1_label
+                + "-to-"
+                + options.msa1_label
+                + "-(seq "
+                + options.ref1
+                + ")",
+                density=True,
+                bins=20,
+            )
+            plt.hist(
+                msa2_ref1_distances,
+                alpha=0.5,
+                label=options.msa2_label
+                + "-to-"
+                + options.msa1_label
+                + "-(seq "
+                + options.ref1
+                + ")",
+                density=True,
+                bins=20,
+            )
+            plt.legend(loc="upper right")
+            plt.xlabel("Nearest Sequence Similarity")
+            #  plt.xlim(0, 1)
+            plt.title(
+                "Ref ("
+                + options.msa1_label
+                + ", "
+                + "Seq "
+                + options.ref1
+                + "): "
+                + options.title
+            )
+            plt.savefig(outname_ref1)
+            plt.close()
+
+    if options.ref2 is not None:
+        with plt.style.context("fivethirtyeight"):
+            plt.hist(
+                msa1_ref2_distances,
+                alpha=0.5,
+                label=options.msa1_label
+                + "-to-"
+                + options.msa1_label
+                + "-(seq "
+                + options.ref2
+                + ")",
+                density=True,
+                bins=20,
+            )
+            plt.hist(
+                msa2_ref2_distances,
+                alpha=0.5,
+                label=options.msa2_label
+                + "-to-"
+                + options.msa1_label
+                + "-(seq "
+                + options.ref2
+                + ")",
+                density=True,
+                bins=20,
+            )
+            plt.legend(loc="upper right")
+            plt.xlabel("Nearest Sequence Similarity")
+            #  plt.xlim(0, 1)
+            plt.title(
+                "Ref ("
+                + options.msa1_label
+                + ", "
+                + "Seq "
+                + options.ref2
+                + "): "
+                + options.title
+            )
+            plt.savefig(outname_ref1)
+            plt.close()
+
     if options.cleanup:
         os.remove("msa1_distances.txt")
         os.remove("msa2_distances.txt")
         os.remove("msa1_msa2_distances.txt")
         os.remove("msa2_msa1_distances.txt")
+        if options.ref1 is not None:
+            os.remove("msa1_msa1-ref" + options.ref1 + "_distances.txt")
+            os.remove("msa2_msa1-ref" + options.ref1 + "_distances.txt")
+        if options.ref2 is not None:
+            os.remove("msa1_msa1-ref" + options.ref2 + "_distances.txt")
+            os.remove("msa2_msa1-ref" + options.ref2 + "_distances.txt")
 
 
 if __name__ == "__main__":
