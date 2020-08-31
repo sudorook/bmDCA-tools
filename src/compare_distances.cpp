@@ -16,10 +16,12 @@ main(int argc, char* argv[])
   // std::string outfile;
   bool is_numeric1 = false;
   bool is_numeric2 = false;
+  int reference_idx1 = -1;
+  int reference_idx2 = -1;
 
   char c;
   // while ((c = getopt(argc, argv, "i:n:N:o:")) != -1) {
-  while ((c = getopt(argc, argv, "i:I:n:N:")) != -1) {
+  while ((c = getopt(argc, argv, "i:I:n:N:r:R:")) != -1) {
     switch (c) {
       case 'i':
         infile1 = optarg;
@@ -34,6 +36,12 @@ main(int argc, char* argv[])
       case 'N':
         infile2 = optarg;
         is_numeric2 = true;
+        break;
+      case 'r':
+        reference_idx1 = std::stoi(optarg);
+        break;
+      case 'R':
+        reference_idx2 = std::stoi(optarg);
         break;
       // case 'o':
       //   outfile = optarg;
@@ -58,7 +66,7 @@ main(int argc, char* argv[])
 
   int M1 = msa1.M;
   int M2 = msa2.M;
-  
+
   int N1 = msa1.N;
   int N2 = msa2.N;
 
@@ -71,8 +79,19 @@ main(int argc, char* argv[])
     arma::Col<double>(M1, arma::fill::zeros);
   arma::Col<double> msa2_msa1_distances =
     arma::Col<double>(M2, arma::fill::zeros);
+
   arma::Mat<int> alignment1_T = msa1.alignment.t();
   arma::Mat<int> alignment2_T = msa2.alignment.t();
+
+  arma::Col<double> msa1_ref1_distances =
+    arma::Col<double>(M1, arma::fill::zeros);
+  arma::Col<double> msa2_ref1_distances =
+    arma::Col<double>(M2, arma::fill::zeros);
+
+  arma::Col<double> msa1_ref2_distances =
+    arma::Col<double>(M1, arma::fill::zeros);
+  arma::Col<double> msa2_ref2_distances =
+    arma::Col<double>(M2, arma::fill::zeros);
 
   arma::wall_clock timer;
   timer.tic();
@@ -128,6 +147,102 @@ main(int argc, char* argv[])
   }
   std::cout << timer.toc() << " sec" << std::endl;
 
+  if ((reference_idx1 != -1) & (reference_idx1 < M1)) {
+    timer.tic();
+    std::cout << "computing distances from msa 1 to msa 1 reference sequence "
+              << reference_idx1 << " " << std::flush;
+    {
+      int* m1_ptr = nullptr;
+      int* ref_ptr = nullptr;
+      int count = 0;
+      double id = 0;
+      for (int m1 = 0; m1 < M1; m1++) {
+        m1_ptr = alignment1_T.colptr(m1);
+        count = 0;
+        ref_ptr = alignment1_T.colptr(reference_idx1);
+        for (int n = 0; n < N1; n++) {
+          if (*(m1_ptr + n) == *(ref_ptr + n)) {
+            count++;
+          }
+        }
+        id = (double)count / N1;
+        msa1_ref1_distances(m1) = id;
+      }
+    }
+    std::cout << timer.toc() << " sec" << std::endl;
+
+    timer.tic();
+    std::cout << "computing distances from msa 2 to msa 1 reference sequence "
+              << reference_idx1 << " " << std::flush;
+    {
+      int* ref_ptr = nullptr;
+      int* m2_ptr = nullptr;
+      int count = 0;
+      double id = 0;
+      for (int m2 = 0; m2 < M2; m2++) {
+        m2_ptr = alignment2_T.colptr(m2);
+        count = 0;
+        ref_ptr = alignment1_T.colptr(reference_idx1);
+        for (int n = 0; n < N2; n++) {
+          if (*(m2_ptr + n) == *(ref_ptr + n)) {
+            count++;
+          }
+        }
+        id = (double)count / N2;
+        msa2_ref1_distances(m2) = id;
+      }
+    }
+    std::cout << timer.toc() << " sec" << std::endl;
+  }
+
+  if ((reference_idx2 != -1) & (reference_idx2 < M2)) {
+    timer.tic();
+    std::cout << "computing distances from msa 1 to msa 2 reference sequence "
+              << reference_idx2 << " " << std::flush;
+    {
+      int* m1_ptr = nullptr;
+      int* ref_ptr = nullptr;
+      int count = 0;
+      double id = 0;
+      for (int m1 = 0; m1 < M1; m1++) {
+        m1_ptr = alignment1_T.colptr(m1);
+        count = 0;
+        ref_ptr = alignment2_T.colptr(reference_idx2);
+        for (int n = 0; n < N1; n++) {
+          if (*(m1_ptr + n) == *(ref_ptr + n)) {
+            count++;
+          }
+        }
+        id = (double)count / N1;
+        msa1_ref1_distances(m1) = id;
+      }
+    }
+    std::cout << timer.toc() << " sec" << std::endl;
+
+    timer.tic();
+    std::cout << "computing distances from msa 2 to msa 2 reference sequence "
+              << reference_idx1 << " " << std::flush;
+    {
+      int* ref_ptr = nullptr;
+      int* m2_ptr = nullptr;
+      int count = 0;
+      double id = 0;
+      for (int m2 = 0; m2 < M2; m2++) {
+        m2_ptr = alignment2_T.colptr(m2);
+        count = 0;
+        ref_ptr = alignment2_T.colptr(reference_idx2);
+        for (int n = 0; n < N2; n++) {
+          if (*(m2_ptr + n) == *(ref_ptr + n)) {
+            count++;
+          }
+        }
+        id = (double)count / N2;
+        msa2_ref1_distances(m2) = id;
+      }
+    }
+    std::cout << timer.toc() << " sec" << std::endl;
+  }
+
   std::cout << "writing output... " << std::flush;
   {
     std::ofstream output_stream("msa1_msa2_distances.txt");
@@ -142,6 +257,43 @@ main(int argc, char* argv[])
       output_stream << msa2_msa1_distances(i) << std::endl;
     }
     output_stream.close();
+  }
+
+  if ((reference_idx1 != -1) & (reference_idx1 < M1)) {
+    {
+      std::ofstream output_stream(
+        "msa1_msa1-ref" + std::to_string(reference_idx1) + "_distances.txt");
+      for (int i = 0; i < M1; i++) {
+        output_stream << msa1_ref1_distances(i) << std::endl;
+      }
+      output_stream.close();
+    }
+    {
+      std::ofstream output_stream(
+        "msa2_msa1-ref" + std::to_string(reference_idx1) + "_distances.txt");
+      for (int i = 0; i < M2; i++) {
+        output_stream << msa2_ref1_distances(i) << std::endl;
+      }
+      output_stream.close();
+    }
+  }
+  if ((reference_idx2 != -1) & (reference_idx2 < M2)) {
+    {
+      std::ofstream output_stream(
+        "msa1_msa2-ref" + std::to_string(reference_idx2) + "_distances.txt");
+      for (int i = 0; i < M1; i++) {
+        output_stream << msa1_ref2_distances(i) << std::endl;
+      }
+      output_stream.close();
+    }
+    {
+      std::ofstream output_stream(
+        "msa2_msa2-ref" + std::to_string(reference_idx2) + "_distances.txt");
+      for (int i = 0; i < M2; i++) {
+        output_stream << msa2_ref2_distances(i) << std::endl;
+      }
+      output_stream.close();
+    }
   }
   std::cout << "done" << std::endl;
 }
