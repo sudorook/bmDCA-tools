@@ -364,9 +364,10 @@ MSA::writeSequenceWeights(std::string output_file)
 };
 
 void
-MSA::computeHammingDistances(void)
+MSA::computeSequenceSimilarity(void)
 {
-  hamming_distances = arma::Col<double>(M, arma::fill::zeros);
+  max_similarity = arma::Col<double>(M, arma::fill::zeros);
+  mean_similarity = arma::Col<double>(M, arma::fill::zeros);
   arma::Mat<int> alignment_T = alignment.t();
 
   int* i_ptr = nullptr;
@@ -384,21 +385,37 @@ MSA::computeHammingDistances(void)
         }
       }
       id = (double)count / N;
-      if (id > hamming_distances(i)) {
-        hamming_distances(i) = id;
+
+      mean_similarity(i) += id;
+      mean_similarity(j) += id;
+
+      if (id > max_similarity(i)) {
+        max_similarity(i) = id;
       }
-      if (id > hamming_distances(j)) {
-        hamming_distances(j) = id;
+      if (id > max_similarity(j)) {
+        max_similarity(j) = id;
       }
     }
   }
+  mean_similarity = mean_similarity / (M - 1);
 };
 
 void
-MSA::writeHammingDistances(std::string output_file)
+MSA::writeSequenceSimilarity(std::string max_output_file,
+                             std::string mean_output_file)
 {
-  std::ofstream output_stream(output_file);
-  for (int i = 0; i < M; i++) {
-    output_stream << hamming_distances(i) << std::endl;
+  {
+    std::ofstream output_stream(max_output_file);
+    for (int i = 0; i < M; i++) {
+      output_stream << max_similarity(i) << std::endl;
+    }
+    output_stream.close();
+  }
+  {
+    std::ofstream output_stream(mean_output_file);
+    for (int i = 0; i < M; i++) {
+      output_stream << mean_similarity(i) << std::endl;
+    }
+    output_stream.close();
   }
 };

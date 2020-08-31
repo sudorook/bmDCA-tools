@@ -18,16 +18,17 @@ public:
   const bool reweight;                // whether reweighting performed
   const double threshold;             // reweighting threshold
 
-  arma::Col<double> hamming_distances;
+  arma::Col<double> max_similarity;
+  arma::Col<double> mean_similarity;
 
   MSA(std::string, std::string = "", bool = true, bool = false, double = 0.8);
   MSA(arma::Mat<int>, int, int, int, bool = true, double = 0.8);
   void printAlignment();
   void writeMatrix(std::string);
   void writeSequenceWeights(std::string);
-  void writeHammingDistances(std::string);
+  void writeSequenceSimilarity(std::string, std::string);
 
-  void computeHammingDistances(void);
+  void computeSequenceSimilarity(void);
 
 private:
   std::vector<SeqRecord> seq_records;
