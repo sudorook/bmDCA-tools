@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 import dcatools as tools
 
 plt.rcParams["figure.figsize"] = [12, 9]
-plt.rcParams.update({'mathtext.default':  'regular' })
+plt.rcParams.update({"mathtext.default": "regular"})
 
 
 def parse_options():
@@ -100,7 +100,12 @@ def main():
     #  energies2_sorted = np.sort(energies2)
 
     #  df_e = pd.DataFrame(data={"e1": energies1, "e2": energies2,})
-    df_e = pd.DataFrame(data={"e1": energies[0], "e2": energies[1],})
+    df_e = pd.DataFrame(
+        data={
+            "e1": energies[0],
+            "e2": energies[1],
+        }
+    )
     res_e = sm.ols(formula="e2 ~ e1", data=df_e).fit()
     params_e = res_e.params
 

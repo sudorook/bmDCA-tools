@@ -10,20 +10,32 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 plt.rcParams["figure.figsize"] = [13.5, 24]
-plt.rcParams.update({'mathtext.default':  'regular' })
+plt.rcParams.update({"mathtext.default": "regular"})
 
 
 def parse_options():
     """ cli parser """
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-i", "--input", dest="input", required=True, help="run log file",
+        "-i",
+        "--input",
+        dest="input",
+        required=True,
+        help="run log file",
     )
     parser.add_argument(
-        "-o", "--output", dest="output", required=True, help="figure name",
+        "-o",
+        "--output",
+        dest="output",
+        required=True,
+        help="figure name",
     )
     parser.add_argument(
-        "-s", "--start", dest="start", required=False, help="start offset",
+        "-s",
+        "--start",
+        dest="start",
+        required=False,
+        help="start offset",
     )
     return parser.parse_args()
 
@@ -75,7 +87,12 @@ def main():
     fields = [field for field in wants if field in df.columns]
 
     with plt.style.context("fivethirtyeight"):
-        ax = df.plot(x="step", y=fields, linewidth=1.0, subplots=True,)
+        ax = df.plot(
+            x="step",
+            y=fields,
+            linewidth=1.0,
+            subplots=True,
+        )
         plt.tight_layout()
         plt.savefig(options.output)
 

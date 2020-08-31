@@ -14,14 +14,18 @@ import dcatools as tools
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-plt.rcParams.update({'mathtext.default':  'regular' })
+plt.rcParams.update({"mathtext.default": "regular"})
 
 
 def parse_options():
     """ cli parser """
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-s", "--steps", dest="steps", action="append", help="steps",
+        "-s",
+        "--steps",
+        dest="steps",
+        action="append",
+        help="steps",
     )
     parser.add_argument(
         "-i",
@@ -48,7 +52,11 @@ def parse_options():
         help="labels",
     )
     parser.add_argument(
-        "-t", "--title", dest="title", required=False, help="figure title",
+        "-t",
+        "--title",
+        dest="title",
+        required=False,
+        help="figure title",
     )
     parser.add_argument(
         "-p",
@@ -127,12 +135,8 @@ def main():
             label1 = options.labels[0]
             label2 = options.labels[1]
             if options.steps is not None:
-                prefix1 = tools.slugify(
-                    options.labels[0]
-                )
-                prefix2 = tools.slugify(
-                    options.labels[1]
-                )
+                prefix1 = tools.slugify(options.labels[0])
+                prefix2 = tools.slugify(options.labels[1])
             else:
                 prefix1 = tools.slugify(options.labels[0])
                 prefix2 = tools.slugify(options.labels[1])
@@ -301,11 +305,21 @@ def main():
             J1_1d = J1.flatten()
             J2_1d = J2.flatten()
 
-            df_h = pd.DataFrame(data={"h1": h1_1d, "h2": h2_1d,})
+            df_h = pd.DataFrame(
+                data={
+                    "h1": h1_1d,
+                    "h2": h2_1d,
+                }
+            )
             res_h = sm.ols(formula="h2 ~ h1", data=df_h).fit()
             params_h = res_h.params
 
-            df_J = pd.DataFrame(data={"J1": J1_1d, "J2": J2_1d,})
+            df_J = pd.DataFrame(
+                data={
+                    "J1": J1_1d,
+                    "J2": J2_1d,
+                }
+            )
             res_J = sm.ols(formula="J2 ~ J1", data=df_J).fit()
             params_J = res_J.params
 
@@ -355,7 +369,8 @@ def main():
             )
             ax.plot(x, x, "--k", alpha=0.25, zorder=0, label=r"y=x")
             ax.set_title(
-                s[0] + " h", fontsize=plt.rcParams["axes.titlesize"],
+                s[0] + " h",
+                fontsize=plt.rcParams["axes.titlesize"],
             )
             ax.set_xlabel("")
             ax.set_ylabel("")
@@ -399,7 +414,8 @@ def main():
             )
             ax.plot(x, x, "--k", alpha=0.25, zorder=0, label=r"y=x")
             ax.set_title(
-                s[0] + " J", fontsize=plt.rcParams["axes.titlesize"],
+                s[0] + " J",
+                fontsize=plt.rcParams["axes.titlesize"],
             )
             ax.set_xlabel("")
             ax.set_ylabel("")

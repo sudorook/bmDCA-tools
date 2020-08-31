@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 import dcatools as tools
 
 plt.rcParams["figure.figsize"] = [12, 10]
-plt.rcParams.update({'mathtext.default':  'regular' })
+plt.rcParams.update({"mathtext.default": "regular"})
 
 
 def parse_options():
@@ -95,10 +95,18 @@ def parse_options():
         help="sequence similarity threshold for reweighting",
     )
     parser.add_argument(
-        "-l", "--xlabel", dest="xlabel", required=True, help="x axis label",
+        "-l",
+        "--xlabel",
+        dest="xlabel",
+        required=True,
+        help="x axis label",
     )
     parser.add_argument(
-        "-L", "--ylabel", dest="ylabel", required=True, help="y axis label",
+        "-L",
+        "--ylabel",
+        dest="ylabel",
+        required=True,
+        help="y axis label",
     )
     parser.add_argument(
         "-T", "--title", dest="title", required=True, help="title"
@@ -241,14 +249,23 @@ def main():
     for i in range(1, options.n + 1):
         if i == 1:
             filenames.append(
-                [str(i) + "p freq", "freq_" + str(i) + "p",]
+                [
+                    str(i) + "p freq",
+                    "freq_" + str(i) + "p",
+                ]
             )
         else:
             filenames.append(
-                [str(i) + "p freq", "freq_" + str(i) + "p",]
+                [
+                    str(i) + "p freq",
+                    "freq_" + str(i) + "p",
+                ]
             )
             filenames.append(
-                [str(i) + "p corr", "corr_" + str(i) + "p",]
+                [
+                    str(i) + "p corr",
+                    "corr_" + str(i) + "p",
+                ]
             )
 
     for files in filenames:
@@ -280,7 +297,10 @@ def main():
             else:
                 label = r"y={:.3g}x, $R^2$={:.3g}".format(b, r2)
             ax.plot(
-                x, b * x + a, label=label, alpha=0.5,
+                x,
+                b * x + a,
+                label=label,
+                alpha=0.5,
             )
             ax.plot(x, x, "--k", alpha=0.25, zorder=0, label=r"y=x")
             plt.legend(loc="upper left")

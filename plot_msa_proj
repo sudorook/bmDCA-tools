@@ -15,7 +15,7 @@ from pysca import scaTools as sca
 import dcatools as tools
 
 plt.rcParams["figure.figsize"] = [12, 10]
-plt.rcParams.update({'mathtext.default':  'regular' })
+plt.rcParams.update({"mathtext.default": "regular"})
 
 
 random.seed(0)
@@ -57,7 +57,11 @@ def parse_options():
         help="flag to include basis data in projection",
     )
     parser.add_argument(
-        "-o", "--output", dest="output", required=False, help="output file name"
+        "-o",
+        "--output",
+        dest="output",
+        required=False,
+        help="output file name",
     )
     parser.add_argument("-t", "--title", dest="title", help="figure title")
     return parser.parse_args()
@@ -139,7 +143,6 @@ def main():
     else:
         outfile_proj = tools.slugify(options.title) + "_proj.png"
 
-
     [M, N] = msa_basis.shape
     if options.weights_basis is not None:
         msa_weights_basis = load_sequence_weights_input(options.weights_basis)
@@ -187,9 +190,15 @@ def main():
 
     with plt.style.context("fivethirtyeight"):
         ax = plt.gca()
-        if (options.plot_basis):
+        if options.plot_basis:
             data_df.plot.scatter(
-                x="PC1", y="PC2", zorder=0, alpha=0.33, ax=ax, s=5, color="gray"
+                x="PC1",
+                y="PC2",
+                zorder=0,
+                alpha=0.33,
+                ax=ax,
+                s=5,
+                color="gray",
             )
         data_df_new.plot.hexbin(
             x="PC1", y="PC2", mincnt=1, cmap="viridis", zorder=1, ax=ax
