@@ -20,7 +20,6 @@ main(int argc, char* argv[])
   int reference_idx2 = -1;
 
   char c;
-  // while ((c = getopt(argc, argv, "i:n:N:o:")) != -1) {
   while ((c = getopt(argc, argv, "i:I:n:N:r:R:")) != -1) {
     switch (c) {
       case 'i':
@@ -54,14 +53,16 @@ main(int argc, char* argv[])
 
   std::cout << "reading msa 1 sequences... " << std::flush;
   MSA msa1 = MSA(infile1, "", false, is_numeric1, 0.8);
-  msa1.computeHammingDistances();
-  msa1.writeHammingDistances("msa1_distances.txt");
+  msa1.computeSequenceSimilarity();
+  msa1.writeSequenceSimilarity("msa1_max_similarity.txt",
+                               "msa1_mean_similarity.txt");
   std::cout << "done" << std::endl;
 
   std::cout << "reading msa 2 sequences... " << std::flush;
   MSA msa2 = MSA(infile2, "", false, is_numeric2, 0.8);
-  msa2.computeHammingDistances();
-  msa2.writeHammingDistances("msa2_distances.txt");
+  msa2.computeSequenceSimilarity();
+  msa2.writeSequenceSimilarity("msa2_max_similarity.txt",
+                               "msa2_mean_similarity.txt");
   std::cout << "done" << std::endl;
 
   int M1 = msa1.M;
@@ -75,27 +76,42 @@ main(int argc, char* argv[])
     std::exit(EXIT_FAILURE);
   }
 
-  arma::Col<double> msa1_msa2_distances =
-    arma::Col<double>(M1, arma::fill::zeros);
-  arma::Col<double> msa2_msa1_distances =
-    arma::Col<double>(M2, arma::fill::zeros);
-
   arma::Mat<int> alignment1_T = msa1.alignment.t();
   arma::Mat<int> alignment2_T = msa2.alignment.t();
 
-  arma::Col<double> msa1_ref1_distances =
+  arma::Col<double> msa1_msa2_max_distances =
     arma::Col<double>(M1, arma::fill::zeros);
-  arma::Col<double> msa2_ref1_distances =
+  arma::Col<double> msa2_msa1_max_distances =
     arma::Col<double>(M2, arma::fill::zeros);
 
-  arma::Col<double> msa1_ref2_distances =
+  arma::Col<double> msa1_msa2_mean_distances =
     arma::Col<double>(M1, arma::fill::zeros);
-  arma::Col<double> msa2_ref2_distances =
+  arma::Col<double> msa2_msa1_mean_distances =
+    arma::Col<double>(M2, arma::fill::zeros);
+
+  arma::Col<double> msa1_ref1_max_distances =
+    arma::Col<double>(M1, arma::fill::zeros);
+  arma::Col<double> msa2_ref1_max_distances =
+    arma::Col<double>(M2, arma::fill::zeros);
+
+  arma::Col<double> msa1_ref2_max_distances =
+    arma::Col<double>(M1, arma::fill::zeros);
+  arma::Col<double> msa2_ref2_max_distances =
+    arma::Col<double>(M2, arma::fill::zeros);
+
+  arma::Col<double> msa1_ref1_mean_distances =
+    arma::Col<double>(M1, arma::fill::zeros);
+  arma::Col<double> msa2_ref1_mean_distances =
+    arma::Col<double>(M2, arma::fill::zeros);
+
+  arma::Col<double> msa1_ref2_mean_distances =
+    arma::Col<double>(M1, arma::fill::zeros);
+  arma::Col<double> msa2_ref2_mean_distances =
     arma::Col<double>(M2, arma::fill::zeros);
 
   arma::wall_clock timer;
   timer.tic();
-  std::cout << "computing distances from msa 1 to msa 2... " << std::flush;
+  std::cout << "computing distances between msa 1 and msa 2... " << std::flush;
   {
     int* m1_ptr = nullptr;
     int* m2_ptr = nullptr;
@@ -113,37 +129,19 @@ main(int argc, char* argv[])
         }
         id = (double)count / N1;
 
-        if (id > msa1_msa2_distances(m1)) {
-          msa1_msa2_distances(m1) = id;
+        msa1_msa2_mean_distances(m1) += id;
+        msa2_msa1_mean_distances(m2) += id;
+
+        if (id > msa1_msa2_max_distances(m1)) {
+          msa1_msa2_max_distances(m1) = id;
+        }
+        if (id > msa2_msa1_max_distances(m2)) {
+          msa2_msa1_max_distances(m2) = id;
         }
       }
     }
-  }
-  std::cout << timer.toc() << " sec" << std::endl;
-
-  std::cout << "computing distances from msa 2 to msa 1... " << std::flush;
-  {
-    int* m1_ptr = nullptr;
-    int* m2_ptr = nullptr;
-    int count = 0;
-    double id = 0;
-    for (int m2 = 0; m2 < M2; m2++) {
-      m2_ptr = alignment2_T.colptr(m2);
-      for (int m1 = 0; m1 < M1; m1++) {
-        count = 0;
-        m1_ptr = alignment1_T.colptr(m1);
-        for (int n = 0; n < N1; n++) {
-          if (*(m1_ptr + n) == *(m2_ptr + n)) {
-            count++;
-          }
-        }
-        id = (double)count / N1;
-
-        if (id > msa2_msa1_distances(m2)) {
-          msa2_msa1_distances(m2) = id;
-        }
-      }
-    }
+    msa1_msa2_mean_distances = msa1_msa2_mean_distances / M2;
+    msa2_msa1_mean_distances = msa2_msa1_mean_distances / M1;
   }
   std::cout << timer.toc() << " sec" << std::endl;
 
@@ -166,7 +164,7 @@ main(int argc, char* argv[])
           }
         }
         id = (double)count / N1;
-        msa1_ref1_distances(m1) = id;
+        msa1_ref1_max_distances(m1) = id;
       }
     }
     std::cout << timer.toc() << " sec" << std::endl;
@@ -189,7 +187,7 @@ main(int argc, char* argv[])
           }
         }
         id = (double)count / N2;
-        msa2_ref1_distances(m2) = id;
+        msa2_ref1_max_distances(m2) = id;
       }
     }
     std::cout << timer.toc() << " sec" << std::endl;
@@ -214,7 +212,7 @@ main(int argc, char* argv[])
           }
         }
         id = (double)count / N1;
-        msa1_ref1_distances(m1) = id;
+        msa1_ref2_max_distances(m1) = id;
       }
     }
     std::cout << timer.toc() << " sec" << std::endl;
@@ -237,7 +235,7 @@ main(int argc, char* argv[])
           }
         }
         id = (double)count / N2;
-        msa2_ref1_distances(m2) = id;
+        msa2_ref2_max_distances(m2) = id;
       }
     }
     std::cout << timer.toc() << " sec" << std::endl;
@@ -245,16 +243,30 @@ main(int argc, char* argv[])
 
   std::cout << "writing output... " << std::flush;
   {
-    std::ofstream output_stream("msa1_msa2_distances.txt");
+    std::ofstream output_stream("msa1_msa2_max_similarity.txt");
     for (int i = 0; i < M1; i++) {
-      output_stream << msa1_msa2_distances(i) << std::endl;
+      output_stream << msa1_msa2_max_distances(i) << std::endl;
     }
     output_stream.close();
   }
   {
-    std::ofstream output_stream("msa2_msa1_distances.txt");
+    std::ofstream output_stream("msa1_msa2_mean_similarity.txt");
+    for (int i = 0; i < M1; i++) {
+      output_stream << msa1_msa2_mean_distances(i) << std::endl;
+    }
+    output_stream.close();
+  }
+  {
+    std::ofstream output_stream("msa2_msa1_max_similarity.txt");
     for (int i = 0; i < M2; i++) {
-      output_stream << msa2_msa1_distances(i) << std::endl;
+      output_stream << msa2_msa1_max_distances(i) << std::endl;
+    }
+    output_stream.close();
+  }
+  {
+    std::ofstream output_stream("msa2_msa1_mean_similarity.txt");
+    for (int i = 0; i < M2; i++) {
+      output_stream << msa2_msa1_mean_distances(i) << std::endl;
     }
     output_stream.close();
   }
@@ -262,17 +274,17 @@ main(int argc, char* argv[])
   if ((reference_idx1 != -1) & (reference_idx1 < M1)) {
     {
       std::ofstream output_stream(
-        "msa1_msa1-ref" + std::to_string(reference_idx1) + "_distances.txt");
+        "msa1_msa1-ref" + std::to_string(reference_idx1) + "_max_similarity.txt");
       for (int i = 0; i < M1; i++) {
-        output_stream << msa1_ref1_distances(i) << std::endl;
+        output_stream << msa1_ref1_max_distances(i) << std::endl;
       }
       output_stream.close();
     }
     {
       std::ofstream output_stream(
-        "msa2_msa1-ref" + std::to_string(reference_idx1) + "_distances.txt");
+        "msa2_msa1-ref" + std::to_string(reference_idx1) + "_max_similarity.txt");
       for (int i = 0; i < M2; i++) {
-        output_stream << msa2_ref1_distances(i) << std::endl;
+        output_stream << msa2_ref1_max_distances(i) << std::endl;
       }
       output_stream.close();
     }
@@ -280,17 +292,17 @@ main(int argc, char* argv[])
   if ((reference_idx2 != -1) & (reference_idx2 < M2)) {
     {
       std::ofstream output_stream(
-        "msa1_msa2-ref" + std::to_string(reference_idx2) + "_distances.txt");
+        "msa1_msa2-ref" + std::to_string(reference_idx2) + "_max_similarity.txt");
       for (int i = 0; i < M1; i++) {
-        output_stream << msa1_ref2_distances(i) << std::endl;
+        output_stream << msa1_ref2_max_distances(i) << std::endl;
       }
       output_stream.close();
     }
     {
       std::ofstream output_stream(
-        "msa2_msa2-ref" + std::to_string(reference_idx2) + "_distances.txt");
+        "msa2_msa2-ref" + std::to_string(reference_idx2) + "_max_similarity.txt");
       for (int i = 0; i < M2; i++) {
-        output_stream << msa2_ref2_distances(i) << std::endl;
+        output_stream << msa2_ref2_max_distances(i) << std::endl;
       }
       output_stream.close();
     }
