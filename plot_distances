@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 
 import dcatools as tools
 
-plt.rcParams["figure.figsize"] = [12, 9]
+#  plt.rcParams["figure.figsize"] = [16, 12]
 plt.rcParams.update({"mathtext.default": "regular"})
 
 
@@ -130,23 +130,27 @@ def main():
         if res != 0:
             sys.exit(1)
 
-    msa1_distances = tools.load_distances("msa1_distances.txt")
-    msa2_distances = tools.load_distances("msa2_distances.txt")
-    msa1_msa2_distances = tools.load_distances("msa1_msa2_distances.txt")
-    msa2_msa1_distances = tools.load_distances("msa2_msa1_distances.txt")
+    msa1_max_distances = tools.load_distances("msa1_max_similarity.txt")
+    msa2_max_distances = tools.load_distances("msa2_max_similarity.txt")
+    msa1_msa2_max_distances = tools.load_distances("msa1_msa2_max_similarity.txt")
+    msa2_msa1_max_distances = tools.load_distances("msa2_msa1_max_similarity.txt")
+    msa1_mean_distances = tools.load_distances("msa1_mean_similarity.txt")
+    msa2_mean_distances = tools.load_distances("msa2_mean_similarity.txt")
+    msa1_msa2_mean_distances = tools.load_distances("msa1_msa2_mean_similarity.txt")
+    msa2_msa1_mean_distances = tools.load_distances("msa2_msa1_mean_similarity.txt")
     if options.ref1 is not None:
-        msa1_ref1_distances = tools.load_distances(
-            "msa1_msa1-ref" + options.ref1 + "_distances.txt"
+        msa1_ref1_max_distances = tools.load_distances(
+            "msa1_msa1-ref" + options.ref1 + "_max_similarity.txt"
         )
-        msa2_ref1_distances = tools.load_distances(
-            "msa2_msa1-ref" + options.ref1 + "_distances.txt"
+        msa2_ref1_max_distances = tools.load_distances(
+            "msa2_msa1-ref" + options.ref1 + "_max_similarity.txt"
         )
     if options.ref2 is not None:
-        msa1_ref2_distances = tools.load_distances(
-            "msa1_msa1-ref" + options.ref2 + "_distances.txt"
+        msa1_ref2_max_distances = tools.load_distances(
+            "msa1_msa2-ref" + options.ref2 + "_max_similarity.txt"
         )
-        msa2_ref2_distances = tools.load_distances(
-            "msa2_msa1-ref" + options.ref2 + "_distances.txt"
+        msa2_ref2_max_distances = tools.load_distances(
+            "msa2_msa2-ref" + options.ref2 + "_max_similarity.txt"
         )
 
     prefix = tools.slugify(options.title)
@@ -163,19 +167,9 @@ def main():
 
     if "_step_" in prefix:
         prefix1, prefix2 = prefix.split("_step_")
-        outname1 = (
+        outname = (
             prefix1
-            + "_similarity_within_"
-            + slug1
-            + "_"
-            + slug2
-            + "_step_"
-            + prefix2
-            + ".png"
-        )
-        outname2 = (
-            prefix1
-            + "_similarity_between_"
+            + "_sequence_similarity_"
             + slug1
             + "_"
             + slug2
@@ -210,11 +204,8 @@ def main():
                 + ".png"
             )
     else:
-        outname1 = (
-            prefix + "_similarity_within_" + slug1 + "_" + slug2 + ".png"
-        )
-        outname2 = (
-            prefix + "_similarity_between_" + slug1 + "_" + slug2 + ".png"
+        outname = (
+            prefix + "_sequence_similarity_" + slug1 + "_" + slug2 + ".png"
         )
         if options.ref1 is not None:
             outname_ref1 = (
@@ -239,54 +230,123 @@ def main():
                 + ".png"
             )
 
+    subplots_count = 4
+    if options.ref1 is not None:
+        subplots_count = subplots_count + 1
+    if options.ref2 is not None:
+        subplots_count = subplots_count + 1
+
+    if subplots_count > 4:
+        subplots_rows = "3"
+        plt.rcParams["figure.figsize"] = [16, 18]
+    else:
+        subplots_rows = "2"
+        plt.rcParams["figure.figsize"] = [16, 12]
+    subplots_columns = "2"
+
     with plt.style.context("fivethirtyeight"):
-        plt.hist(
-            msa1_distances,
+        fig = plt.figure()
+        axes = fig.add_subplot(111)
+        axes.tick_params(
+            axis="both",
+            which="both",
+            labelcolor="none",
+            top=False,
+            bottom=False,
+            left=False,
+            right=False,
+        )
+        axes.grid(False)
+        axes.set_title("Sequence Similarity: " + options.title, pad=45)
+        axes.set_xlabel("Nearest Sequence Similarity")
+
+        ax = fig.add_subplot(int(subplots_rows + subplots_columns + "1"))
+        ax.set_title("Within-Group Max", fontsize=plt.rcParams["axes.labelsize"])
+        ax.hist(
+            msa1_max_distances,
             alpha=0.5,
             label=options.msa1_label,
             density=True,
             bins=20,
         )
-        plt.hist(
-            msa2_distances,
+        ax.hist(
+            msa2_max_distances,
             alpha=0.5,
             label=options.msa2_label,
             density=True,
             bins=20,
         )
-        plt.legend(loc="upper right")
-        #  plt.xlim(0, 1)
-        plt.xlabel("Nearest Sequence Similarity")
-        plt.title("Within-Group: " + options.title)
-        plt.savefig(outname1)
-        plt.close()
+        ax.set_xlabel("")
+        ax.set_ylabel("")
+        ax.legend(loc="upper right")
 
-    with plt.style.context("fivethirtyeight"):
-        plt.hist(
-            msa1_msa2_distances,
+        ax = fig.add_subplot(int(subplots_rows + subplots_columns + "3"), sharex=ax)
+        ax.set_title("Within-Group Mean", fontsize=plt.rcParams["axes.labelsize"])
+        ax.hist(
+            msa1_mean_distances,
+            alpha=0.5,
+            label=options.msa1_label,
+            density=True,
+            bins=20,
+        )
+        ax.hist(
+            msa2_mean_distances,
+            alpha=0.5,
+            label=options.msa2_label,
+            density=True,
+            bins=20,
+        )
+        ax.set_xlabel("")
+        ax.set_ylabel("")
+        ax.legend(loc="upper right")
+
+        ax = fig.add_subplot(int(subplots_rows + subplots_columns + "2"))
+        ax.set_title("Between-Group Max", fontsize=plt.rcParams["axes.labelsize"])
+        ax.hist(
+            msa1_msa2_max_distances,
             alpha=0.5,
             label=options.msa1_label + "-to-" + options.msa2_label,
             density=True,
             bins=20,
         )
-        plt.hist(
-            msa2_msa1_distances,
+        ax.hist(
+            msa2_msa1_max_distances,
             alpha=0.5,
             label=options.msa2_label + "-to-" + options.msa1_label,
             density=True,
             bins=20,
         )
-        plt.legend(loc="upper right")
-        plt.xlabel("Nearest Sequence Similarity")
-        #  plt.xlim(0, 1)
-        plt.title("Between-Group: " + options.title)
-        plt.savefig(outname2)
-        plt.close()
+        ax.set_xlabel("")
+        ax.set_ylabel("")
+        ax.legend(loc="upper right")
 
-    if options.ref1 is not None:
-        with plt.style.context("fivethirtyeight"):
-            plt.hist(
-                msa1_ref1_distances,
+        ax = fig.add_subplot(int(subplots_rows + subplots_columns + "4"), sharex=ax)
+        ax.set_title("Between-Group Mean", fontsize=plt.rcParams["axes.labelsize"])
+        ax.hist(
+            msa1_msa2_mean_distances,
+            alpha=0.5,
+            label=options.msa1_label + "-to-" + options.msa2_label,
+            density=True,
+            bins=20,
+        )
+        ax.hist(
+            msa2_msa1_mean_distances,
+            alpha=0.5,
+            label=options.msa2_label + "-to-" + options.msa1_label,
+            density=True,
+            bins=20,
+        )
+        ax.set_xlabel("")
+        ax.set_ylabel("")
+        ax.legend(loc="upper right")
+
+        if options.ref1 is not None:
+            ax = fig.add_subplot(int(subplots_rows + subplots_columns + "5"))
+            ref_label = "Reference (" + options.msa1_label + ", " + "Seq " + options.ref1 + ")"
+            ax.set_title(ref_label, fontsize=plt.rcParams["axes.labelsize"])
+
+            ax.hist(
+                msa1_ref1_max_distances,
                 alpha=0.5,
                 label=options.msa1_label
                 + "-to-"
@@ -297,8 +357,8 @@ def main():
                 density=True,
                 bins=20,
             )
-            plt.hist(
-                msa2_ref1_distances,
+            ax.hist(
+                msa2_ref1_max_distances,
                 alpha=0.5,
                 label=options.msa2_label
                 + "-to-"
@@ -309,25 +369,21 @@ def main():
                 density=True,
                 bins=20,
             )
-            plt.legend(loc="upper right")
-            plt.xlabel("Nearest Sequence Similarity")
-            #  plt.xlim(0, 1)
-            plt.title(
-                "Ref ("
-                + options.msa1_label
-                + ", "
-                + "Seq "
-                + options.ref1
-                + "): "
-                + options.title
-            )
-            plt.savefig(outname_ref1)
-            plt.close()
+            ax.set_xlabel("")
+            ax.set_ylabel("")
+            ax.legend(loc="upper right")
 
-    if options.ref2 is not None:
-        with plt.style.context("fivethirtyeight"):
-            plt.hist(
-                msa1_ref2_distances,
+        if options.ref2 is not None:
+            if options.ref1 is not None:
+                ax = fig.add_subplot(int(subplots_rows + subplots_columns + "6"))
+            else:
+                ax = fig.add_subplot(int(subplots_rows + subplots_columns + "5"))
+
+            ref_label = "Reference (" + options.msa2_label + ", " + "Seq " + options.ref2 + ")"
+            ax.set_title(ref_label, fontsize=plt.rcParams["axes.labelsize"])
+
+            ax.hist(
+                msa1_ref2_max_distances,
                 alpha=0.5,
                 label=options.msa1_label
                 + "-to-"
@@ -338,8 +394,8 @@ def main():
                 density=True,
                 bins=20,
             )
-            plt.hist(
-                msa2_ref2_distances,
+            ax.hist(
+                msa2_ref2_max_distances,
                 alpha=0.5,
                 label=options.msa2_label
                 + "-to-"
@@ -350,32 +406,28 @@ def main():
                 density=True,
                 bins=20,
             )
-            plt.legend(loc="upper right")
-            plt.xlabel("Nearest Sequence Similarity")
-            #  plt.xlim(0, 1)
-            plt.title(
-                "Ref ("
-                + options.msa1_label
-                + ", "
-                + "Seq "
-                + options.ref2
-                + "): "
-                + options.title
-            )
-            plt.savefig(outname_ref1)
-            plt.close()
+            ax.set_xlabel("")
+            ax.set_ylabel("")
+            ax.legend(loc="upper right")
+
+        fig.tight_layout()
+        fig.savefig(outname)
 
     if options.cleanup:
-        os.remove("msa1_distances.txt")
-        os.remove("msa2_distances.txt")
-        os.remove("msa1_msa2_distances.txt")
-        os.remove("msa2_msa1_distances.txt")
+        os.remove("msa1_max_similarity.txt")
+        os.remove("msa2_max_similarity.txt")
+        os.remove("msa1_msa2_max_similarity.txt")
+        os.remove("msa2_msa1_max_similarity.txt")
+        os.remove("msa1_mean_similarity.txt")
+        os.remove("msa2_mean_similarity.txt")
+        os.remove("msa1_msa2_mean_similarity.txt")
+        os.remove("msa2_msa1_mean_similarity.txt")
         if options.ref1 is not None:
-            os.remove("msa1_msa1-ref" + options.ref1 + "_distances.txt")
-            os.remove("msa2_msa1-ref" + options.ref1 + "_distances.txt")
+            os.remove("msa1_msa1-ref" + options.ref1 + "_max_similarity.txt")
+            os.remove("msa2_msa1-ref" + options.ref1 + "_max_similarity.txt")
         if options.ref2 is not None:
-            os.remove("msa1_msa1-ref" + options.ref2 + "_distances.txt")
-            os.remove("msa2_msa1-ref" + options.ref2 + "_distances.txt")
+            os.remove("msa1_msa2-ref" + options.ref2 + "_max_similarity.txt")
+            os.remove("msa2_msa2-ref" + options.ref2 + "_max_similarity.txt")
 
 
 if __name__ == "__main__":
