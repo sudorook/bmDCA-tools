@@ -10,6 +10,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 plt.rcParams["figure.figsize"] = [13.5, 24]
+plt.rcParams.update({'mathtext.default':  'regular' })
 
 
 def parse_options():

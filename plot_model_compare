@@ -14,6 +14,8 @@ import dcatools as tools
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
+plt.rcParams.update({'mathtext.default':  'regular' })
+
 
 def parse_options():
     """ cli parser """

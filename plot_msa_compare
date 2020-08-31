@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 import dcatools as tools
 
 plt.rcParams["figure.figsize"] = [12, 10]
+plt.rcParams.update({'mathtext.default':  'regular' })
 
 
 def parse_options():

@@ -16,6 +16,7 @@ import seaborn as sns
 import dcatools as tools
 
 plt.rcParams["figure.figsize"] = [10, 7.5]
+plt.rcParams.update({'mathtext.default':  'regular' })
 
 
 def parse_options():
