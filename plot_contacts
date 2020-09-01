@@ -5,6 +5,7 @@ import argparse
 import os
 import sys
 import numpy as np
+import pandas as pd
 import matplotlib
 
 matplotlib.use("Agg")
@@ -13,18 +14,75 @@ import seaborn as sns
 
 import dcatools as tools
 
-sns.set(rc={"figure.figsize": (10, 7.5)})
+#  sns.set(rc={"figure.figsize": (10, 7.5)})
+sns.set(rc={"figure.figsize": (12.5, 12)})
 
 
 def parse_options():
     """ cli parser """
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-i",
-        "--input",
+        "-p",
+        "--params",
         dest="params",
         required=True,
         help="input parameters file",
+    )
+    parser.add_argument(
+        "-P",
+        "--params_J",
+        dest="params_J",
+        required=False,
+        help="input parameters file (J)",
+    )
+    parser.add_argument(
+        "-i",
+        "--msa",
+        dest="msa",
+        required=False,
+        help="input msa",
+    )
+    parser.add_argument(
+        "-n",
+        "--numeric_msa",
+        dest="num_msa",
+        required=False,
+        help="numeric msa",
+    )
+    parser.add_argument(
+        "-b",
+        "--pdb_file",
+        dest="pdb_file",
+        required=True,
+        help="PDB file",
+    )
+    parser.add_argument(
+        "-B",
+        "--pdb_id",
+        dest="pdb_id",
+        help="PDB ID",
+    )
+    parser.add_argument(
+        "-c",
+        "--pdb_chain",
+        dest="pdb_chain",
+        default="A",
+        help="PDB Chain ID",
+    )
+    parser.add_argument(
+        "-r",
+        "--reference_position",
+        dest="ref_idx",
+        help="Reference sequence index in MSA to compare with PDB",
+    )
+    parser.add_argument(
+        "-t",
+        "--title",
+        dest="title",
+        help="Plot title",
+    )
+    parser.add_argument(
+        "-o", "--output", dest="output", help="output file name"
     )
     return parser.parse_args()
 
@@ -33,50 +91,112 @@ def main():
     """ do stuff """
     options = parse_options()
 
-    prefix = os.path.splitext((options.params).replace("/", "_"))[0]
+    if options.title is not None:
+        title = options.title
+        title_slug = tools.slugify(title)
+        if "_step_" in title_slug:
+            prefix1, prefix2 = title_slug.split("_step_")
+            outname = prefix1 + "_sequence_similarity_step_" + prefix2 + ".png"
+        else:
+            outname = title_slug + ".png"
+    else:
+        prefix = os.path.splitext((options.params).replace("/", "_"))[0]
+        outname = prefix + "_contacts_couplings.png"
 
-    h, J = tools.load_model(options.params)
+    # Load parameters
+    if options.params_J is not None:
+        param_file = (
+            (os.path.splitext((options.params).replace("/", "_"))[0]).replace(
+                "_h_", "_"
+            )
+        ) + ".txt"
+        if not os.path.exists(param_file):
+            tools.arma2ascii(options.params, options.params_J)
+    else:
+        param_file = options.params
 
-    Npos, Naa = np.shape(h)
+    h, J = tools.load_model(param_file)
+    N_pos, N_aa = np.shape(h)
 
-    J_2d = tools.reduce_J(J, "fro")
-    h_1d = tools.reduce_h(h)
-    model = J_2d + np.transpose(J_2d)
+    # Load PDB
+    if options.pdb_id is None:
+        pdb_id = os.path.splitext(options.pdb_file)[0]
+    else:
+        pdb_id = options.pdb_id
+    structure = tools.load_pdb_structure(pdb_id, options.pdb_file)
 
-    # Make plots
+    distmat, labels_pdb = tools.compute_pdb_distance_matrix(
+        structure, chain_id=options.pdb_chain, mode="CA"
+    )
+    distmat_contact = tools.compute_contact_matrix(distmat, threshold=8.5)
+    N_contacts = np.sum(distmat_contact > 0)
+
+    sequence_pdb = tools.get_pdb_sequence(
+        structure, chain_id=options.pdb_chain
+    )
+
+    # Load MSA
+    if options.msa:
+        msa_fasta_file = options.msa
+    elif options.num_msa:
+        msa_fasta_file = (os.path.splitext(options.num_msa)[0]).replace(
+            "_numerical", ""
+        ) + ".fasta"
+        tools.numeric2fasta(options.num_msa, msa_fasta_file)
+    else:
+        sys.exit("FUCK YOU")
+
+    # Find reference sequence in MSA to compare with PDB sequence
+    if options.ref_idx is None:
+        tools.save_sequences_fasta(sequence_pdb, "tmp_pdb_sequence.fasta")
+        reference_sequence = tools.find_reference_sequence_ggsearch(
+            "tmp_pdb_sequence.fasta", msa_fasta_file, N_pos
+        )
+        os.remove("tmp_pdb_sequence.fasta")
+    else:
+        alignment = tools.load_alignment_fasta(msa_fasta_file)
+        reference_sequence = alignment[options.ref_idx].seq
+
+    # Align sequence to get list of positions to keep
+    pos_idx_pdb, pos_idx_ref = tools.find_positions_to_keep(
+        sequence_pdb, reference_sequence
+    )
+
+    h_truncate, J_truncate = tools.subset_model(h, J, pos_idx_ref)
+
+    J_2d = tools.reduce_J(J_truncate, "fro")
+    h_1d = tools.reduce_h(h_truncate)
+
+    distmat_truncate = tools.subset_distance_matrix(
+        distmat_contact, pos_idx_pdb
+    )
+    labels_truncate = [labels_pdb[i] for i in pos_idx_pdb]
+
+    J_threshold = np.sort(J_2d.flatten())[-N_pos]
+
+    model = (
+        2 * np.transpose(distmat_truncate > 0)
+        + (J_2d >= J_threshold)
+        + (distmat_truncate > 0) * (J_2d >= J_threshold)
+    )
+    model_df = pd.DataFrame(
+        model, columns=labels_truncate, index=labels_truncate
+    )
+
+    if options.num_msa is not None:
+        if options.msa is None:
+            os.remove(msa_fasta_file)
+
     with sns.axes_style("white"):
-        ax = sns.heatmap(model + np.diag(h_1d), cmap="Blues", linewidths=0.2)
+        ax = sns.heatmap((model_df), cmap="Blues", linewidths=0.2, cbar=False)
         fig = ax.get_figure()
         ax.xaxis.set_ticks_position("top")
         ax.yaxis.set_ticks_position("left")
-        ax.set(xlabel="Position", ylabel="Position", title="J Parameters")
+        ax.xaxis.set_tick_params(rotation=45)
+        ax.yaxis.set_tick_params(rotation=0)
+        ax.set(title=options.title)
         plt.tight_layout()
-        fig.savefig(prefix + "_heatmap.svg")
-        plt.close()
-
-    with sns.axes_style("white"):
-        ax = sns.heatmap(model, cmap="Blues", linewidths=0.2)
-        fig = ax.get_figure()
-        ax.xaxis.set_ticks_position("top")
-        ax.yaxis.set_ticks_position("left")
-        ax.set(xlabel="Position", ylabel="Position", title="J Parameters")
-        plt.tight_layout()
-        fig.savefig(prefix + "_heatmap_no-h.svg")
-        plt.close()
-
-    ref = np.partition(J_2d.flatten(), round(-Npos / 2) - 1)[
-        round(-Npos / 2) - 1
-    ]
-    model = model * (model > ref).astype(int)
-
-    with sns.axes_style("white"):
-        ax = sns.heatmap(model, cmap="Blues", linewidths=0.2)
-        fig = ax.get_figure()
-        ax.xaxis.set_ticks_position("top")
-        ax.yaxis.set_ticks_position("left")
-        ax.set(xlabel="Position", ylabel="Position", title="J Parameters")
-        plt.tight_layout()
-        fig.savefig(prefix + "_contacts.svg")
+        fig.savefig(outname)
         plt.close()
 
 

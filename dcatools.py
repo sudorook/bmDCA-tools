@@ -3,10 +3,19 @@
 
 import re
 import subprocess
+from collections import defaultdict
 import numpy as np
 import pandas as pd
 import unidecode
 from scipy.io import loadmat
+
+from Bio.PDB import PDBParser
+from Bio import pairwise2
+from Bio.Seq import Seq
+from Bio.SeqRecord import SeqRecord
+from Bio.Alphabet import generic_protein
+from Bio import SeqIO
+from Bio import AlignIO
 
 
 def reduce_J(J, norm=2):
@@ -35,6 +44,7 @@ def reduce_h(h, norm=2, gap_pos=-1):
 
 
 def compute_energies(seqs, h, J):
+    """ compute statistical energies for sequences """
     energies = np.zeros(seqs.shape[0])
     N = len(seqs[0])
     for i, seq in enumerate(seqs):
@@ -45,10 +55,101 @@ def compute_energies(seqs, h, J):
     return energies
 
 
+def compute_pdb_distance_matrix(structure, chain_id="A", mode="CA"):
+    """ compute PDB distance matrix """
+
+    chain = structure[0][chain_id]
+    labels = [
+        ("".join(map(str, i.get_id()[1:3]))).strip()
+        for i in chain.get_residues()
+        if i.get_id()[0] == " "
+    ]
+    residues = [aa for aa in chain.get_residues() if aa.get_id()[0] == " "]
+
+    Naa = len(residues)
+    distmat = np.zeros((Naa, Naa))
+
+    if mode == "CA":
+        atoms = [
+            atom
+            for residue in residues
+            for atom in residue.get_atoms()
+            if atom.get_id() == "CA"
+        ]
+        for i in range(0, Naa):
+            for j in range(i + 1, Naa):
+                distmat[i, j] = atoms[i] - atoms[j]
+
+    elif mode == "min":
+        for i in range(0, Naa):
+            for j in range(i + 1, Naa):
+                distmat[i, j] = min(
+                    [
+                        atom0 - atom1
+                        for atom0 in residues[i].get_atoms()
+                        for atom1 in residues[j].get_atoms()
+                    ]
+                )
+
+    return distmat, labels
+
+
+def get_pdb_sequence(structure, chain_id="A"):
+    """ compute PDB distance matrix """
+
+    aa_table = defaultdict(lambda: "X")
+    aa_table["ALA"] = "A"
+    aa_table["ARG"] = "R"
+    aa_table["ASN"] = "N"
+    aa_table["ASP"] = "D"
+    aa_table["CYS"] = "C"
+    aa_table["GLN"] = "Q"
+    aa_table["GLU"] = "E"
+    aa_table["GLY"] = "G"
+    aa_table["HIS"] = "H"
+    aa_table["ILE"] = "I"
+    aa_table["LEU"] = "L"
+    aa_table["LYS"] = "K"
+    aa_table["MET"] = "M"
+    aa_table["PHE"] = "F"
+    aa_table["PRO"] = "P"
+    aa_table["SER"] = "S"
+    aa_table["THR"] = "T"
+    aa_table["TRP"] = "W"
+    aa_table["TYR"] = "Y"
+    aa_table["VAL"] = "V"
+
+    chain = structure[0][chain_id]
+    sequence = [
+        aa_table[aa.resname]
+        for aa in chain.get_residues()
+        if aa.get_id()[0] == " "
+    ]
+
+    return Seq("".join(sequence), generic_protein)
+
+
+def compute_contact_matrix(distmat, threshold=8.0):
+    """ convert distance matrix to contact matrix """
+    return distmat * (distmat != 0) * (distmat < threshold)
+
+
 def load_sequences(msa_file):
     """ load sequences """
     data = np.loadtxt(msa_file, dtype="int", skiprows=1)
     return data
+
+
+def load_sequences_fasta(sequence_file, sequence_format="fasta"):
+    """ load FASTA-formatted sequences """
+    sequences = list(SeqIO.parse(sequence_file, sequence_format))
+    return sequences
+
+
+def load_alignment_fasta(alignment_file, alignment_format="fasta"):
+    """ Load the alignment and return it. """
+    alignment = AlignIO.read(alignment_file, alignment_format)
+    return alignment
 
 
 def load_model(data_file):
@@ -94,6 +195,12 @@ def load_model_mat(data_file):
     return alignment, params_h, params_J
 
 
+def load_pdb_structure(pdb_id, pdb_file):
+    """ load pdb structure """
+    parser = PDBParser(PERMISSIVE=1)
+    return parser.get_structure(pdb_id, pdb_file)
+
+
 def load_energies(energy_file):
     """ load sequences energies """
     data = np.loadtxt(energy_file, dtype="double", skiprows=1)
@@ -116,6 +223,14 @@ def save_alignment(alignment, M, N, Q, filename):
             handle.write("\n")
 
 
+def save_sequences_fasta(sequence, sequence_file, sequence_format="fasta"):
+    """ Save sequences to disk. """
+    with open(sequence_file, "w") as handle:
+        SeqIO.write(
+            SeqRecord(sequence, id="PDB sequence"), handle, sequence_format
+        )
+
+
 def save_parameters(h, J, M, N, Q, filename):
     """ save parameters (h, J) to file """
     with open(filename, "w") as handle:
@@ -131,6 +246,91 @@ def save_parameters(h, J, M, N, Q, filename):
                 handle.write("h %d %d %lf\n" % (i, a, h[a, i]))
 
 
+def find_reference_sequence_ggsearch(
+    sequence_reference_fasta, msa_fasta, N_pos
+):
+    """ use ggsearch to find the reference sequence in an MSA """
+    command = [
+        "ggsearch36",
+        "-M 1-" + str(N_pos),
+        "-b",
+        "1",
+        "-m 8",
+        sequence_reference_fasta,
+        msa_fasta,
+    ]
+    res = subprocess.check_output(command)
+    align_id = res.decode("ASCII").split("\t")[1]
+    alignment = load_alignment_fasta(msa_fasta)
+    sequence = [seq.seq for seq in alignment if seq.id == align_id][0]
+    return sequence
+
+
+def find_positions_to_keep(target_sequence, reference_sequence):
+    """ align 2 sequences and return list of ungapped positons to keep """
+    target_strip = str(target_sequence).replace("-", "")
+    target_start_positions = [
+        i for i in range(0, len(target_sequence)) if target_sequence[i] != "-"
+    ]
+    reference_strip = str(reference_sequence).replace("-", "")
+    reference_start_positions = [
+        i
+        for i in range(0, len(reference_sequence))
+        if reference_sequence[i] != "-"
+    ]
+
+    target_align, reference_align, _, _, _ = pairwise2.align.globalms(
+        target_strip, reference_strip, 2, -1, -0.5, -0.1
+    )[0]
+
+    i_target = 0
+    i_reference = 0
+    target_positions = []
+    reference_positions = []
+    for i, aa in enumerate(target_align):
+        if aa != "-" and reference_align[i] != "-":
+            target_positions.append(i_target)
+            reference_positions.append(i_reference)
+        if aa != "-":
+            i_target += 1
+        if reference_align[i] != "-":
+            i_reference += 1
+
+    return_target_positions = [
+        target_start_positions[i] for i in target_positions
+    ]
+    return_reference_positions = [
+        reference_start_positions[i] for i in reference_positions
+    ]
+
+    return return_target_positions, return_reference_positions
+
+
+def subset_model(h, J, position_list):
+    """ subset the positions in a Potts model """
+    N_pos = len(position_list)
+    N_aa = h.shape[1]
+
+    h_subset = h[position_list, :]
+
+    J_subset = np.zeros((N_pos, N_pos, N_aa, N_aa))
+    for i, pos1 in enumerate(position_list):
+        for j, pos2 in enumerate(position_list):
+            J_subset[i, j, :, :] = J[pos1, pos2, :, :]
+
+    return h_subset, J_subset
+
+
+def subset_distance_matrix(distmat, position_list):
+    """ subset the distance matrix """
+    N_pos = len(position_list)
+    distmat_subset = np.zeros((N_pos, N_pos))
+    for i, pos1 in enumerate(position_list):
+        for j, pos2 in enumerate(position_list):
+            distmat_subset[i, j] = distmat[pos1, pos2]
+    return distmat_subset
+
+
 def slugify(text):
     """ convert text string to slug """
     text = unidecode.unidecode(text).lower()
@@ -141,6 +341,19 @@ def arma2ascii(h_file, J_file):
     """ convert armadillo binary to text file """
 
     command = ["arma2ascii", "-p", h_file, "-P", J_file]
+    res = subprocess.call(command)
+    return res
+
+
+def numeric2fasta(numeric_msa_file, output_fasta_file):
+    """ convert numeric MSA to a FASTA file """
+    command = [
+        "numeric2fasta",
+        "-n",
+        numeric_msa_file,
+        "-o",
+        output_fasta_file,
+    ]
     res = subprocess.call(command)
     return res
 
