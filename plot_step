@@ -17,6 +17,8 @@ function make_figures() {
 
   local step="$3"
   local nproc="$4"
+  local pdb="$5"
+  local chain="$6"
 
   export OMP_NUM_THREADS="$nproc"
 
@@ -87,9 +89,20 @@ function make_figures() {
     -T "${title}, step ${step}" -c
   echo
 
+  if [[ "$pdb" != "none" ]]; then
+    echo "compute contact map"
+    taskset --cpu-list "$cpulist" plot_contacts \
+      -p "parameters_h_${step}.bin" \
+      -P "parameters_J_${step}.bin" \
+      -b "$pdb" \
+      -c "$chain" \
+      -n "msa_numerical.txt" \
+      -t "${title}, step ${step}"
+  fi
+
   if [[ -v prev_step ]]; then
     echo "previous model comparison"
-    plot_model_compare \
+    taskset --cpu-list "$cpulist" plot_model_compare \
       -s "$prev_step" \
       -s "$step" \
       -l "step $prev_step" \
@@ -99,7 +112,7 @@ function make_figures() {
 
     echo "sequence energy comparisons"
     compute_energies \
-      -n msa_numerical.txt \
+      -n "msa_numerical.txt" \
       -p "parameters_h_${prev_step}.bin" \
       -P "parameters_J_${prev_step}.bin" \
       -o "msa_energies_${prev_step}.txt"
@@ -125,8 +138,8 @@ function get_step() {
 # Parse command line options
 #
 
-OPTIONS=t:d:s:n:
-LONGOPTIONS=title:,description:,step:,nproc:
+OPTIONS=t:d:s:n:p:c:
+LONGOPTIONS=title:,description:,step:,nproc:,p:,c:
 PARSED=$(getopt -o ${OPTIONS} --long ${LONGOPTIONS} -n "$0" -- "$@")
 eval set -- "$PARSED"
 while [ $# -ge 1 ]; do
@@ -145,6 +158,14 @@ while [ $# -ge 1 ]; do
       ;;
     -n|--nproc)
       NPROC="${2}"
+      shift 2
+      ;;
+    -p|--pdb)
+      PDB="${2}"
+      shift 2
+      ;;
+    -c|--chain)
+      CHAIN="${2}"
       shift 2
       ;;
     --)
@@ -168,4 +189,12 @@ if ! [[ -v NPROC ]]; then
   NPROC=$(nproc)
 fi
 
-make_figures "$TITLE" "$DESCRIPTION" "$STEP" "$NPROC"
+if ! [[ -v PDB ]]; then
+  PDB="none"
+fi
+
+if ! [[ -v CHAIN ]]; then
+  CHAIN="A"
+fi
+
+make_figures "$TITLE" "$DESCRIPTION" "$STEP" "$NPROC" "$PDB" "$CHAIN"
