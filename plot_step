@@ -55,7 +55,7 @@ function make_figures() {
     -w sequence_weights.txt \
     -N "MC_samples_${step}.txt" \
     -t "${title}, step ${step}" \
-    -o "${name}_${slug}_proj_${step}.png"
+    -o "${name}_${slug}_proj_${step}.png" -b
   echo
 
   echo "model parameters"
