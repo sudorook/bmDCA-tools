@@ -96,7 +96,7 @@ def main():
         title_slug = tools.slugify(title)
         if "_step_" in title_slug:
             prefix1, prefix2 = title_slug.split("_step_")
-            outname = prefix1 + "_sequence_similarity_step_" + prefix2 + ".png"
+            outname = prefix1 + "_contacts_couplings_step_" + prefix2 + ".png"
         else:
             outname = title_slug + ".png"
     else:
