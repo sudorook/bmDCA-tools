@@ -96,12 +96,20 @@ def main():
         title_slug = tools.slugify(title)
         if "_step_" in title_slug:
             prefix1, prefix2 = title_slug.split("_step_")
-            outname = prefix1 + "_contacts_couplings_step_" + prefix2 + ".png"
+            outname1 = prefix1 + "_contacts_couplings_step_" + prefix2 + ".png"
+            outname2 = (
+                prefix1
+                + "_contacts_couplings_step_"
+                + prefix2
+                + "_zero_gauge.png"
+            )
         else:
-            outname = title_slug + ".png"
+            outname1 = title_slug + ".png"
+            outname2 = title_slug + "_zero_gauge.png"
     else:
         prefix = os.path.splitext((options.params).replace("/", "_"))[0]
-        outname = prefix + "_contacts_couplings.png"
+        outname1 = prefix + "_contacts_couplings.png"
+        outname2 = prefix + "_contacts_couplings_zero_gauge.png"
 
     # Load parameters
     if options.params_J is not None:
@@ -165,6 +173,8 @@ def main():
     h_truncate, J_truncate = tools.subset_model(h, J, pos_idx_ref)
 
     J_2d = tools.reduce_J(J_truncate, "fro")
+    J_2d_zg = tools.reduce_J(J_truncate, "fro", "zero-sum")
+    J_2d_zg = tools.correct_frobenius_norm(J_2d_zg)
     h_1d = tools.reduce_h(h_truncate)
 
     distmat_truncate = tools.subset_distance_matrix(
@@ -172,7 +182,8 @@ def main():
     )
     labels_truncate = [labels_pdb[i] for i in pos_idx_pdb]
 
-    J_threshold = np.sort(J_2d.flatten())[-N_pos]
+    J_threshold = np.sort(J_2d.flatten())[-N_pos * 2]
+    J_threshold_zg = np.sort(J_2d_zg.flatten())[-N_pos * 2]
 
     model = (
         2 * np.transpose(distmat_truncate > 0)
@@ -181,6 +192,15 @@ def main():
     )
     model_df = pd.DataFrame(
         model, columns=labels_truncate, index=labels_truncate
+    )
+
+    model_zg = (
+        2 * np.transpose(distmat_truncate > 0)
+        + (J_2d_zg >= J_threshold_zg)
+        + (distmat_truncate > 0) * (J_2d_zg >= J_threshold_zg)
+    )
+    model_zg_df = pd.DataFrame(
+        model_zg, columns=labels_truncate, index=labels_truncate
     )
 
     if options.num_msa is not None:
@@ -194,9 +214,21 @@ def main():
         ax.yaxis.set_ticks_position("left")
         ax.xaxis.set_tick_params(rotation=45)
         ax.yaxis.set_tick_params(rotation=0)
-        ax.set(title=options.title)
+        plt.title(options.title)
         plt.tight_layout()
-        fig.savefig(outname)
+        fig.savefig(outname1)
+        plt.close()
+
+    with sns.axes_style("white"):
+        ax = sns.heatmap((model_zg_df), cmap="Blues", linewidths=0.2, cbar=False)
+        fig = ax.get_figure()
+        ax.xaxis.set_ticks_position("top")
+        ax.yaxis.set_ticks_position("left")
+        ax.xaxis.set_tick_params(rotation=45)
+        ax.yaxis.set_tick_params(rotation=0)
+        plt.title(options.title + " (0-gauge)")
+        plt.tight_layout()
+        fig.savefig(outname2)
         plt.close()
 
 

@@ -18,13 +18,29 @@ from Bio import SeqIO
 from Bio import AlignIO
 
 
-def reduce_J(J, norm=2):
+def reduce_J(J, norm=2, gauge="default"):
     """ reduce J using Frobenius-norm """
     Npos = np.shape(J)[0]
+    Naa = np.shape(J[0, 0])[0]
     J_new = np.zeros((Npos, Npos))
     for i in range(Npos):
         for j in range(i + 1, Npos):
-            J_new[i, j] = np.linalg.norm(J[i, j], norm)
+            if gauge == "default":
+                J_new[i, j] = np.linalg.norm(J[i, j], norm)
+            elif gauge == "zero-sum":
+                J_prime = np.zeros((Naa, Naa))
+                J_ij_mean = np.mean(J[i, j, :, :])
+                for a in range(0, Naa):
+                    J_ija_mean = np.mean(J[i, j, a, :])
+                    for b in range(0, Naa):
+                        J_prime[a, b] = (
+                            J[i, j, a, b]
+                            - J_ija_mean
+                            - np.mean(J[i, j, :, b])
+                            + J_ij_mean
+                        )
+                J_new[i, j] = np.linalg.norm(J_prime, norm)
+
     return J_new
 
 
@@ -41,6 +57,21 @@ def reduce_h(h, norm=2, gap_pos=-1):
     if norm == 0:  # mean
         h_new = np.mean(h[pos_range, :], 1)
     return h_new
+
+
+def correct_frobenius_norm(frob_mat):
+    """ adjust Frobenius norm for sampling error """
+    corr_mat = np.zeros(np.shape(frob_mat))
+    Npos = np.shape(frob_mat)[0]
+    frob_mean = np.mean(frob_mat[:, :])
+    for i in range(0, Npos):
+        frob_mean_i = np.mean(frob_mat[i, :])
+        for j in range(i + 1, Npos):
+            corr_mat[i, j] = (
+                frob_mat[i, j]
+                - frob_mean_i * np.mean(frob_mat[:, j]) / frob_mean
+            )
+    return corr_mat
 
 
 def compute_energies(seqs, h, J):
