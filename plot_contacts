@@ -99,9 +99,9 @@ def main():
             outname1 = prefix1 + "_contacts_couplings_step_" + prefix2 + ".png"
             outname2 = (
                 prefix1
-                + "_contacts_couplings_step_"
+                + "_contacts_couplings_zero_gauge_step_"
                 + prefix2
-                + "_zero_gauge.png"
+                + ".png"
             )
         else:
             outname1 = title_slug + ".png"
