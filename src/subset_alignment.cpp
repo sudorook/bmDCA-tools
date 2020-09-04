@@ -17,7 +17,7 @@ main(int argc, char* argv[])
   bool is_numeric1 = false;
   bool is_numeric2 = false;
   double between_threshold = 0.8;
-  double within_threshold = 0.9;
+  double within_threshold = 0.8;
 
   char c;
   while ((c = getopt(argc, argv, "i:I:n:N:o:w:b:")) != -1) {
@@ -74,7 +74,8 @@ main(int argc, char* argv[])
   }
 
   if (Q1 != Q2) {
-    std::cerr << "ERROR: alignments have different number of states." << std::endl;
+    std::cerr << "ERROR: alignments have different number of states."
+              << std::endl;
     std::exit(EXIT_FAILURE);
   }
 
@@ -95,10 +96,11 @@ main(int argc, char* argv[])
       m1_ptr = alignment1_T.colptr(m1);
 
       volatile bool too_close = false;
-      {
+      if ((between_threshold < 1) & (between_threshold >= 0)) {
 #pragma omp parallel for shared(too_close)
         for (int m2 = 0; m2 < M2; m2++) {
-          if (too_close) continue;
+          if (too_close)
+            continue;
           count = 0;
           m2_ptr = alignment2_T.colptr(m2);
           for (int n = 0; n < N1; n++) {
@@ -113,11 +115,12 @@ main(int argc, char* argv[])
         }
       }
 
-      if (too_close == false) {
-        {
+      if ((within_threshold < 1) & (within_threshold >= 0)) {
+        if (too_close == false) {
 #pragma omp parallel for shared(too_close)
           for (int m2 = 0; m2 < result_counter; m2++) {
-            if (too_close) continue;
+            if (too_close)
+              continue;
             arma::Mat<int> results_T = results.t();
             count = 0;
             m2_ptr = results_T.colptr(m2);
