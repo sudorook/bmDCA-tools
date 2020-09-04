@@ -8,7 +8,7 @@ source globals
 
 function check_input() {
   if ! [[ -v OUTPUT ]]; then
-    show_error "ERROR: output file missing."
+    echo "ERROR: output file missing."
     exit 3
   fi
 
@@ -17,12 +17,12 @@ function check_input() {
   fi
 
   if ! [[ -v MSA ]]; then
-    show_error "ERROR: input MSA missing."
+    echo "ERROR: input MSA missing."
     exit 3
   fi
 
   if ! [[ -v MSA_REF ]]; then
-    show_error "ERROR: reference MSA missing."
+    echo "ERROR: reference MSA missing."
     exit 3
   fi
 
@@ -35,7 +35,7 @@ function check_input() {
   fi
 
   if ! [[ -v PARAMS ]]; then
-    show_error "ERROR: parameter file(s) missing."
+    echo "ERROR: parameter file(s) missing."
     exit 3
   fi
 }
@@ -196,7 +196,7 @@ while [ $# -ge 1 ]; do
       break
       ;;
     *)
-      show_error "ERROR: unknown command line option."
+      echo "ERROR: unknown command line option."
       print_usage
       exit 3
       ;;
