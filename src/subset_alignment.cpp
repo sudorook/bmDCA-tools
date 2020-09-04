@@ -18,7 +18,6 @@ main(int argc, char* argv[])
   bool is_numeric2 = false;
   double between_threshold = 0.8;
   double within_threshold = 0.9;
-  bool compare_file_given = false;
 
   char c;
   while ((c = getopt(argc, argv, "i:I:n:N:o:w:b:")) != -1) {
@@ -28,7 +27,6 @@ main(int argc, char* argv[])
         break;
       case 'I':
         infile2 = optarg;
-        compare_file_given = true;
         break;
       case 'n':
         infile1 = optarg;
@@ -37,7 +35,6 @@ main(int argc, char* argv[])
       case 'N':
         infile2 = optarg;
         is_numeric2 = true;
-        compare_file_given = true;
         break;
       case 'o':
         outfile = optarg;
@@ -76,6 +73,11 @@ main(int argc, char* argv[])
     std::exit(EXIT_FAILURE);
   }
 
+  if (Q1 != Q2) {
+    std::cerr << "ERROR: alignments have different number of states." << std::endl;
+    std::exit(EXIT_FAILURE);
+  }
+
   arma::Mat<int> alignment1_T = msa1.alignment.t();
   arma::Mat<int> alignment2_T = msa2.alignment.t();
   arma::Mat<int> results = arma::Mat<int>(M1, N1, arma::fill::zeros);
@@ -83,7 +85,7 @@ main(int argc, char* argv[])
 
   arma::wall_clock timer;
   timer.tic();
-  std::cout << "picking distance sequence... " << std::flush;
+  std::cout << "finding distant sequences... " << std::flush;
   {
     int* m1_ptr = nullptr;
     int* m2_ptr = nullptr;
@@ -92,30 +94,43 @@ main(int argc, char* argv[])
     for (int m1 = 0; m1 < M1; m1++) {
       m1_ptr = alignment1_T.colptr(m1);
 
-      bool too_close = false;
-      for (int m2 = 0; m2 < M2; m2++) {
-        count = 0;
-        m2_ptr = alignment2_T.colptr(m2);
-        for (int n = 0; n < N1; n++) {
-          if (*(m1_ptr + n) == *(m2_ptr + n)) {
-            count++;
-          }
-        }
-        id = (double)count / N1;
-        if (id > between_threshold) too_close = true;
-      }
-    
-      for (int m2 = 0; m2 < result_counter; m2++) {
-        if (m1 != m2) {
+      volatile bool too_close = false;
+      {
+#pragma omp parallel for shared(too_close)
+        for (int m2 = 0; m2 < M2; m2++) {
+          if (too_close) continue;
           count = 0;
-          m2_ptr = alignment1_T.colptr(m2);
+          m2_ptr = alignment2_T.colptr(m2);
           for (int n = 0; n < N1; n++) {
             if (*(m1_ptr + n) == *(m2_ptr + n)) {
               count++;
             }
           }
           id = (double)count / N1;
-          if (id > within_threshold) too_close = true;
+          if (id > between_threshold) {
+            too_close = true;
+          }
+        }
+      }
+
+      if (too_close == false) {
+        {
+#pragma omp parallel for shared(too_close)
+          for (int m2 = 0; m2 < result_counter; m2++) {
+            if (too_close) continue;
+            arma::Mat<int> results_T = results.t();
+            count = 0;
+            m2_ptr = results_T.colptr(m2);
+            for (int n = 0; n < N1; n++) {
+              if (*(m1_ptr + n) == *(m2_ptr + n)) {
+                count++;
+              }
+            }
+            id = (double)count / N1;
+            if (id > within_threshold) {
+              too_close = true;
+            }
+          }
         }
       }
 
@@ -142,7 +157,7 @@ main(int argc, char* argv[])
     }
     output_stream.close();
   }
- 
+
   // {
   //   std::ofstream output_stream(outfile);
   //   char aa;
