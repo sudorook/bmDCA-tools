@@ -121,14 +121,14 @@ function make_figures() {
       -n msa_numerical.txt \
       -w sequence_weights.txt \
       -N "MC_samples_subset_${step}.txt" \
-      -t "${title} subset (b=${between} w=${within}), step ${step}" \
+      -t "${title}, subset (b=${between} w=${within}), step ${step}" \
       -o "${name}_${slug}_proj_subset_${step}.png" -b
     taskset --cpu-list "$cpulist" plot_distances \
       -n msa_numerical.txt \
       -l "msa" \
       -N "MC_samples_subset_${step}.txt" \
       -L "samples subset" \
-      -T "${title} subset (b=${between} w=${within}), step ${step}" -c
+      -T "${title}, subset (b=${between} w=${within}), step ${step}" -c
   fi
   echo
 
