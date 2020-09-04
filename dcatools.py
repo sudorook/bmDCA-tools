@@ -59,9 +59,11 @@ def reduce_h(h, norm=2, gap_pos=-1):
     return h_new
 
 
-def correct_frobenius_norm(frob_mat):
+def adjust_frobenius_norm(frob_mat, reflect=True):
     """ adjust Frobenius norm for sampling error """
     corr_mat = np.zeros(np.shape(frob_mat))
+    if reflect:
+        frob_mat = frob_mat + np.transpose(frob_mat)
     Npos = np.shape(frob_mat)[0]
     frob_mean = np.mean(frob_mat[:, :])
     for i in range(0, Npos):
