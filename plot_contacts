@@ -174,7 +174,7 @@ def main():
 
     J_2d = tools.reduce_J(J_truncate, "fro")
     J_2d_zg = tools.reduce_J(J_truncate, "fro", "zero-sum")
-    J_2d_zg = tools.correct_frobenius_norm(J_2d_zg)
+    J_2d_zg = tools.adjust_frobenius_norm(J_2d_zg)
     h_1d = tools.reduce_h(h_truncate)
 
     distmat_truncate = tools.subset_distance_matrix(
