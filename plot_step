@@ -10,6 +10,8 @@ function make_figures() {
   slug="$(echo "$description" | \
           sed -r s/λ/l/g | \
           sed -r s/α/a/g | \
+          sed -r s/β/b/g | \
+          sed -r s/γ/g/g | \
           iconv -t ascii//TRANSLIT | \
           sed -r s/[~\^]+//g | \
           sed -r s/[^a-zA-Z0-9]+/_/g | \
