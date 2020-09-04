@@ -4,6 +4,7 @@ DISTANCE := compare_distances
 MSACOMPARE := compare_msa_stats
 DMS := compute_dms
 DCS := compute_dcs
+SUBSET := subset_aligment
 PATHFINDER := compute_paths
 
 CC := g++
@@ -48,14 +49,23 @@ SOURCES_DCS = ${SRCPATH}/compute_dcs.cpp \
               ${SRCPATH}/utils.cpp
 OBJECTS_DCS = $(SOURCES_DCS:%.cpp=%.o)
 
+SOURCES_SUBSET = ${SRCPATH}/subset_alignment.cpp \
+                 ${SRCPATH}/msa.cpp \
+                 ${SRCPATH}/utils.cpp
+OBJECTS_SUBSET = $(SOURCES_SUBSET:%.cpp=%.o)
+
 SOURCES_PATHFINDER = ${SRCPATH}/compute_paths.cpp \
                      ${SRCPATH}/msa.cpp \
                      ${SRCPATH}/utils.cpp
 OBJECTS_PATHFINDER = $(SOURCES_PATHFINDER:%.cpp=%.o)
 
+SOURCES_Z = ${SRCPATH}/compute_z.cpp \
+            ${SRCPATH}/utils.cpp
+OBJECTS_Z = $(SOURCES_Z:%.cpp=%.o)
+
 .PHONY: all
 
-all: $(MSACOMPUTE) $(MSACOMPARE) $(ENERGY) $(DISTANCE) $(DMS) $(DCS) $(PATHFINDER)
+all: $(MSACOMPUTE) $(MSACOMPARE) $(ENERGY) $(DISTANCE) $(DMS) $(DCS) $(SUBSET) $(PATHFINDER)
 
 $(MSACOMPUTE): $(OBJECTS_MSACOMPUTE)
 	$(CC) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
@@ -75,6 +85,9 @@ $(DMS): $(OBJECTS_DMS)
 $(DCS): $(OBJECTS_DCS)
 	$(CC) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
+$(SUBSET): $(OBJECTS_SUBSET)
+	$(CC) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
+
 $(PATHFINDER): $(OBJECTS_PATHFINDER)
 	$(CC) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
@@ -87,6 +100,7 @@ clean:
 	rm -f $(DISTANCE)
 	rm -f $(DMS)
 	rm -f $(DCS)
+	rm -f $(SUBSET)
 	rm -f $(PATHFINDER)
 	rm -f $(OBJECTS_MSACOMPUTE)
 	rm -f $(OBJECTS_MSACOMPARE)
@@ -94,4 +108,5 @@ clean:
 	rm -f $(OBJECTS_DISTANCE)
 	rm -f $(OBJECTS_DMS)
 	rm -f $(OBJECTS_DCS)
+	rm -f $(OBJECTS_SUBSET)
 	rm -f $(OBJECTS_PATHFINDER)
