@@ -1,0 +1,209 @@
+#! /bin/bash
+set -eu
+source globals
+
+#
+# Functions
+#
+
+function check_input() {
+  if ! [[ -v OUTPUT ]]; then
+    show_error "ERROR: output file missing."
+    exit 3
+  fi
+
+  if ! [[ -v OUTPUT_ENERGY ]]; then
+    OUTPUT_ENERGY="${OUTPUT%.*}_energy.txt"
+  fi
+
+  if ! [[ -v MSA ]]; then
+    show_error "ERROR: input MSA missing."
+    exit 3
+  fi
+
+  if ! [[ -v MSA_REF ]]; then
+    show_error "ERROR: reference MSA missing."
+    exit 3
+  fi
+
+  if ! [[ -v BETWEEN ]]; then
+    BETWEEN=1
+  fi
+
+  if ! [[ -v WITHIN ]]; then
+    WITHIN=1
+  fi
+
+  if ! [[ -v PARAMS ]]; then
+    show_error "ERROR: parameter file(s) missing."
+    exit 3
+  fi
+}
+
+function compute_subset() {
+  local cmd
+  cmd="subset_alignment"
+
+  if [ "$MSA_NUMERIC" = true ]; then
+    cmd="${cmd} -n ${MSA}"
+  else
+    cmd="${cmd} -i ${MSA}"
+  fi
+
+  if [ "$MSA_REF_NUMERIC" = true ]; then
+    cmd="${cmd} -N ${MSA_REF}"
+  else
+    cmd="${cmd} -I ${MSA_REF}"
+  fi
+
+  cmd="${cmd} -o ${OUTPUT} -b ${BETWEEN} -w ${WITHIN}"
+  eval "${cmd}"
+}
+
+function compute_subset_energies() {
+  local cmd
+  cmd="compute_energies -n ${OUTPUT}"
+  if ! [[ -v PARAMS_J ]]; then
+    cmd="${cmd} -p ${PARAMS}"
+  else
+    cmd="${cmd} -p ${PARAMS} -P ${PARAMS_J}"
+  fi
+  cmd="${cmd} -o ${OUTPUT_ENERGY}"
+  eval "${cmd}"
+}
+
+function make_plots() {
+  local slug
+  slug="$(echo "$TITLE, $DESCRIPTION Subset (b=${BETWEEN} w=${WITHIN})" | \
+          sed -r s/λ/l/g | \
+          sed -r s/α/a/g | \
+          sed -r s/β/b/g | \
+          sed -r s/γ/g/g | \
+          iconv -t ascii//TRANSLIT | \
+          sed -r s/[~\^]+//g | \
+          sed -r s/[^a-zA-Z0-9]+/_/g | \
+          sed -r s/^-+\|-+$//g | tr "[:upper:]" "[:lower:]")"
+
+  plot_energy.py \
+    -e "${ENERGY_REF}" \
+    -e "${ENERGY}" \
+    -e "${OUTPUT_ENERGY}" \
+    -l "${LABEL_REF}" \
+    -l "${LABEL}" \
+    -l "${LABEL} Subset" \
+    -t "${TITLE}, ${DESCRIPTION} Subset (b=${BETWEEN} w=${WITHIN})" \
+    -o "${slug}_energy.png"
+
+  plot_msa_proj \
+    -n "${MSA_REF}" \
+    -w "${MSA_REF_WEIGHTS}" \
+    -N "${OUTPUT}" \
+    -t "${TITLE}, ${DESCRIPTION} Subset (b=${BETWEEN} w=${WITHIN})" -b
+
+  plot_distances \
+    -n "${MSA_REF}" \
+    -l "${LABEL_REF}" \
+    -N "${OUTPUT}" \
+    -L "${LABEL} (Subset)" \
+    -T "${TITLE}, ${DESCRIPTION} Subset (b=${BETWEEN} w=${WITHIN})" -c
+}
+
+
+#
+# Parse command line options
+#
+
+OPTIONS=i:I:n:N:b:w:o:O:p:P:t:d:e:E:l:L:W:
+LONGOPTIONS=msa_fasta:,msa_numeric:,msa_fasta_ref:,msa_numeric_ref:,between:,within:,output:,output_energy:,parameters:,parameters_J:,title:,description:,energy_msa:,energy_msa_ref:,msa_label:,msa_ref_label:,msa_weights:
+PARSED=$(getopt -o ${OPTIONS} --long ${LONGOPTIONS} -n "$0" -- "$@")
+eval set -- "$PARSED"
+while [ $# -ge 1 ]; do
+  case "$1" in
+    -i|--msa_fasta)
+      MSA="${2}"
+      MSA_NUMERIC=false
+      shift 2
+      ;;
+    -n|--msa_fasta_ref)
+      MSA="${2}"
+      MSA_NUMERIC=true
+      shift 2
+      ;;
+    -I|--msa_numeric)
+      MSA_REF="${2}"
+      MSA_REF_NUMERIC=false
+      shift 2
+      ;;
+    -N|--msa_numeric_ref)
+      MSA_REF="${2}"
+      MSA_REF_NUMERIC=true
+      shift 2
+      ;;
+    -W|--msa_ref_weights)
+      MSA_REF_WEIGHTS="${2}"
+      shift 2
+      ;;
+    -e|--msa_energy)
+      ENERGY="${2}"
+      shift 2
+      ;;
+    -E|--msa_ref_energy)
+      ENERGY_REF="${2}"
+      shift 2
+      ;;
+    -l|--msa_label)
+      LABEL="${2}"
+      shift 2
+      ;;
+    -L|--msa_ref_label)
+      LABEL_REF="${2}"
+      shift 2
+      ;;
+    -b|--between)
+      BETWEEN="${2}"
+      shift 2
+      ;;
+    -w|--within)
+      WITHIN="${2}"
+      shift 2
+      ;;
+    -o|--output)
+      OUTPUT="${2}"
+      shift 2
+      ;;
+    -O|--output_energy)
+      OUTPUT_ENERGY="${2}"
+      shift 2
+      ;;
+    -p|--parameters)
+      PARAMS="${2}"
+      shift 2
+      ;;
+    -P|--parameters_J)
+      PARAMS_J="${2}"
+      shift 2
+      ;;
+    -t|--title)
+      TITLE="${2}"
+      shift 2
+      ;;
+    -d|--description)
+      DESCRIPTION="${2}"
+      shift 2
+      ;;
+    --)
+      shift
+      break
+      ;;
+    *)
+      show_error "ERROR: unknown command line option."
+      print_usage
+      exit 3
+      ;;
+  esac
+done
+
+check_input
+compute_subset
+compute_subset_energies
+make_plots
