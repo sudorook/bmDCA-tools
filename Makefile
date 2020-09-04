@@ -4,7 +4,7 @@ DISTANCE := compare_distances
 MSACOMPARE := compare_msa_stats
 DMS := compute_dms
 DCS := compute_dcs
-SUBSET := subset_aligment
+SUBSET := subset_alignment
 PATHFINDER := compute_paths
 
 CC := g++
