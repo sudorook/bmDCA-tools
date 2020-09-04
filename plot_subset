@@ -104,7 +104,7 @@ function make_plots() {
     -n "${MSA_REF}" \
     -l "${LABEL_REF}" \
     -N "${OUTPUT}" \
-    -L "${LABEL} (Subset)" \
+    -L "${LABEL} Subset" \
     -T "${TITLE}, ${DESCRIPTION} Subset (b=${BETWEEN} w=${WITHIN})" -c
 }
 
