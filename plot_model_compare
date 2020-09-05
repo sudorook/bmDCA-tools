@@ -83,6 +83,14 @@ def parse_options():
         help="compare learn rates flag",
     )
     parser.add_argument(
+        "-m",
+        "--plot_moments",
+        dest="moment",
+        action="store_true",
+        default=False,
+        help="compare moments flag",
+    )
+    parser.add_argument(
         "-v",
         "--vertical",
         dest="vertical",
@@ -157,6 +165,7 @@ def main():
         options.grad is False
         and options.params is False
         and options.learn is False
+        and options.moment is False
     ):
         if file1 is None or file2 is None:
             sys.exit("Gotta plot something...")
@@ -242,6 +251,33 @@ def main():
                     dir2, "learning_rates_J_" + str(step2) + ".bin"
                 )
                 tools.arma2ascii(learn2_h, learn2_J)
+
+        if options.moment:
+            moment1 = os.path.join(
+                dir1, "moment1_" + str(step1) + ".txt"
+            )
+            moment2 = os.path.join(
+                dir2, "moment1_" + str(step2) + ".txt"
+            )
+            subplots.append(("momenting rate", moment1, moment2))
+
+            if not os.path.exists(moment1):
+                moment1_h = os.path.join(
+                    dir1, "moment1_h_" + str(step1) + ".bin"
+                )
+                moment1_J = os.path.join(
+                    dir1, "moment1_J_" + str(step1) + ".bin"
+                )
+                tools.arma2ascii(moment1_h, moment1_J)
+
+            if not os.path.exists(moment2):
+                moment2_h = os.path.join(
+                    dir2, "moment1_h_" + str(step2) + ".bin"
+                )
+                moment2_J = os.path.join(
+                    dir2, "moment1_J_" + str(step2) + ".bin"
+                )
+                tools.arma2ascii(moment2_h, moment2_J)
 
     subplots_count = len(subplots)
 
