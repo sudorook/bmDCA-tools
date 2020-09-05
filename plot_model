@@ -79,6 +79,14 @@ def parse_options():
         help="compare learn rates flag",
     )
     parser.add_argument(
+        "-m",
+        "--plot_moments",
+        dest="moment",
+        action="store_true",
+        default=False,
+        help="compare moments flag",
+    )
+    parser.add_argument(
         "-v",
         "--vertical",
         dest="vertical",
@@ -128,6 +136,7 @@ def main():
         options.grad is False
         and options.params is False
         and options.learn is False
+        and options.moment is False
     ):
         if infile is None:
             sys.exit("Gotta plot something...")
@@ -177,6 +186,19 @@ def main():
                     indir, "learning_rates_J_" + str(step) + ".bin"
                 )
                 tools.arma2ascii(learn_h, learn_J)
+
+        if options.moment:
+            moment = os.path.join(indir, "moment1_" + str(step) + ".txt")
+            subplots.append(("moment 1", moment))
+
+            if not os.path.exists(moment):
+                moment_h = os.path.join(
+                    indir, "moment1_h_" + str(step) + ".bin"
+                )
+                moment_J = os.path.join(
+                    indir, "moment1_J_" + str(step) + ".bin"
+                )
+                tools.arma2ascii(moment_h, moment_J)
 
     subplots_count = len(subplots)
 
