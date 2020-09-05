@@ -217,7 +217,7 @@ while [ $# -ge 1 ]; do
       break
       ;;
     *)
-      show_error "Error: unknown command line option."
+      show_error "ERROR: unknown command line option."
       print_usage
       exit 3
       ;;
@@ -227,6 +227,12 @@ done
 if ! [[ -v STEP ]]; then
   STEP="$(get_step)"
   echo "plotting step $STEP"
+else
+  CHECK_STEP="$(get_step)"
+  if [ "${STEP}" -gt "${CHECK_STEP}" ]; then
+    echo "ERROR: step $STEP has not been reached."
+    exit
+  fi
 fi
 
 if ! [[ -v NPROC ]]; then
