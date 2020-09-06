@@ -100,29 +100,29 @@ function make_figures() {
     -N msa_numerical.txt \
     -b "${between}" \
     -w "${within}" \
-    -o "MC_samples_subset_${step}.txt"
-  if [ "$(wc -l "MC_samples_subset_${step}.txt" | cut -d" " -f1)" -gt 1 ]
+    -o "MC_samples_${step}_subset.txt"
+  if [ "$(wc -l "MC_samples_${step}_subset.txt" | cut -d" " -f1)" -gt 1 ]
   then
     compute_energies \
-      -n "MC_samples_subset_${step}.txt" \
+      -n "MC_samples_${step}_subset.txt" \
       -p "parameters_h_${step}.bin" \
       -P "parameters_J_${step}.bin" \
-      -o "MC_energies_subset_${step}.txt"
+      -o "MC_energies_${step}_subset.txt"
     taskset --cpu-list "$cpulist" plot_energy.py \
       -e "msa_energies_${step}.txt" \
       -e "MC_energies_${step}.txt" \
-      -e "MC_energies_subset_${step}.txt" \
+      -e "MC_energies_${step}_subset.txt" \
       -l "msa" \
       -l "samples" \
       -l "samples subset" \
       -t "${title} subset (b=${between} w=${within}), step ${step}" \
-      -o "${name}_${slug}_energy_subset_${step}.png"
+      -o "${name}_${slug}_energy_${step}_subset.png"
     taskset --cpu-list "$cpulist" plot_msa_proj \
       -n msa_numerical.txt \
       -w sequence_weights.txt \
-      -N "MC_samples_subset_${step}.txt" \
+      -N "MC_samples_${step}_subset.txt" \
       -t "${title}, subset (b=${between} w=${within}), step ${step}" \
-      -o "${name}_${slug}_proj_subset_${step}.png" -b
+      -o "${name}_${slug}_proj_${step}_subset.png" -b
     # taskset --cpu-list "$cpulist" plot_distances \
     #   -n msa_numerical.txt \
     #   -l "msa" \
