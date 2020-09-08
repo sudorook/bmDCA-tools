@@ -51,7 +51,7 @@ function make_figures() {
     -w sequence_weights.txt \
     -N "MC_samples_${step}.txt" \
     -l "MSA" \
-    -L "MC" \
+    -L "Samples" \
     -T "${title}, step ${step}" -p 3 -c
 
   echo "pca projection"
@@ -123,6 +123,13 @@ function make_figures() {
       -N "MC_samples_${step}_subset.txt" \
       -t "${title}, subset (b=${between} w=${within}), step ${step}" \
       -o "${name}_${slug}_proj_${step}_subset.png" -b
+    plot_msa_compare \
+      -n msa_numerical.txt \
+      -w sequence_weights.txt \
+      -N "MC_samples_${step}_subset.txt" \
+      -l "MSA" \
+      -L "Samples Subset" \
+      -T "${title}, subset (b=${between} w=${within}), step ${step}" -p 3 -c
     # taskset --cpu-list "$cpulist" plot_distances \
     #   -n msa_numerical.txt \
     #   -l "msa" \
