@@ -100,6 +100,14 @@ function make_plots() {
     -N "${OUTPUT}" \
     -t "${TITLE}, ${DESCRIPTION} Subset (b=${BETWEEN} w=${WITHIN})" -b
 
+  plot_msa_compare \
+    -n "${MSA_REF}" \
+    -w "${MSA_REF_WEIGHTS}" \
+    -N "${OUTPUT}" \
+    -l "${LABEL_REF}" \
+    -L "${LABEL} Subset" \
+    -T "${TITLE}, ${DESCRIPTION} Subset (b=${BETWEEN} w=${WITHIN})" -p 3 -c
+
   plot_distances \
     -n "${MSA_REF}" \
     -l "${LABEL_REF}" \
