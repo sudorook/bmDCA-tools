@@ -4,6 +4,7 @@ DISTANCE := compare_distances
 MSACOMPARE := compare_msa_stats
 DMS := compute_dms
 DCS := compute_dcs
+AVERAGE := compute_average
 SUBSET := subset_alignment
 PATHFINDER := compute_paths
 
@@ -49,6 +50,10 @@ SOURCES_DCS = ${SRCPATH}/compute_dcs.cpp \
               ${SRCPATH}/utils.cpp
 OBJECTS_DCS = $(SOURCES_DCS:%.cpp=%.o)
 
+SOURCES_AVERAGE = ${SRCPATH}/average_models.cpp \
+                  ${SRCPATH}/utils.cpp
+OBJECTS_AVERAGE = $(SOURCES_AVERAGE:%.cpp=%.o)
+
 SOURCES_SUBSET = ${SRCPATH}/subset_alignment.cpp \
                  ${SRCPATH}/msa.cpp \
                  ${SRCPATH}/utils.cpp
@@ -65,7 +70,7 @@ OBJECTS_Z = $(SOURCES_Z:%.cpp=%.o)
 
 .PHONY: all
 
-all: $(MSACOMPUTE) $(MSACOMPARE) $(ENERGY) $(DISTANCE) $(DMS) $(DCS) $(SUBSET) $(PATHFINDER)
+all: $(MSACOMPUTE) $(MSACOMPARE) $(ENERGY) $(DISTANCE) $(DMS) $(DCS) $(AVERAGE) $(SUBSET) $(PATHFINDER)
 
 $(MSACOMPUTE): $(OBJECTS_MSACOMPUTE)
 	$(CC) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
@@ -85,6 +90,9 @@ $(DMS): $(OBJECTS_DMS)
 $(DCS): $(OBJECTS_DCS)
 	$(CC) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
+$(AVERAGE): $(OBJECTS_AVERAGE)
+	$(CC) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
+
 $(SUBSET): $(OBJECTS_SUBSET)
 	$(CC) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
@@ -100,6 +108,7 @@ clean:
 	rm -f $(DISTANCE)
 	rm -f $(DMS)
 	rm -f $(DCS)
+	rm -f $(AVERAGE)
 	rm -f $(SUBSET)
 	rm -f $(PATHFINDER)
 	rm -f $(OBJECTS_MSACOMPUTE)
@@ -108,5 +117,6 @@ clean:
 	rm -f $(OBJECTS_DISTANCE)
 	rm -f $(OBJECTS_DMS)
 	rm -f $(OBJECTS_DCS)
+	rm -f $(OBJECTS_AVERAGE)
 	rm -f $(OBJECTS_SUBSET)
 	rm -f $(OBJECTS_PATHFINDER)

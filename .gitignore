@@ -8,6 +8,7 @@ compute_energies
 compute_distances
 compare_distances
 compute_paths
+compute_average
 subset_alignment
 
 __pycache__/
