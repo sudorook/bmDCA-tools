@@ -257,11 +257,17 @@ def save_alignment(alignment, M, N, Q, filename):
 
 
 def save_sequences_fasta(sequence, sequence_file, sequence_format="fasta"):
-    """ Save sequences to disk. """
+    """ save sequences to disk """
     with open(sequence_file, "w") as handle:
         SeqIO.write(
             SeqRecord(sequence, id="PDB sequence"), handle, sequence_format
         )
+
+
+def save_alignment_fasta(alignment, filename, sequence_format="fasta"):
+    """ save FASTA alignment """
+    with open(filename, "w") as handle:
+        AlignIO.write(alignment, handle, format="fasta-2line")
 
 
 def save_parameters(h, J, M, N, Q, filename):
