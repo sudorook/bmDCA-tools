@@ -81,7 +81,7 @@ def load_sequence_weights_input(weight_file):
 def compute_sequence_weights_input(msa, Q=21):
     """ comptue seq weights_input """
     X2d = sca.alg2bin(msa, Q)
-    simMat = (X2d.dot(X2d.T)).todense() / msa.shape[1]
+    simMat = (X2d.dot(X2d.T)) / msa.shape[1]
     seqw = np.array(1 / (simMat > 0.8).sum(axis=0))
     #  return seqw[0] # ???
     return seqw  # ???
@@ -161,6 +161,7 @@ def main():
         print("subsetting the alignment...")
         msa_basis = sample_msa_weighted(msa_basis, msa_weights_basis, 10000)
         msa_weights_basis = compute_sequence_weights_input(msa_basis)
+        [M, N] = msa_basis.shape
 
     # compute eignvectors for the msa
     msa_sim = compute_sim_mat(msa_basis)
