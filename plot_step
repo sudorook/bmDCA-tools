@@ -63,13 +63,6 @@ function make_figures() {
     -o "${name}_${slug}_proj_${step}.png" -b
   echo
 
-  echo "model parameters"
-  plot_model \
-    -s "$step" \
-    -l "step $step" \
-    -t "$title" -p -g -v
-  echo
-
   echo "sequence energies"
   compute_energies \
     -n msa_numerical.txt \
@@ -83,6 +76,13 @@ function make_figures() {
     -l "samples" \
     -t "${title}, step ${step}" \
     -o "${name}_${slug}_energy_${step}.png"
+  echo
+
+  echo "model parameters"
+  plot_model \
+    -s "$step" \
+    -l "step $step" \
+    -t "$title" -p -g -v
   echo
 
   echo "compare sequence similarities"
