@@ -190,7 +190,7 @@ function get_step() {
 #
 
 OPTIONS=t:d:s:n:p:c:
-LONGOPTIONS=title:,description:,step:,nproc:,p:,c:
+LONGOPTIONS=title:,description:,step:,nproc:,pdb:,chain:
 PARSED=$(getopt -o ${OPTIONS} --long ${LONGOPTIONS} -n "$0" -- "$@")
 eval set -- "$PARSED"
 while [ $# -ge 1 ]; do
