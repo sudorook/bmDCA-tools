@@ -100,7 +100,7 @@ function make_figures() {
       -l "msa" \
       -l "msa (validation)" \
       -t "${title}, step ${step}" \
-      -o "${slug}_energy_${step}_validation.png"
+      -o "${slug}_energy_validation_${step}.png"
     echo
   fi
 
