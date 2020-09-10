@@ -21,6 +21,7 @@ function make_figures() {
   local nproc="$4"
   local pdb="$5"
   local chain="$6"
+  local validation="$7"
 
   local between=0.8
   local within=0.8
@@ -77,6 +78,31 @@ function make_figures() {
     -t "${title}, step ${step}" \
     -o "${name}_${slug}_energy_${step}.png"
   echo
+
+  if [[ "$validation" != "none" ]]; then
+    echo "validation alignment energies"
+    if [[ "${validation##*.}" == "fasta" ]]; then
+      compute_energies \
+        -i "${validation}" \
+        -p "parameters_h_${step}.bin" \
+        -P "parameters_J_${step}.bin" \
+        -o "msa_energies_${step}_validation.txt"
+    else
+      compute_energies \
+        -n "${validation}" \
+        -p "parameters_h_${step}.bin" \
+        -P "parameters_J_${step}.bin" \
+        -o "msa_energies_${step}_validation.txt"
+    fi
+    taskset --cpu-list "$cpulist" plot_energy.py \
+      -e "msa_energies_${step}.txt" \
+      -e "msa_energies_${step}_validation.txt" \
+      -l "msa" \
+      -l "msa (validation)" \
+      -t "${title}, step ${step}" \
+      -o "${name}_${slug}_energy_${step}_validation.png"
+    echo
+  fi
 
   echo "model parameters"
   plot_model \
@@ -189,8 +215,8 @@ function get_step() {
 # Parse command line options
 #
 
-OPTIONS=t:d:s:n:p:c:
-LONGOPTIONS=title:,description:,step:,nproc:,pdb:,chain:
+OPTIONS=t:d:s:n:p:c:v:
+LONGOPTIONS=title:,description:,step:,nproc:,pdb:,chain:,validation
 PARSED=$(getopt -o ${OPTIONS} --long ${LONGOPTIONS} -n "$0" -- "$@")
 eval set -- "$PARSED"
 while [ $# -ge 1 ]; do
@@ -217,6 +243,10 @@ while [ $# -ge 1 ]; do
       ;;
     -c|--chain)
       CHAIN="${2}"
+      shift 2
+      ;;
+    -v|--validation)
+      VALIDATION="${2}"
       shift 2
       ;;
     --)
@@ -254,4 +284,9 @@ if ! [[ -v CHAIN ]]; then
   CHAIN="A"
 fi
 
-make_figures "$TITLE" "$DESCRIPTION" "$STEP" "$NPROC" "$PDB" "$CHAIN"
+if ! [[ -v VALIDATION ]]; then
+  VALIDATION="none"
+fi
+
+make_figures \
+  "$TITLE" "$DESCRIPTION" "$STEP" "$NPROC" "$PDB" "$CHAIN" "$VALIDATION"
