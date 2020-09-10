@@ -7,7 +7,7 @@ function make_figures() {
   local title="$name, $description"
 
   local slug
-  slug="$(echo "$description" | \
+  slug="$(echo "$name, $description" | \
           sed -r s/λ/l/g | \
           sed -r s/α/a/g | \
           sed -r s/β/b/g | \
@@ -43,7 +43,7 @@ function make_figures() {
   done
 
   echo "run log"
-  plot_runlog -i bmdca_run.log -o "${name}_${slug}_runlog.png"
+  plot_runlog -i bmdca_run.log -o "${slug}_runlog.png"
   echo
 
   echo "stats comparison"
@@ -61,7 +61,7 @@ function make_figures() {
     -w sequence_weights.txt \
     -N "MC_samples_${step}.txt" \
     -t "${title}, step ${step}" \
-    -o "${name}_${slug}_proj_${step}.png" -b
+    -o "${slug}_proj_${step}.png" -b
   echo
 
   echo "sequence energies"
@@ -76,7 +76,7 @@ function make_figures() {
     -l "msa" \
     -l "samples" \
     -t "${title}, step ${step}" \
-    -o "${name}_${slug}_energy_${step}.png"
+    -o "${slug}_energy_${step}.png"
   echo
 
   if [[ "$validation" != "none" ]]; then
@@ -100,7 +100,7 @@ function make_figures() {
       -l "msa" \
       -l "msa (validation)" \
       -t "${title}, step ${step}" \
-      -o "${name}_${slug}_energy_${step}_validation.png"
+      -o "${slug}_energy_${step}_validation.png"
     echo
   fi
 
@@ -142,13 +142,13 @@ function make_figures() {
       -l "samples" \
       -l "samples subset" \
       -t "${title} subset (b=${between} w=${within}), step ${step}" \
-      -o "${name}_${slug}_energy_${step}_subset.png"
+      -o "${slug}_energy_${step}_subset.png"
     taskset --cpu-list "$cpulist" plot_msa_proj \
       -n msa_numerical.txt \
       -w sequence_weights.txt \
       -N "MC_samples_${step}_subset.txt" \
       -t "${title}, subset (b=${between} w=${within}), step ${step}" \
-      -o "${name}_${slug}_proj_${step}_subset.png" -b
+      -o "${slug}_proj_${step}_subset.png" -b
     plot_msa_compare \
       -n msa_numerical.txt \
       -w sequence_weights.txt \
@@ -200,7 +200,7 @@ function make_figures() {
       -l "samples step $prev_step" \
       -l "msa step $step" \
       -t "${title}, step ${prev_step} vs step ${step}" \
-      -o "${name}_${slug}_energy_compare_${prev_step}-vs-${step}.png"
+      -o "${slug}_energy_compare_${prev_step}-vs-${step}.png"
   fi
   echo
 }
