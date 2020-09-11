@@ -48,8 +48,12 @@ def main():
         df = pd.read_csv(options.input, sep="\t")[offset:]
     else:
         df = pd.read_csv(options.input, sep="\t")
+
     df["log10-burn-in"] = np.log10(df["burn-in"])
-    df["log10-burn-between"] = np.log10(df["burn-between"])
+    if np.sum(df["burn-between"] == 0) + np.sum(
+        df["burn-between"] == 1
+    ) != len(df["burn-between"]):
+        df["log10-burn-between"] = np.log10(df["burn-between"])
 
     # collect fields
     wants = [
