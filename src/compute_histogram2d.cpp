@@ -11,27 +11,44 @@
 #include "utils.hpp"
 
 #define NBINS 101
-  
-std::string
-generateOutputString(std::string name1, std::string name2) {
 
-  std::vector<std::string> seglist1;
+std::string
+generateOutputString(std::string name1, std::string name2)
+{
+
+  std::vector<std::string> dirlist1;
   {
     std::stringstream test(name1);
     std::string segment;
-    while(std::getline(test, segment, '_'))
-    {
-       seglist1.push_back(segment);
+    while (std::getline(test, segment, '/')) {
+      dirlist1.push_back(segment);
+    }
+  }
+
+  std::vector<std::string> seglist1;
+  {
+    std::stringstream test(dirlist1[dirlist1.size() - 1]);
+    std::string segment;
+    while (std::getline(test, segment, '_')) {
+      seglist1.push_back(segment);
+    }
+  }
+
+  std::vector<std::string> dirlist2;
+  {
+    std::stringstream test(name2);
+    std::string segment;
+    while (std::getline(test, segment, '/')) {
+      dirlist2.push_back(segment);
     }
   }
 
   std::vector<std::string> seglist2;
   {
-    std::stringstream test(name2);
+    std::stringstream test(dirlist2[dirlist2.size() - 1]);
     std::string segment;
-    while(std::getline(test, segment, '_'))
-    {
-       seglist2.push_back(segment);
+    while (std::getline(test, segment, '_')) {
+      seglist2.push_back(segment);
     }
   }
 
@@ -53,7 +70,7 @@ main(int argc, char* argv[])
   std::string params_file;
   std::string params_J_file;
   bool compat_mode = true;
-  
+
   std::string params2_file;
   std::string params2_J_file;
   bool compat2_mode = true;
@@ -98,9 +115,9 @@ main(int argc, char* argv[])
     hist_J_file = params_file.substr(0, idx2) + "_J" +
                   params_file.substr(idx2, idx - idx2) + "_hist.tsv";
     model_h_file = params_file.substr(0, idx2) + "_h" +
-                  params_file.substr(idx2, idx - idx2) + "_model.tsv";
+                   params_file.substr(idx2, idx - idx2) + "_model.tsv";
     model_J_file = params_file.substr(0, idx2) + "_J" +
-                  params_file.substr(idx2, idx - idx2) + "_model.tsv";
+                   params_file.substr(idx2, idx - idx2) + "_model.tsv";
   } else {
     params1 = loadPottsModel(params_file, params_J_file);
 
@@ -165,25 +182,27 @@ main(int argc, char* argv[])
       std::cerr << "ERROR: parameters dimension mismatch." << std::endl;
       std::exit(EXIT_FAILURE);
     }
-    if ((Q != (int)params1.J(0, 1).n_cols) | (Q != (int)params1.J(0, 1).n_rows)) {
+    if ((Q != (int)params1.J(0, 1).n_cols) |
+        (Q != (int)params1.J(0, 1).n_rows)) {
       std::cerr << "ERROR: parameters dimension mismatch." << std::endl;
       std::exit(EXIT_FAILURE);
     }
-  
+
     int Q2 = params2.h.n_rows;
     int N2 = params2.h.n_cols;
-    
+
     if ((N != N2) | (Q != Q2)) {
       std::cerr << "ERROR: two parameter sets have mismatched dimensions."
                 << std::endl;
       std::exit(EXIT_FAILURE);
     }
-    
+
     if ((N2 != (int)params2.J.n_rows) | (N2 != (int)params2.J.n_cols)) {
       std::cerr << "ERROR: parameters dimension mismatch." << std::endl;
       std::exit(EXIT_FAILURE);
     }
-    if ((Q2 != (int)params2.J(0, 1).n_cols) | (Q2 != (int)params2.J(0, 1).n_rows)) {
+    if ((Q2 != (int)params2.J(0, 1).n_cols) |
+        (Q2 != (int)params2.J(0, 1).n_rows)) {
       std::cerr << "ERROR: parameters dimension mismatch." << std::endl;
       std::exit(EXIT_FAILURE);
     }
@@ -205,7 +224,7 @@ main(int argc, char* argv[])
 
     double x_mean = arma::mean(arma::mean(params1.h));
     double y_mean = arma::mean(arma::mean(params2.h));
-    
+
     double xx = arma::accu(arma::pow((params1.h - x_mean), 2));
     double xy = arma::accu((params1.h - x_mean) % (params2.h - y_mean));
     double yy = arma::accu(arma::pow((params2.h - y_mean), 2));
@@ -217,7 +236,8 @@ main(int argc, char* argv[])
     model_h.b = b;
     model_h.R2 = pow(r, 2);
 
-    std::cout << "model h: y=" << b << "x+" << a << " (r=" << r << ")" << std::endl;
+    std::cout << "model h: y=" << b << "x+" << a << " (r=" << r << ")"
+              << std::endl;
 
     for (int i = 0; i < N; i++) {
       for (int a = 0; a < Q; a++) {
@@ -256,7 +276,8 @@ main(int argc, char* argv[])
       }
     }
     double x_mean = arma::accu(x_mean_mat) / (double)(N * (N - 1.) / 2.);
-    double y_mean = arma::accu(y_mean_mat) / (double)(N * (N - 1.) / 2.);;
+    double y_mean = arma::accu(y_mean_mat) / (double)(N * (N - 1.) / 2.);
+    ;
     arma::Mat<double> xx_mat = arma::Mat<double>(N, N, arma::fill::zeros);
     arma::Mat<double> xy_mat = arma::Mat<double>(N, N, arma::fill::zeros);
     arma::Mat<double> yy_mat = arma::Mat<double>(N, N, arma::fill::zeros);
@@ -280,7 +301,8 @@ main(int argc, char* argv[])
     model_J.b = b;
     model_J.R2 = pow(r, 2);
 
-    std::cout << "model J: y=" << b << "x+" << a << " (r=" << r << ")" << std::endl;
+    std::cout << "model J: y=" << b << "x+" << a << " (r=" << r << ")"
+              << std::endl;
 
     hist_J.grid =
       arma::Mat<unsigned long long int>(NBINS, NBINS, arma::fill::zeros);
