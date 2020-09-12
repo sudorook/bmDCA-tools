@@ -69,13 +69,13 @@ def parse_options():
 
 def load_sequences(seq_file):
     """ load sequences """
-    data = np.loadtxt(seq_file, dtype="float", skiprows=1)
+    data = np.loadtxt(seq_file, dtype=np.int16, skiprows=1)
     return data
 
 
 def load_sequence_weights_input(weight_file):
     """ load msa weights_input """
-    return np.loadtxt(weight_file, dtype="float")
+    return np.loadtxt(weight_file, dtype=np.float32)
 
 
 def compute_sequence_weights_input(msa, Q=21):
@@ -85,37 +85,6 @@ def compute_sequence_weights_input(msa, Q=21):
     seqw = np.array(1 / (simMat > 0.8).sum(axis=0))
     #  return seqw[0] # ???
     return seqw  # ???
-
-
-def compute_sim_mat(msa, Q=21):
-    """ Compute sequence similarity matrix """
-    [M, N] = msa.shape
-    Abin_tensor = np.zeros((Q, N, M))
-    for ia in range(Q):
-        Abin_tensor[ia, :, :] = (msa == ia + 1).T
-    #  Abin = sparsify(Abin_tensor.reshape(Q * N, M, order="F").T)
-    #  return (Abin.dot(Abin.T)).todense() / N
-    Abin = Abin_tensor.reshape(Q * N, M, order="F").T
-    return Abin.dot(Abin.T) / N
-
-
-def alg2bin(alg, N_aa=21):
-    """
-    Translate an alignment of matrix of size M sequences by L positions where
-    the amino acids are represented by numbers between 0 and N_aa (obtained
-    using lett2num) to a sparse binary array of size M x (N_aa x L).
-
-    **Example**::
-
-      Abin = alg2bin(alg, N_aa=20)
-    """
-
-    [N_seq, N_pos] = alg.shape
-    Abin_tensor = np.zeros((N_aa, N_pos, N_seq))
-    for ia in range(N_aa):
-        Abin_tensor[ia, :, :] = (alg == ia + 1).T
-    Abin = sparsify(Abin_tensor.reshape(N_aa * N_pos, N_seq, order="F").T)
-    return Abin
 
 
 def sample_msa_weighted(msa, weights_input, N):
@@ -155,17 +124,16 @@ def main():
     else:
         msa_weights_proj = np.ones(M2)
 
-    if M > 10000:
+    if M > 100000:
         # too many sequences, so subset the alignment and recompute the
         # weights_basis
         print("subsetting the alignment...")
-        msa_basis = sample_msa_weighted(msa_basis, msa_weights_basis, 10000)
+        msa_basis = sample_msa_weighted(msa_basis, msa_weights_basis, 100000)
         msa_weights_basis = compute_sequence_weights_input(msa_basis)
         [M, N] = msa_basis.shape
 
     # compute eignvectors for the msa
-    msa_sim = compute_sim_mat(msa_basis)
-    X2d = sca.alg2bin(msa_basis, 21)
+    X2d = sca.alg2binss(msa_basis, 21)
     X2dw = sparsify(np.diag(np.sqrt(msa_weights_basis))).dot(X2d)
     u, s, v = sca.svdss(X2dw, k=6)
 
