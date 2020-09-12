@@ -165,6 +165,54 @@ def cleanup(filenames):
         os.remove(f[2][1])
 
 
+def derive_file_names(model1, model2, model1_J=None, model2_J=None):
+    """ Match the output format in compute_histogram2d.cpp """
+    if model1_J is not None and model2_J is not None:
+        tmp1 = model1.split("/")[-1]
+        tmp1 = ".".join(tmp1.split(".")[0:-1])
+        tmp2 = model2.split("/")[-1]
+        tmp2 = ".".join(tmp2.split(".")[0:-1])
+        tmp1 = tmp1.split("_")
+        tmp2 = tmp2.split("_")
+        tmp = "_".join(
+            [tmp1[i] for i, _ in enumerate(tmp1) if tmp1[i] == tmp2[i]]
+        )
+
+        values_h_hist = tmp + "_hist.tsv"
+        values_h_model = tmp + "_model.tsv"
+
+        tmp1 = model1_J.split("/")[-1]
+        tmp1 = ".".join(tmp1.split(".")[0:-1])
+        tmp2 = model2_J.split("/")[-1]
+        tmp2 = ".".join(tmp2.split(".")[0:-1])
+        tmp1 = tmp1.split("_")
+        tmp2 = tmp2.split("_")
+        tmp = "_".join(
+            [tmp1[i] for i, _ in enumerate(tmp1) if tmp1[i] == tmp2[i]]
+        )
+
+        values_J_hist = tmp + "_hist.tsv"
+        values_J_model = tmp + "_model.tsv"
+    else:
+        tmp1 = model1.split("/")[-1]
+        tmp1 = ".".join(tmp1.split(".")[0:-1])
+        tmp2 = model2.split("/")[-1]
+        tmp2 = ".".join(tmp2.split(".")[0:-1])
+        tmp1 = tmp1.split("_")
+        tmp2 = tmp2.split("_")
+        tmp = "_".join(
+            [tmp1[i] for i, _ in enumerate(tmp1) if tmp1[i] == tmp2[i]]
+        )
+
+        tmp = tmp.split("_")
+        values_h_hist = "_".join(tmp[0:-1]) + "_h_" + tmp[-1] + "_hist.tsv"
+        values_h_model = "_".join(tmp[0:-1]) + "_h_" + tmp[-1] + "_model.tsv"
+        values_J_hist = "_".join(tmp[0:-1]) + "_J_" + tmp[-1] + "_hist.tsv"
+        values_J_model = "_".join(tmp[0:-1]) + "_J_" + tmp[-1] + "_model.tsv"
+
+    return values_h_hist, values_h_model, values_J_hist, values_J_model
+
+
 def main():
     """ do stuff """
     options = parse_options()
@@ -256,28 +304,7 @@ def main():
         if res != 0:
             sys.exit("Error generating input histograms. Exiting...")
 
-        if file1_J is not None and file2_J is not None:
-            tmp1 = ".".join(file1.split(".")[0:-1])
-            tmp2 = ".".join(file2.split(".")[0:-1])
-            tmp1 = tmp1.split("_")
-            tmp2 = tmp2.split("_")
-            tmp = "_".join(
-                [tmp1[i] for i, _ in enumerate(tmp1) if tmp1[i] == tmp2[i]]
-            )
-
-            values_h_hist = tmp + "_hist.tsv"
-            values_h_model = tmp + "_model.tsv"
-
-            tmp1 = ".".join(file1_J.split(".")[0:-1])
-            tmp2 = ".".join(file2_J.split(".")[0:-1])
-            tmp1 = tmp1.split("_")
-            tmp2 = tmp2.split("_")
-            tmp = "_".join(
-                [tmp1[i] for i, _ in enumerate(tmp1) if tmp1[i] == tmp2[i]]
-            )
-
-            values_J_hist = tmp + "_hist.tsv"
-            values_J_model = tmp + "_model.tsv"
+        values_h_hist, values_h_model, values_J_hist, values_J_model = derive_file_names(file1, file2, file1_J, file2_J)
 
         subplots.append(
             (
@@ -288,10 +315,11 @@ def main():
         )
     else:
         if options.params:
-            params_h_hist = os.path.join(dir1, "parameters_h_hist.tsv")
-            params_h_model = os.path.join(dir1, "parameters_h_model.tsv")
-            params_J_hist = os.path.join(dir1, "parameters_J_hist.tsv")
-            params_J_model = os.path.join(dir1, "parameters_J_model.tsv")
+            param1_h = os.path.join(dir1, "parameters_h_" + str(step1) + ".bin")
+            param1_J = os.path.join(dir1, "parameters_J_" + str(step1) + ".bin")
+            param2_h = os.path.join(dir2, "parameters_h_" + str(step2) + ".bin")
+            param2_J = os.path.join(dir2, "parameters_J_" + str(step2) + ".bin")
+            params_h_hist, params_h_model, params_J_hist, params_J_model = derive_file_names(param1_h, param2_h, param1_J, param2_J)
             subplots.append(
                 (
                     "parameters",
@@ -302,70 +330,60 @@ def main():
 
             command = [
                 "compute_histogram2d",
-                "-p",
-                "parameters_h_" + str(step1) + ".bin",
-                "-P",
-                "parameters_J_" + str(step1) + ".bin",
-                "-q",
-                "parameters_h_" + str(step2) + ".bin",
-                "-Q",
-                "parameters_J_" + str(step2) + ".bin",
+                "-p", param1_h,
+                "-P", param1_J,
+                "-q", param2_h,
+                "-Q", param2_J,
             ]
             res = subprocess.call(command)
             if res != 0:
                 sys.exit("Error generating parameter histograms. Exiting...")
 
         if options.grad:
-            grad_h_hist = os.path.join(dir1, "gradients_h_hist.tsv")
-            grad_h_model = os.path.join(dir1, "gradients_h_model.tsv")
-            grad_J_hist = os.path.join(dir1, "gradients_J_hist.tsv")
-            grad_J_model = os.path.join(dir1, "gradients_J_model.tsv")
+            grad1_h = os.path.join(dir1, "gradients_h_" + str(step1) + ".bin")
+            grad1_J = os.path.join(dir1, "gradients_J_" + str(step1) + ".bin")
+            grad2_h = os.path.join(dir2, "gradients_h_" + str(step2) + ".bin")
+            grad2_J = os.path.join(dir2, "gradients_J_" + str(step2) + ".bin")
+            grads_h_hist, grads_h_model, grads_J_hist, grads_J_model = derive_file_names(grad1_h, grad2_h, grad1_J, grad2_J)
             subplots.append(
                 (
                     "gradients",
-                    [grad_h_hist, grad_h_model],
-                    [grad_J_hist, grad_J_model],
+                    [grads_h_hist, grads_h_model],
+                    [grads_J_hist, grads_J_model],
                 )
             )
 
             command = [
                 "compute_histogram2d",
-                "-p",
-                "gradients_h_" + str(step1) + ".bin",
-                "-P",
-                "gradients_J_" + str(step1) + ".bin",
-                "-q",
-                "gradients_h_" + str(step2) + ".bin",
-                "-Q",
-                "gradients_J_" + str(step2) + ".bin",
+                "-p", grad1_h,
+                "-P", grad1_J,
+                "-q", grad2_h,
+                "-Q", grad2_J,
             ]
             res = subprocess.call(command)
             if res != 0:
                 sys.exit("Error generating gradient histograms. Exiting...")
 
         if options.learn:
-            learn_h_hist = os.path.join(dir1, "learning rates_h_hist.tsv")
-            learn_h_model = os.path.join(dir1, "learning rates_h_model.tsv")
-            learn_J_hist = os.path.join(dir1, "learning rates_J_hist.tsv")
-            learn_J_model = os.path.join(dir1, "learning rates_J_model.tsv")
+            param1_h = os.path.join(dir1, "learning_rates_h_" + str(step1) + ".bin")
+            param1_J = os.path.join(dir1, "learning_rates_J_" + str(step1) + ".bin")
+            param2_h = os.path.join(dir2, "learning_rates_h_" + str(step2) + ".bin")
+            param2_J = os.path.join(dir2, "learning_rates_J_" + str(step2) + ".bin")
+            params_h_hist, params_h_model, params_J_hist, params_J_model = derive_file_names(param1_h, param2_h, param1_J, param2_J)
             subplots.append(
                 (
-                    "learning rates",
-                    [learn_h_hist, learn_h_model],
-                    [learn_J_hist, learn_J_model],
+                    "learning_rates",
+                    [params_h_hist, params_h_model],
+                    [params_J_hist, params_J_model],
                 )
             )
 
             command = [
                 "compute_histogram2d",
-                "-p",
-                "learning rates_h_" + str(step1) + ".bin",
-                "-P",
-                "learning rates_J_" + str(step1) + ".bin",
-                "-q",
-                "learning rates_h_" + str(step2) + ".bin",
-                "-Q",
-                "learning rates_J_" + str(step2) + ".bin",
+                "-p", param1_h,
+                "-P", param1_J,
+                "-q", param2_h,
+                "-Q", param2_J,
             ]
             res = subprocess.call(command)
             if res != 0:
@@ -374,28 +392,25 @@ def main():
                 )
 
         if options.moment:
-            moment1_h_hist = os.path.join(dir1, "moment1_h_hist.tsv")
-            moment1_h_model = os.path.join(dir1, "moment1_h_model.tsv")
-            moment1_J_hist = os.path.join(dir1, "moment1_J_hist.tsv")
-            moment1_J_model = os.path.join(dir1, "moment1_J_model.tsv")
+            moment1_h = os.path.join(dir1, "moment1_h_" + str(step1) + ".bin")
+            moment1_J = os.path.join(dir1, "moment1_J_" + str(step1) + ".bin")
+            moment2_h = os.path.join(dir2, "moment1_h_" + str(step2) + ".bin")
+            moment2_J = os.path.join(dir2, "moment1_J_" + str(step2) + ".bin")
+            moments_h_hist, moments_h_model, moments_J_hist, moments_J_model = derive_file_names(moment1_h, moment2_h, moment1_J, moment2_J)
             subplots.append(
                 (
                     "moment1",
-                    [moment1_h_hist, moment1_h_model],
-                    [moment1_J_hist, moment1_J_model],
+                    [moments_h_hist, moments_h_model],
+                    [moments_J_hist, moments_J_model],
                 )
             )
 
             command = [
                 "compute_histogram2d",
-                "-p",
-                "moment1_h_" + str(step1) + ".bin",
-                "-P",
-                "moment1_J_" + str(step1) + ".bin",
-                "-q",
-                "moment1_h_" + str(step2) + ".bin",
-                "-Q",
-                "moment1_J_" + str(step2) + ".bin",
+                "-p", moment1_h,
+                "-P", moment1_J,
+                "-q", moment2_h,
+                "-Q", moment2_J,
             ]
             res = subprocess.call(command)
             if res != 0:
