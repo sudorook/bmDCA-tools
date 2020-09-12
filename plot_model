@@ -4,9 +4,9 @@
 import argparse
 import os
 import sys
+import subprocess
 import numpy as np
 import pandas as pd
-import statsmodels.formula.api as sm
 import matplotlib
 
 import dcatools as tools
@@ -32,6 +32,13 @@ def parse_options():
         dest="input",
         required=False,
         help="input",
+    )
+    parser.add_argument(
+        "-I",
+        "--input2",
+        dest="input2",
+        required=False,
+        help="input2",
     )
     parser.add_argument(
         "-d",
@@ -94,7 +101,43 @@ def parse_options():
         default=False,
         help="orient plots vertically",
     )
+    parser.add_argument(
+        "-c",
+        "--cleanup",
+        dest="cleanup",
+        action="store_true",
+        default=False,
+        help="delete intermediate files",
+    )
+    parser.add_argument(
+        "-b",
+        "--bins",
+        dest="bins",
+        default=51,
+        help="orient plots vertically",
+    )
     return parser.parse_args()
+
+
+def load_histogram_1d(filename, names):
+    """ load histogram grid and counts """
+    data_df = pd.read_csv(
+        filename,
+        sep="\t",
+        names=names,
+        dtype={
+            names[0]: np.float64,
+            names[1]: np.int64,
+        },
+    )
+    return data_df
+
+
+def cleanup(filenames):
+    """ delete list of files """
+    for f in filenames:
+        os.remove(f[1])
+        os.remove(f[2])
 
 
 def main():
@@ -106,6 +149,10 @@ def main():
         infile = None
     elif options.input is not None:
         infile = options.input
+        if options.input2 is not None:
+            infile2 = options.input2
+        else:
+            infile2 = None
 
     if options.dir is not None:
         if os.path.isdir(options.dir):
@@ -144,61 +191,74 @@ def main():
     subplots = []
 
     if infile is not None:
-        subplots.append(("values", infile))
+        command = ["compute_histogram", "-p", infile]
+
+        if infile2 is not None:
+            command.append("-P")
+            command.append(infile2)
+
+        res = subprocess.call(command)
+        if res != 0:
+            sys.exit("Error generating input histograms. Exiting...")
+
+        if infile2 is not None:
+            infile_h = ".".join(infile.split(".")[0:-1]) + "_hist.tsv"
+            infile_J = ".".join(infile2.split(".")[0:-1]) + "_hist.tsv"
+        else:
+            tmp = ".".join(infile.split(".")[0:-1])
+            tmp = tmp.split("_")
+            infile_h = "_".join(tmp[0:-1]) + "_h_" + tmp[-1] + "_hist.tsv"
+            infile_J = "_".join(tmp[0:-1]) + "_J_" + tmp[-1] + "_hist.tsv"
+
+        subplots.append(("values", infile_h, infile_J))
     else:
         if options.params:
-            params = os.path.join(indir, "parameters_" + str(step) + ".txt")
-            subplots.append(("parameters", params))
+            param_h = os.path.join(indir, "parameters_h_" + str(step) + "_hist.tsv")
+            param_J = os.path.join(indir, "parameters_J_" + str(step) + "_hist.tsv")
+            subplots.append(("parameters", param_h, param_J))
 
-            if not os.path.exists(params):
-                params_h = os.path.join(
-                    indir, "parameters_h_" + str(step) + ".bin"
-                )
-                params_J = os.path.join(
-                    indir, "parameters_J_" + str(step) + ".bin"
-                )
-                res = tools.arma2ascii(params_h, params_J)
-                if res != 0:
-                    sys.exit("Error converting " + params + ". Exiting...")
+            command = ["compute_histogram",
+                       "-p", "parameters_h_" + str(step) + ".bin",
+                       "-P", "parameters_J_" + str(step) + ".bin"]
+            res = subprocess.call(command)
+            if res != 0:
+                sys.exit("Error generating gradient histograms. Exiting...")
 
         if options.grad:
-            grad = os.path.join(indir, "gradients_" + str(step) + ".txt")
-            subplots.append(("gradient", grad))
+            grad_h = os.path.join(indir, "gradients_h_" + str(step) + "_hist.tsv")
+            grad_J = os.path.join(indir, "gradients_J_" + str(step) + "_hist.tsv")
+            subplots.append(("gradient", grad_h, grad_J))
 
-            if not os.path.exists(grad):
-                grad_h = os.path.join(
-                    indir, "gradients_h_" + str(step) + ".bin"
-                )
-                grad_J = os.path.join(
-                    indir, "gradients_J_" + str(step) + ".bin"
-                )
-                tools.arma2ascii(grad_h, grad_J)
+            command = ["compute_histogram",
+                       "-p", "gradients_h_" + str(step) + ".bin",
+                       "-P", "gradients_J_" + str(step) + ".bin"]
+            res = subprocess.call(command)
+            if res != 0:
+                sys.exit("Error generating gradient histograms. Exiting...")
 
         if options.learn:
-            learn = os.path.join(indir, "learning_rates_" + str(step) + ".txt")
-            subplots.append(("learning rate", learn))
+            learn_h = os.path.join(indir, "learning_rates_h_" + str(step) + "_hist.tsv")
+            learn_J = os.path.join(indir, "learning_rates_J_" + str(step) + "_hist.tsv")
+            subplots.append(("learning rate", learn_h, learn_J))
 
-            if not os.path.exists(learn):
-                learn_h = os.path.join(
-                    indir, "learning_rates_h_" + str(step) + ".bin"
-                )
-                learn_J = os.path.join(
-                    indir, "learning_rates_J_" + str(step) + ".bin"
-                )
-                tools.arma2ascii(learn_h, learn_J)
+            command = ["compute_histogram",
+                       "-p", "learning_rates_h_" + str(step) + ".bin",
+                       "-P", "learning_rates_J_" + str(step) + ".bin"]
+            res = subprocess.call(command)
+            if res != 0:
+                sys.exit("Error generating learning rate histograms. Exiting...")
 
         if options.moment:
-            moment = os.path.join(indir, "moment1_" + str(step) + ".txt")
-            subplots.append(("moment 1", moment))
+            moment1_h = os.path.join(indir, "moment1_h_" + str(step) + "_hist.tsv")
+            moment1_J = os.path.join(indir, "moment1_J_" + str(step) + "_hist.tsv")
+            subplots.append(("moment 1", moment1_h, moment1_J))
 
-            if not os.path.exists(moment):
-                moment_h = os.path.join(
-                    indir, "moment1_h_" + str(step) + ".bin"
-                )
-                moment_J = os.path.join(
-                    indir, "moment1_J_" + str(step) + ".bin"
-                )
-                tools.arma2ascii(moment_h, moment_J)
+            command = ["compute_histogram",
+                       "-p", "moment1_h_" + str(step) + ".bin",
+                       "-P", "moment1_J_" + str(step) + ".bin"]
+            res = subprocess.call(command)
+            if res != 0:
+                sys.exit("Error generating moment 1 histograms. Exiting...")
 
     subplots_count = len(subplots)
 
@@ -226,17 +286,8 @@ def main():
             axes.yaxis.labelpad = 20
 
         for idx, s in enumerate(subplots):
-            h, J = tools.load_model(s[1])
-
-            h_1d = h.flatten()
-            J_1d = J.flatten()
-
-            df_h = pd.DataFrame(
-                data={
-                    "h": h_1d,
-                }
-            )
-            df_J = pd.DataFrame(data={"J": J_1d})
+            df_h = load_histogram_1d(filename=s[1], names=["h " + s[0], "Count"])
+            df_J = load_histogram_1d(filename=s[2], names=["J " + s[0], "Count"])
 
             if options.vertical:
                 ax = fig.add_subplot(
@@ -247,9 +298,11 @@ def main():
                     int("2" + str(subplots_count) + str(idx + 1))
                 )
 
-            df_h.hist(
-                ax=ax,
+            ax.hist(
+                x=df_h["h " + s[0]],
+                weights=df_h["Count"],
                 alpha=0.5,
+                bins=options.bins,
                 zorder=1,
             )
             ax.set_title(
@@ -270,19 +323,24 @@ def main():
                     )
                 )
 
-            df_J.hist(
-                ax=ax,
+            ax.hist(
+                x=df_J["J " + s[0]],
+                weights=df_J["Count"],
                 alpha=0.5,
+                bins=options.bins,
                 zorder=1,
             )
             ax.set_title(
                 s[0] + " J",
                 fontsize=plt.rcParams["axes.titlesize"],
             )
+            #  ax.set_yscale('log')
 
         fig.tight_layout()
         fig.savefig(title_prefix + prefix + ".png")
 
+    if options.cleanup:
+        cleanup(subplots)
 
 if __name__ == "__main__":
     main()
