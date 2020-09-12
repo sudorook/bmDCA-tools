@@ -304,7 +304,12 @@ def main():
         if res != 0:
             sys.exit("Error generating input histograms. Exiting...")
 
-        values_h_hist, values_h_model, values_J_hist, values_J_model = derive_file_names(file1, file2, file1_J, file2_J)
+        (
+            values_h_hist,
+            values_h_model,
+            values_J_hist,
+            values_J_model,
+        ) = derive_file_names(file1, file2, file1_J, file2_J)
 
         subplots.append(
             (
@@ -315,11 +320,24 @@ def main():
         )
     else:
         if options.params:
-            param1_h = os.path.join(dir1, "parameters_h_" + str(step1) + ".bin")
-            param1_J = os.path.join(dir1, "parameters_J_" + str(step1) + ".bin")
-            param2_h = os.path.join(dir2, "parameters_h_" + str(step2) + ".bin")
-            param2_J = os.path.join(dir2, "parameters_J_" + str(step2) + ".bin")
-            params_h_hist, params_h_model, params_J_hist, params_J_model = derive_file_names(param1_h, param2_h, param1_J, param2_J)
+            param1_h = os.path.join(
+                dir1, "parameters_h_" + str(step1) + ".bin"
+            )
+            param1_J = os.path.join(
+                dir1, "parameters_J_" + str(step1) + ".bin"
+            )
+            param2_h = os.path.join(
+                dir2, "parameters_h_" + str(step2) + ".bin"
+            )
+            param2_J = os.path.join(
+                dir2, "parameters_J_" + str(step2) + ".bin"
+            )
+            (
+                params_h_hist,
+                params_h_model,
+                params_J_hist,
+                params_J_model,
+            ) = derive_file_names(param1_h, param2_h, param1_J, param2_J)
             subplots.append(
                 (
                     "parameters",
@@ -330,10 +348,14 @@ def main():
 
             command = [
                 "compute_histogram2d",
-                "-p", param1_h,
-                "-P", param1_J,
-                "-q", param2_h,
-                "-Q", param2_J,
+                "-p",
+                param1_h,
+                "-P",
+                param1_J,
+                "-q",
+                param2_h,
+                "-Q",
+                param2_J,
             ]
             res = subprocess.call(command)
             if res != 0:
@@ -344,7 +366,12 @@ def main():
             grad1_J = os.path.join(dir1, "gradients_J_" + str(step1) + ".bin")
             grad2_h = os.path.join(dir2, "gradients_h_" + str(step2) + ".bin")
             grad2_J = os.path.join(dir2, "gradients_J_" + str(step2) + ".bin")
-            grads_h_hist, grads_h_model, grads_J_hist, grads_J_model = derive_file_names(grad1_h, grad2_h, grad1_J, grad2_J)
+            (
+                grads_h_hist,
+                grads_h_model,
+                grads_J_hist,
+                grads_J_model,
+            ) = derive_file_names(grad1_h, grad2_h, grad1_J, grad2_J)
             subplots.append(
                 (
                     "gradients",
@@ -355,21 +382,38 @@ def main():
 
             command = [
                 "compute_histogram2d",
-                "-p", grad1_h,
-                "-P", grad1_J,
-                "-q", grad2_h,
-                "-Q", grad2_J,
+                "-p",
+                grad1_h,
+                "-P",
+                grad1_J,
+                "-q",
+                grad2_h,
+                "-Q",
+                grad2_J,
             ]
             res = subprocess.call(command)
             if res != 0:
                 sys.exit("Error generating gradient histograms. Exiting...")
 
         if options.learn:
-            param1_h = os.path.join(dir1, "learning_rates_h_" + str(step1) + ".bin")
-            param1_J = os.path.join(dir1, "learning_rates_J_" + str(step1) + ".bin")
-            param2_h = os.path.join(dir2, "learning_rates_h_" + str(step2) + ".bin")
-            param2_J = os.path.join(dir2, "learning_rates_J_" + str(step2) + ".bin")
-            params_h_hist, params_h_model, params_J_hist, params_J_model = derive_file_names(param1_h, param2_h, param1_J, param2_J)
+            param1_h = os.path.join(
+                dir1, "learning_rates_h_" + str(step1) + ".bin"
+            )
+            param1_J = os.path.join(
+                dir1, "learning_rates_J_" + str(step1) + ".bin"
+            )
+            param2_h = os.path.join(
+                dir2, "learning_rates_h_" + str(step2) + ".bin"
+            )
+            param2_J = os.path.join(
+                dir2, "learning_rates_J_" + str(step2) + ".bin"
+            )
+            (
+                params_h_hist,
+                params_h_model,
+                params_J_hist,
+                params_J_model,
+            ) = derive_file_names(param1_h, param2_h, param1_J, param2_J)
             subplots.append(
                 (
                     "learning_rates",
@@ -380,10 +424,14 @@ def main():
 
             command = [
                 "compute_histogram2d",
-                "-p", param1_h,
-                "-P", param1_J,
-                "-q", param2_h,
-                "-Q", param2_J,
+                "-p",
+                param1_h,
+                "-P",
+                param1_J,
+                "-q",
+                param2_h,
+                "-Q",
+                param2_J,
             ]
             res = subprocess.call(command)
             if res != 0:
@@ -396,7 +444,12 @@ def main():
             moment1_J = os.path.join(dir1, "moment1_J_" + str(step1) + ".bin")
             moment2_h = os.path.join(dir2, "moment1_h_" + str(step2) + ".bin")
             moment2_J = os.path.join(dir2, "moment1_J_" + str(step2) + ".bin")
-            moments_h_hist, moments_h_model, moments_J_hist, moments_J_model = derive_file_names(moment1_h, moment2_h, moment1_J, moment2_J)
+            (
+                moments_h_hist,
+                moments_h_model,
+                moments_J_hist,
+                moments_J_model,
+            ) = derive_file_names(moment1_h, moment2_h, moment1_J, moment2_J)
             subplots.append(
                 (
                     "moment1",
@@ -407,10 +460,14 @@ def main():
 
             command = [
                 "compute_histogram2d",
-                "-p", moment1_h,
-                "-P", moment1_J,
-                "-q", moment2_h,
-                "-Q", moment2_J,
+                "-p",
+                moment1_h,
+                "-P",
+                moment1_J,
+                "-q",
+                moment2_h,
+                "-Q",
+                moment2_J,
             ]
             res = subprocess.call(command)
             if res != 0:
