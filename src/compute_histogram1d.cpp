@@ -1,6 +1,6 @@
 #include <armadillo>
-#include <cstdlib>
 #include <cmath>
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -18,7 +18,7 @@ main(int argc, char* argv[])
   std::string params_file;
   std::string params_J_file;
   bool compat_mode = true;
-  
+
   std::string output_h_file;
   std::string output_J_file;
 
@@ -57,7 +57,7 @@ main(int argc, char* argv[])
     output_h_file = params_file.substr(0, idx_h) + "_hist.tsv";
     output_J_file = params_J_file.substr(0, idx_J) + "_hist.tsv";
   }
-  
+
   int Q = params.h.n_rows;
   int N = params.h.n_cols;
 
@@ -96,7 +96,7 @@ main(int argc, char* argv[])
     double J_min = 0;
     double J_max = 0;
     for (int i = 0; i < N; i++) {
-      for (int j = i + 1 ; j < N; j++) {
+      for (int j = i + 1; j < N; j++) {
         if ((i == 0) & (j == 1)) {
           J_min = params.J(i, j).min();
           J_max = params.J(i, j).max();
@@ -119,7 +119,7 @@ main(int argc, char* argv[])
     hist_J.bin_width = bin_width;
     hist_J.max = J_max + .025 * (J_max - J_min);
     hist_J.min = J_min - .025 * (J_max - J_min);
-    
+
     for (int i = 0; i < N; i++) {
       for (int j = i + 1; j < N; j++) {
         for (int a = 0; a < Q; a++) {

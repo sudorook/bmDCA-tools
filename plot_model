@@ -213,49 +213,83 @@ def main():
         subplots.append(("values", infile_h, infile_J))
     else:
         if options.params:
-            param_h = os.path.join(indir, "parameters_h_" + str(step) + "_hist.tsv")
-            param_J = os.path.join(indir, "parameters_J_" + str(step) + "_hist.tsv")
+            param_h = os.path.join(
+                indir, "parameters_h_" + str(step) + "_hist.tsv"
+            )
+            param_J = os.path.join(
+                indir, "parameters_J_" + str(step) + "_hist.tsv"
+            )
             subplots.append(("parameters", param_h, param_J))
 
-            command = ["compute_histogram",
-                       "-p", "parameters_h_" + str(step) + ".bin",
-                       "-P", "parameters_J_" + str(step) + ".bin"]
+            command = [
+                "compute_histogram",
+                "-p",
+                "parameters_h_" + str(step) + ".bin",
+                "-P",
+                "parameters_J_" + str(step) + ".bin",
+            ]
             res = subprocess.call(command)
             if res != 0:
                 sys.exit("Error generating gradient histograms. Exiting...")
 
         if options.grad:
-            grad_h = os.path.join(indir, "gradients_h_" + str(step) + "_hist.tsv")
-            grad_J = os.path.join(indir, "gradients_J_" + str(step) + "_hist.tsv")
+            grad_h = os.path.join(
+                indir, "gradients_h_" + str(step) + "_hist.tsv"
+            )
+            grad_J = os.path.join(
+                indir, "gradients_J_" + str(step) + "_hist.tsv"
+            )
             subplots.append(("gradient", grad_h, grad_J))
 
-            command = ["compute_histogram",
-                       "-p", "gradients_h_" + str(step) + ".bin",
-                       "-P", "gradients_J_" + str(step) + ".bin"]
+            command = [
+                "compute_histogram",
+                "-p",
+                "gradients_h_" + str(step) + ".bin",
+                "-P",
+                "gradients_J_" + str(step) + ".bin",
+            ]
             res = subprocess.call(command)
             if res != 0:
                 sys.exit("Error generating gradient histograms. Exiting...")
 
         if options.learn:
-            learn_h = os.path.join(indir, "learning_rates_h_" + str(step) + "_hist.tsv")
-            learn_J = os.path.join(indir, "learning_rates_J_" + str(step) + "_hist.tsv")
+            learn_h = os.path.join(
+                indir, "learning_rates_h_" + str(step) + "_hist.tsv"
+            )
+            learn_J = os.path.join(
+                indir, "learning_rates_J_" + str(step) + "_hist.tsv"
+            )
             subplots.append(("learning rate", learn_h, learn_J))
 
-            command = ["compute_histogram",
-                       "-p", "learning_rates_h_" + str(step) + ".bin",
-                       "-P", "learning_rates_J_" + str(step) + ".bin"]
+            command = [
+                "compute_histogram",
+                "-p",
+                "learning_rates_h_" + str(step) + ".bin",
+                "-P",
+                "learning_rates_J_" + str(step) + ".bin",
+            ]
             res = subprocess.call(command)
             if res != 0:
-                sys.exit("Error generating learning rate histograms. Exiting...")
+                sys.exit(
+                    "Error generating learning rate histograms. Exiting..."
+                )
 
         if options.moment:
-            moment1_h = os.path.join(indir, "moment1_h_" + str(step) + "_hist.tsv")
-            moment1_J = os.path.join(indir, "moment1_J_" + str(step) + "_hist.tsv")
+            moment1_h = os.path.join(
+                indir, "moment1_h_" + str(step) + "_hist.tsv"
+            )
+            moment1_J = os.path.join(
+                indir, "moment1_J_" + str(step) + "_hist.tsv"
+            )
             subplots.append(("moment 1", moment1_h, moment1_J))
 
-            command = ["compute_histogram",
-                       "-p", "moment1_h_" + str(step) + ".bin",
-                       "-P", "moment1_J_" + str(step) + ".bin"]
+            command = [
+                "compute_histogram",
+                "-p",
+                "moment1_h_" + str(step) + ".bin",
+                "-P",
+                "moment1_J_" + str(step) + ".bin",
+            ]
             res = subprocess.call(command)
             if res != 0:
                 sys.exit("Error generating moment 1 histograms. Exiting...")
@@ -286,8 +320,12 @@ def main():
             axes.yaxis.labelpad = 20
 
         for idx, s in enumerate(subplots):
-            df_h = load_histogram_1d(filename=s[1], names=["h " + s[0], "Count"])
-            df_J = load_histogram_1d(filename=s[2], names=["J " + s[0], "Count"])
+            df_h = load_histogram_1d(
+                filename=s[1], names=["h " + s[0], "Count"]
+            )
+            df_J = load_histogram_1d(
+                filename=s[2], names=["J " + s[0], "Count"]
+            )
 
             if options.vertical:
                 ax = fig.add_subplot(
@@ -341,6 +379,7 @@ def main():
 
     if options.cleanup:
         cleanup(subplots)
+
 
 if __name__ == "__main__":
     main()
