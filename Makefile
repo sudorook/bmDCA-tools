@@ -5,6 +5,7 @@ MSACOMPARE := compare_msa_stats
 DMS := compute_dms
 DCS := compute_dcs
 HIST1D := compute_histogram
+HIST2D := compute_histogram2d
 AVERAGE := compute_average
 SUBSET := subset_alignment
 PATHFINDER := compute_paths
@@ -55,6 +56,10 @@ SOURCES_HIST1D = ${SRCPATH}/compute_histogram1d.cpp \
                  ${SRCPATH}/utils.cpp
 OBJECTS_HIST1D = $(SOURCES_HIST1D:%.cpp=%.o)
 
+SOURCES_HIST2D = ${SRCPATH}/compute_histogram2d.cpp \
+                 ${SRCPATH}/utils.cpp
+OBJECTS_HIST2D = $(SOURCES_HIST2D:%.cpp=%.o)
+
 SOURCES_AVERAGE = ${SRCPATH}/average_models.cpp \
                   ${SRCPATH}/utils.cpp
 OBJECTS_AVERAGE = $(SOURCES_AVERAGE:%.cpp=%.o)
@@ -75,7 +80,7 @@ OBJECTS_Z = $(SOURCES_Z:%.cpp=%.o)
 
 .PHONY: all
 
-all: $(MSACOMPUTE) $(MSACOMPARE) $(ENERGY) $(DISTANCE) $(DMS) $(DCS) $(HIST1D) $(AVERAGE) $(SUBSET) $(PATHFINDER)
+all: $(MSACOMPUTE) $(MSACOMPARE) $(ENERGY) $(DISTANCE) $(DMS) $(DCS) $(HIST1D) $(HIST2D) $(AVERAGE) $(SUBSET) $(PATHFINDER)
 
 $(MSACOMPUTE): $(OBJECTS_MSACOMPUTE)
 	$(CC) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
@@ -98,6 +103,9 @@ $(DCS): $(OBJECTS_DCS)
 $(HIST1D): $(OBJECTS_HIST1D)
 	$(CC) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
+$(HIST2D): $(OBJECTS_HIST2D)
+	$(CC) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
+
 $(AVERAGE): $(OBJECTS_AVERAGE)
 	$(CC) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
@@ -117,6 +125,7 @@ clean:
 	rm -f $(DMS)
 	rm -f $(DCS)
 	rm -f $(HIST1D)
+	rm -f $(HIST2D)
 	rm -f $(AVERAGE)
 	rm -f $(SUBSET)
 	rm -f $(PATHFINDER)
@@ -127,6 +136,7 @@ clean:
 	rm -f $(OBJECTS_DMS)
 	rm -f $(OBJECTS_DCS)
 	rm -f $(OBJECTS_HIST1D)
+	rm -f $(OBJECTS_HIST2D)
 	rm -f $(OBJECTS_AVERAGE)
 	rm -f $(OBJECTS_SUBSET)
 	rm -f $(OBJECTS_PATHFINDER)

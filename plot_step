@@ -184,7 +184,7 @@ function make_figures() {
       -s "$step" \
       -l "step $prev_step" \
       -l "step $step" \
-      -t "$title" -p -g -v
+      -t "$title" -p -g -v -c
     echo
 
     echo "sequence energy comparisons"
