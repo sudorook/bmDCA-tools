@@ -7,7 +7,7 @@ import sys
 import subprocess
 import numpy as np
 import pandas as pd
-#  import statsmodels.formula.api as sm
+
 import matplotlib
 
 import dcatools as tools
@@ -261,7 +261,9 @@ def main():
             tmp2 = ".".join(file2.split(".")[0:-1])
             tmp1 = tmp1.split("_")
             tmp2 = tmp2.split("_")
-            tmp = "_".join([tmp1[i] for i, _ in enumerate(tmp1) if tmp1[i] == tmp2[i]])
+            tmp = "_".join(
+                [tmp1[i] for i, _ in enumerate(tmp1) if tmp1[i] == tmp2[i]]
+            )
 
             values_h_hist = tmp + "_hist.tsv"
             values_h_model = tmp + "_model.tsv"
@@ -270,19 +272,33 @@ def main():
             tmp2 = ".".join(file2_J.split(".")[0:-1])
             tmp1 = tmp1.split("_")
             tmp2 = tmp2.split("_")
-            tmp = "_".join([tmp1[i] for i, _ in enumerate(tmp1) if tmp1[i] == tmp2[i]])
+            tmp = "_".join(
+                [tmp1[i] for i, _ in enumerate(tmp1) if tmp1[i] == tmp2[i]]
+            )
 
             values_J_hist = tmp + "_hist.tsv"
             values_J_model = tmp + "_model.tsv"
 
-        subplots.append(("values", [values_h_hist, values_h_model], [values_J_hist, values_J_model]))
+        subplots.append(
+            (
+                "values",
+                [values_h_hist, values_h_model],
+                [values_J_hist, values_J_model],
+            )
+        )
     else:
         if options.params:
             params_h_hist = os.path.join(dir1, "parameters_h_hist.tsv")
             params_h_model = os.path.join(dir1, "parameters_h_model.tsv")
             params_J_hist = os.path.join(dir1, "parameters_J_hist.tsv")
             params_J_model = os.path.join(dir1, "parameters_J_model.tsv")
-            subplots.append(("parameters", [params_h_hist, params_h_model], [params_J_hist, params_J_model]))
+            subplots.append(
+                (
+                    "parameters",
+                    [params_h_hist, params_h_model],
+                    [params_J_hist, params_J_model],
+                )
+            )
 
             command = [
                 "compute_histogram2d",
@@ -304,7 +320,13 @@ def main():
             grad_h_model = os.path.join(dir1, "gradients_h_model.tsv")
             grad_J_hist = os.path.join(dir1, "gradients_J_hist.tsv")
             grad_J_model = os.path.join(dir1, "gradients_J_model.tsv")
-            subplots.append(("gradients", [grad_h_hist, grad_h_model], [grad_J_hist, grad_J_model]))
+            subplots.append(
+                (
+                    "gradients",
+                    [grad_h_hist, grad_h_model],
+                    [grad_J_hist, grad_J_model],
+                )
+            )
 
             command = [
                 "compute_histogram2d",
@@ -326,7 +348,13 @@ def main():
             learn_h_model = os.path.join(dir1, "learning rates_h_model.tsv")
             learn_J_hist = os.path.join(dir1, "learning rates_J_hist.tsv")
             learn_J_model = os.path.join(dir1, "learning rates_J_model.tsv")
-            subplots.append(("learning rates", [learn_h_hist, learn_h_model], [learn_J_hist, learn_J_model]))
+            subplots.append(
+                (
+                    "learning rates",
+                    [learn_h_hist, learn_h_model],
+                    [learn_J_hist, learn_J_model],
+                )
+            )
 
             command = [
                 "compute_histogram2d",
@@ -341,14 +369,22 @@ def main():
             ]
             res = subprocess.call(command)
             if res != 0:
-                sys.exit("Error generating learning rate histograms. Exiting...")
+                sys.exit(
+                    "Error generating learning rate histograms. Exiting..."
+                )
 
         if options.moment:
             moment1_h_hist = os.path.join(dir1, "moment1_h_hist.tsv")
             moment1_h_model = os.path.join(dir1, "moment1_h_model.tsv")
             moment1_J_hist = os.path.join(dir1, "moment1_J_hist.tsv")
             moment1_J_model = os.path.join(dir1, "moment1_J_model.tsv")
-            subplots.append(("moment1", [moment1_h_hist, moment1_h_model], [moment1_J_hist, moment1_J_model]))
+            subplots.append(
+                (
+                    "moment1",
+                    [moment1_h_hist, moment1_h_model],
+                    [moment1_J_hist, moment1_J_model],
+                )
+            )
 
             command = [
                 "compute_histogram2d",
@@ -429,9 +465,7 @@ def main():
             ax.plot(
                 x,
                 h_b * x + h_a,
-                label=r"y={:.3g}x+{:.3g}, $R^2$={:.3g}".format(
-                    h_b, h_a, h_r2
-                ),
+                label=r"y={:.3g}x+{:.3g}, $R^2$={:.3g}".format(h_b, h_a, h_r2),
                 alpha=0.5,
             )
             ax.plot(x, x, "--k", alpha=0.25, zorder=0, label=r"y=x")
@@ -477,9 +511,7 @@ def main():
             ax.plot(
                 x,
                 J_b * x + J_a,
-                label=r"y={:.3g}x+{:.3g}, $R^2$={:.3g}".format(
-                    J_b, h_a, J_r2
-                ),
+                label=r"y={:.3g}x+{:.3g}, $R^2$={:.3g}".format(J_b, h_a, J_r2),
                 alpha=0.5,
             )
             ax.plot(x, x, "--k", alpha=0.25, zorder=0, label=r"y=x")
