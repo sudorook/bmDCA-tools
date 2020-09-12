@@ -5,23 +5,6 @@
 
 #include <armadillo>
 
-#define BINS 201
-
-typedef struct
-{
-  arma::Mat<unsigned long long int> grid;
-  int bins = BINS;
-  double bin_width;
-  double min = 0;
-  double max = 1;
-} histogram;
-
-typedef struct
-{
-  double a;
-  double b;
-  double R2;
-} linear_model;
 
 class MSACompare
 {
@@ -93,9 +76,6 @@ private:
   arma::Col<double> mc_correlation_2p;
   arma::Col<double> msa_correlation_3p;
   arma::Col<double> mc_correlation_3p;
-
-  void writeHistogram(std::string, histogram);
-  void writeLinearModel(std::string, linear_model);
 };
 
 #endif

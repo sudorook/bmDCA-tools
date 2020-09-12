@@ -429,3 +429,44 @@ convertAA(int n)
   }
   return aa;
 };
+
+void
+writeHistogram1D(std::string file, histogram1d hist)
+{
+  std::ofstream output_stream(file);
+  for (int i = 0; i < BINS; i++) {
+    output_stream << hist.min + i * hist.bin_width << "\t" << hist.range(i)
+                  << std::endl;
+  }
+  output_stream.close();
+  return;
+};
+
+void
+writeHistogram2D(std::string file, histogram2d hist)
+{
+  std::ofstream output_stream(file);
+  for (int i = 0; i < BINS; i++) {
+    for (int j = 0; j < BINS; j++) {
+      output_stream << hist.min + i * hist.bin_width << "\t"
+                    << hist.min + j * hist.bin_width << "\t" << hist.grid(i, j)
+                    << std::endl;
+    }
+  }
+  output_stream.close();
+  return;
+};
+
+void
+writeLinearModel(std::string file, linear_model model)
+{
+  std::ofstream output_stream(file);
+  output_stream << "a"
+                << "\t" << model.a << std::endl;
+  output_stream << "b"
+                << "\t" << model.b << std::endl;
+  output_stream << "R2"
+                << "\t" << model.R2 << std::endl;
+  output_stream.close();
+  return;
+};

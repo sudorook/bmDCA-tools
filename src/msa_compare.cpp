@@ -330,7 +330,7 @@ MSACompare::makeFrequency1pHistogram(void)
   model.b = b;
   model.R2 = r2;
 
-  histogram hist;
+  histogram2d hist;
   hist.grid = arma::Mat<unsigned long long int>(BINS, BINS, arma::fill::zeros);
   double bin_width = 1. / (double)(BINS - 1);
   hist.bin_width = bin_width;
@@ -338,7 +338,7 @@ MSACompare::makeFrequency1pHistogram(void)
     hist.grid(floor(msa_frequency_1p(i) / bin_width),
               floor(mc_frequency_1p(i) / bin_width))++;
   }
-  writeHistogram("freq_1p_hist.tsv", hist);
+  writeHistogram2D("freq_1p_hist.tsv", hist);
   writeLinearModel("freq_1p_model.tsv", model);
   std::cout << std::endl;
 };
@@ -372,7 +372,7 @@ MSACompare::makeFrequency2pHistogram(void)
   model.b = b;
   model.R2 = r2;
 
-  histogram hist;
+  histogram2d hist;
   hist.grid = arma::Mat<unsigned long long int>(BINS, BINS, arma::fill::zeros);
   double bin_width = 1. / (double)(BINS - 1);
   hist.bin_width = bin_width;
@@ -381,7 +381,7 @@ MSACompare::makeFrequency2pHistogram(void)
               floor(mc_frequency_2p(i) / bin_width))++;
   }
   // hist.grid.print("freq 2p:");
-  writeHistogram("freq_2p_hist.tsv", hist);
+  writeHistogram2D("freq_2p_hist.tsv", hist);
   writeLinearModel("freq_2p_model.tsv", model);
   std::cout << std::endl;
 };
@@ -395,7 +395,7 @@ MSACompare::makeCorrelation2pHistogram(void)
   }
 
   linear_model model;
-  histogram hist;
+  histogram2d hist;
 
   arma::wall_clock timer;
   std::cout << "computing 2p correlation regression... " << std::flush;
@@ -488,7 +488,7 @@ MSACompare::makeCorrelation2pHistogram(void)
     }
   }
   // hist.grid.print("corr 2p:");
-  writeHistogram("corr_2p_hist.tsv", hist);
+  writeHistogram2D("corr_2p_hist.tsv", hist);
   writeLinearModel("corr_2p_model.tsv", model);
 };
 
@@ -527,7 +527,7 @@ MSACompare::makeEfficient3pHistograms(void)
   arma::Cube<unsigned long long int> corr_hist_i =
     arma::Cube<unsigned long long int>(BINS, BINS, N, arma::fill::zeros);
 
-  histogram freq_hist;
+  histogram2d freq_hist;
   freq_hist.grid =
     arma::Mat<unsigned long long int>(BINS, BINS, arma::fill::zeros);
   freq_hist.bin_width = freq_bin_width;
@@ -539,7 +539,7 @@ MSACompare::makeEfficient3pHistograms(void)
   double min = .75 * corr_2p_min;
   double corr_bin_width = (max - min) / (double)(BINS - 1);
 
-  histogram corr_hist;
+  histogram2d corr_hist;
   corr_hist.grid =
     arma::Mat<unsigned long long int>(BINS, BINS, arma::fill::zeros);
   corr_hist.bin_width = corr_bin_width;
@@ -718,7 +718,7 @@ MSACompare::makeEfficient3pHistograms(void)
 
     freq_hist.grid = arma::sum(freq_hist_i, 2);
     // freq_hist.grid.print("freq 3p:");
-    writeHistogram("freq_3p_hist.tsv", freq_hist);
+    writeHistogram2D("freq_3p_hist.tsv", freq_hist);
     writeLinearModel("freq_3p_model.tsv", model);
   }
   {
@@ -740,7 +740,7 @@ MSACompare::makeEfficient3pHistograms(void)
 
     corr_hist.grid = arma::sum(corr_hist_i, 2);
     // corr_hist.grid.print("corr 3p:");
-    writeHistogram("corr_3p_hist.tsv", corr_hist);
+    writeHistogram2D("corr_3p_hist.tsv", corr_hist);
     writeLinearModel("corr_3p_model.tsv", model);
   }
 
@@ -782,7 +782,7 @@ MSACompare::makeFrequency3pHistogram(void)
   model.b = b;
   model.R2 = r2;
 
-  histogram hist;
+  histogram2d hist;
   hist.grid = arma::Mat<unsigned long long int>(BINS, BINS, arma::fill::zeros);
   double bin_width = 1. / (double)(BINS - 1);
   hist.bin_width = bin_width;
@@ -791,7 +791,7 @@ MSACompare::makeFrequency3pHistogram(void)
               floor(mc_frequency_3p(i) / bin_width))++;
   }
   // hist.grid.print("freq 3p:");
-  writeHistogram("freq_3p_hist.tsv", hist);
+  writeHistogram2D("freq_3p_hist.tsv", hist);
   writeLinearModel("freq_3p_model.tsv", model);
 };
 
@@ -809,7 +809,7 @@ MSACompare::makeCorrelation3pHistogram(void)
             << std::endl;
 
   linear_model model;
-  histogram hist;
+  histogram2d hist;
 
   arma::wall_clock timer;
   std::cout << "computing 3p correlation regression... " << std::flush;
@@ -947,7 +947,7 @@ MSACompare::makeCorrelation3pHistogram(void)
     }
   }
   // hist.grid.print("corr 3p:");
-  writeHistogram("corr_3p_hist.tsv", hist);
+  writeHistogram2D("corr_3p_hist.tsv", hist);
   writeLinearModel("corr_3p_model.tsv", model);
 };
 
@@ -989,7 +989,7 @@ MSACompare::makeEfficient4pHistograms(void)
   arma::Cube<unsigned long long int> corr_hist_i =
     arma::Cube<unsigned long long int>(BINS, BINS, N, arma::fill::zeros);
 
-  histogram freq_hist;
+  histogram2d freq_hist;
   freq_hist.grid =
     arma::Mat<unsigned long long int>(BINS, BINS, arma::fill::zeros);
   freq_hist.bin_width = freq_bin_width;
@@ -1001,7 +1001,7 @@ MSACompare::makeEfficient4pHistograms(void)
   double min = .75 * corr_3p_min;
   double corr_bin_width = (max - min) / (double)(BINS - 1);
 
-  histogram corr_hist;
+  histogram2d corr_hist;
   corr_hist.grid =
     arma::Mat<unsigned long long int>(BINS, BINS, arma::fill::zeros);
   corr_hist.bin_width = corr_bin_width;
@@ -1254,7 +1254,7 @@ MSACompare::makeEfficient4pHistograms(void)
 
     freq_hist.grid = arma::sum(freq_hist_i, 2);
     // freq_hist.grid.print("freq 4p:");
-    writeHistogram("freq_4p_hist.tsv", freq_hist);
+    writeHistogram2D("freq_4p_hist.tsv", freq_hist);
     writeLinearModel("freq_4p_model.tsv", model);
   }
   {
@@ -1276,7 +1276,7 @@ MSACompare::makeEfficient4pHistograms(void)
 
     corr_hist.grid = arma::sum(corr_hist_i, 2);
     // corr_hist.grid.print("corr 4p:");
-    writeHistogram("corr_4p_hist.tsv", corr_hist);
+    writeHistogram2D("corr_4p_hist.tsv", corr_hist);
     writeLinearModel("corr_4p_model.tsv", model);
   }
 
@@ -1284,35 +1284,6 @@ MSACompare::makeEfficient4pHistograms(void)
   //   std::endl;
   // std::cout << "4p corr range: " << corr_4p_min << ", " << corr_4p_max <<
   //   std::endl;
-};
-
-void
-MSACompare::writeHistogram(std::string file, histogram hist)
-{
-  std::ofstream output_stream(file);
-  for (int i = 0; i < BINS; i++) {
-    for (int j = 0; j < BINS; j++) {
-      output_stream << hist.min + i * hist.bin_width << "\t"
-                    << hist.min + j * hist.bin_width << "\t" << hist.grid(i, j)
-                    << std::endl;
-    }
-  }
-  output_stream.close();
-  return;
-};
-
-void
-MSACompare::writeLinearModel(std::string file, linear_model model)
-{
-  std::ofstream output_stream(file);
-  output_stream << "a"
-                << "\t" << model.a << std::endl;
-  output_stream << "b"
-                << "\t" << model.b << std::endl;
-  output_stream << "R2"
-                << "\t" << model.R2 << std::endl;
-  output_stream.close();
-  return;
 };
 
 void
