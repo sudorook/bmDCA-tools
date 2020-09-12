@@ -434,7 +434,8 @@ void
 writeHistogram1D(std::string file, histogram1d hist)
 {
   std::ofstream output_stream(file);
-  for (int i = 0; i < BINS; i++) {
+  int N = hist.range.n_elem;
+  for (int i = 0; i < N; i++) {
     output_stream << hist.min + i * hist.bin_width << "\t" << hist.range(i)
                   << std::endl;
   }
@@ -446,8 +447,10 @@ void
 writeHistogram2D(std::string file, histogram2d hist)
 {
   std::ofstream output_stream(file);
-  for (int i = 0; i < BINS; i++) {
-    for (int j = 0; j < BINS; j++) {
+  int N1 = hist.grid.n_rows;
+  int N2 = hist.grid.n_cols;
+  for (int i = 0; i < N1; i++) {
+    for (int j = 0; j < N2; j++) {
       output_stream << hist.min + i * hist.bin_width << "\t"
                     << hist.min + j * hist.bin_width << "\t" << hist.grid(i, j)
                     << std::endl;
