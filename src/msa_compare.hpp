@@ -5,7 +5,6 @@
 
 #include <armadillo>
 
-
 class MSACompare
 {
 public:
