@@ -84,6 +84,8 @@ def main():
 
     msa_labels = options.labels
 
+    mean_energies = [np.mean(msa) for msa in msa_energies]
+
     standard_energy = 0
     if options.mode == "1":
         standard_energy = msa_energies[0][0]
@@ -96,12 +98,14 @@ def main():
             msa_energy - standard_energy for msa_energy in msa_energies
         ]
 
+    colors = ['#008fd5', '#fc4f30', '#e5ae38', '#6d904f', '#8b8b8b', '#810f7c']
+    n_colors = len(colors)
     with plt.style.context("fivethirtyeight"):
         for i, msa_energy in enumerate(msa_energies):
             plt.hist(msa_energy, alpha=0.5, label=msa_labels[i], density=True)
+            plt.axvline(mean_energies[i], color=colors[i % n_colors], alpha=0.5)
         plt.legend(loc="upper right")
         plt.xlabel("Sequence Energy")
-        #  plt.xlim(-270, -110)
         plt.ylabel("Probability")
         plt.title(options.title)
         plt.tight_layout()
