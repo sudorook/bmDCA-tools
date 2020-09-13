@@ -9,25 +9,26 @@ HIST2D := compute_histogram2d
 AVERAGE := compute_average
 SUBSET := subset_alignment
 PATHFINDER := compute_paths
+Z := compute_z
 
 CC := g++
 
 CXXFLAGS = -O3 $(shell pkg-config --cflags armadillo) \
-           -fopenmp -std=c++11 -DARMA_DONT_USE_HDF5 -DARMA_NO_DEBUG
+           -fopenmp -std=c++11 -DARMA_DONT_USE_HDF5
 LDFLAGS = -lm $(shell pkg-config --libs armadillo)
 
 SRCPATH = src
 
 SOURCES_MSACOMPUTE = ${SRCPATH}/compute_stats.cpp \
-                  ${SRCPATH}/msa.cpp \
-                  ${SRCPATH}/msa_stats.cpp \
-                  ${SRCPATH}/utils.cpp
+                     ${SRCPATH}/msa.cpp \
+                     ${SRCPATH}/msa_stats.cpp \
+                     ${SRCPATH}/utils.cpp
 OBJECTS_MSACOMPUTE = $(SOURCES_MSACOMPUTE:%.cpp=%.o)
 
 SOURCES_MSACOMPARE = ${SRCPATH}/compare_stats.cpp \
-                  ${SRCPATH}/msa.cpp \
-                  ${SRCPATH}/msa_compare.cpp \
-                  ${SRCPATH}/utils.cpp
+                     ${SRCPATH}/msa.cpp \
+                     ${SRCPATH}/msa_compare.cpp \
+                     ${SRCPATH}/utils.cpp
 OBJECTS_MSACOMPARE = $(SOURCES_MSACOMPARE:%.cpp=%.o)
 
 SOURCES_ENERGY = ${SRCPATH}/compute_energies.cpp \
