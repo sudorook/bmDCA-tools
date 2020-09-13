@@ -11,6 +11,7 @@ compute_histogram
 compute_histogram2d
 compute_paths
 compute_average
+process_msa
 subset_alignment
 
 __pycache__/
