@@ -1,4 +1,3 @@
-MSAPROCESS := process_msa
 MSACOMPUTE := compute_msa_stats
 ENERGY := compute_energies
 DISTANCE := compare_distances
@@ -19,11 +18,6 @@ CXXFLAGS = -O3 $(shell pkg-config --cflags armadillo) \
 LDFLAGS = -lm $(shell pkg-config --libs armadillo)
 
 SRCPATH = src
-
-SOURCES_MSAPROCESS = ${SRCPATH}/process_msa.cpp \
-                     ${SRCPATH}/msa_binary.cpp \
-                     ${SRCPATH}/utils.cpp
-OBJECTS_MSAPROCESS = $(SOURCES_MSAPROCESS:%.cpp=%.o)
 
 SOURCES_MSACOMPUTE = ${SRCPATH}/compute_stats.cpp \
                      ${SRCPATH}/msa.cpp \
@@ -87,10 +81,7 @@ OBJECTS_Z = $(SOURCES_Z:%.cpp=%.o)
 
 .PHONY: all
 
-all: $(MSAPROCESS) $(MSACOMPUTE) $(MSACOMPARE) $(ENERGY) $(DISTANCE) $(DMS) $(DCS) $(HIST1D) $(HIST2D) $(AVERAGE) $(SUBSET) $(PATHFINDER)
-
-$(MSAPROCESS): $(OBJECTS_MSAPROCESS)
-	$(CC) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
+all: $(MSACOMPUTE) $(MSACOMPARE) $(ENERGY) $(DISTANCE) $(DMS) $(DCS) $(HIST1D) $(HIST2D) $(AVERAGE) $(SUBSET) $(PATHFINDER)
 
 $(MSACOMPUTE): $(OBJECTS_MSACOMPUTE)
 	$(CC) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
@@ -128,7 +119,6 @@ $(PATHFINDER): $(OBJECTS_PATHFINDER)
 .PHONY: clean
 
 clean:
-	rm -f $(MSAPROCESS)
 	rm -f $(MSACOMPUTE)
 	rm -f $(MSACOMPARE)
 	rm -f $(ENERGY)
@@ -140,7 +130,6 @@ clean:
 	rm -f $(AVERAGE)
 	rm -f $(SUBSET)
 	rm -f $(PATHFINDER)
-	rm -f $(OBJECTS_MSAPROCESS)
 	rm -f $(OBJECTS_MSACOMPUTE)
 	rm -f $(OBJECTS_MSACOMPARE)
 	rm -f $(OBJECTS_ENERGY)
