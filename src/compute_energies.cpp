@@ -18,9 +18,10 @@ main(int argc, char* argv[])
   std::string params_J_file;
   bool compat_mode = true;
   bool is_numeric = false;
+  bool ignore_gaps = false;
 
   char c;
-  while ((c = getopt(argc, argv, "i:o:n:p:P:")) != -1) {
+  while ((c = getopt(argc, argv, "i:o:n:p:P:g")) != -1) {
     switch (c) {
       case 'i':
         msa_file = optarg;
@@ -39,8 +40,13 @@ main(int argc, char* argv[])
         params_J_file = optarg;
         compat_mode = false;
         break;
+      case 'g':
+        ignore_gaps = true;
+        break;
       case '?':
         std::cerr << "what the fuck?" << std::endl;
+        std::exit(EXIT_FAILURE);
+        break;
     }
   }
 
@@ -67,8 +73,12 @@ main(int argc, char* argv[])
     for (int seq = 0; seq < msa.M; seq++) {
       E = 0;
       for (int i = 0; i < msa.N; i++) {
+        if ((ignore_gaps) & (msa.alignment(seq, i) == 0))
+          continue;
         E -= params.h.at(msa.alignment.at(seq, i), i);
         for (int j = i + 1; j < msa.N; j++) {
+          if ((ignore_gaps) & (msa.alignment(seq, j) == 0))
+            continue;
           E -= params.J.at(i, j).at(msa.alignment.at(seq, i),
                                     msa.alignment.at(seq, j));
         }
