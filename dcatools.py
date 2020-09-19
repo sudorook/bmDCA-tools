@@ -13,7 +13,6 @@ from Bio.PDB import PDBParser
 from Bio import pairwise2
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
-from Bio.Alphabet import generic_protein
 from Bio import SeqIO
 from Bio import AlignIO
 
@@ -159,7 +158,7 @@ def get_pdb_sequence(structure, chain_id="A"):
         if aa.get_id()[0] == " "
     ]
 
-    return Seq("".join(sequence), generic_protein)
+    return Seq("".join(sequence),)
 
 
 def compute_contact_matrix(distmat, threshold=8.0):
