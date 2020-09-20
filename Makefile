@@ -1,7 +1,8 @@
 MSACOMPUTE := compute_msa_stats
+MSACOMPARE := compare_msa_stats
 ENERGY := compute_energies
 DISTANCE := compare_distances
-MSACOMPARE := compare_msa_stats
+GAUGE := compute_zero_gauge
 DMS := compute_dms
 DCS := compute_dcs
 HIST1D := compute_histogram
@@ -40,6 +41,10 @@ SOURCES_DISTANCE = ${SRCPATH}/compare_distances.cpp \
                    ${SRCPATH}/msa.cpp \
                    ${SRCPATH}/utils.cpp
 OBJECTS_DISTANCE = $(SOURCES_DISTANCE:%.cpp=%.o)
+
+SOURCES_GAUGE = ${SRCPATH}/compute_zero_gauge.cpp \
+                ${SRCPATH}/utils.cpp
+OBJECTS_GAUGE = $(SOURCES_GAUGE:%.cpp=%.o)
 
 SOURCES_DMS = ${SRCPATH}/compute_dms.cpp \
               ${SRCPATH}/msa.cpp \
@@ -81,7 +86,7 @@ OBJECTS_Z = $(SOURCES_Z:%.cpp=%.o)
 
 .PHONY: all
 
-all: $(MSACOMPUTE) $(MSACOMPARE) $(ENERGY) $(DISTANCE) $(DMS) $(DCS) $(HIST1D) $(HIST2D) $(AVERAGE) $(SUBSET) $(PATHFINDER)
+all: $(MSACOMPUTE) $(MSACOMPARE) $(ENERGY) $(DISTANCE) $(GAUGE) $(DMS) $(DCS) $(HIST1D) $(HIST2D) $(AVERAGE) $(SUBSET) $(PATHFINDER)
 
 $(MSACOMPUTE): $(OBJECTS_MSACOMPUTE)
 	$(CC) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
@@ -93,6 +98,9 @@ $(ENERGY): $(OBJECTS_ENERGY)
 	$(CC) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
 $(DISTANCE): $(OBJECTS_DISTANCE)
+	$(CC) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
+
+$(GAUGE): $(OBJECTS_GAUGE)
 	$(CC) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
 $(DMS): $(OBJECTS_DMS)
@@ -123,6 +131,7 @@ clean:
 	rm -f $(MSACOMPARE)
 	rm -f $(ENERGY)
 	rm -f $(DISTANCE)
+	rm -f $(GAUGE)
 	rm -f $(DMS)
 	rm -f $(DCS)
 	rm -f $(HIST1D)
@@ -130,10 +139,12 @@ clean:
 	rm -f $(AVERAGE)
 	rm -f $(SUBSET)
 	rm -f $(PATHFINDER)
+	rm -f $(Z)
 	rm -f $(OBJECTS_MSACOMPUTE)
 	rm -f $(OBJECTS_MSACOMPARE)
 	rm -f $(OBJECTS_ENERGY)
 	rm -f $(OBJECTS_DISTANCE)
+	rm -f $(OBJECTS_GAUGE)
 	rm -f $(OBJECTS_DMS)
 	rm -f $(OBJECTS_DCS)
 	rm -f $(OBJECTS_HIST1D)
