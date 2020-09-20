@@ -17,29 +17,14 @@ from Bio import SeqIO
 from Bio import AlignIO
 
 
-def reduce_J(J, norm=2, gauge="default"):
+def reduce_J(J, norm=2,):
     """ reduce J using Frobenius-norm """
     Npos = np.shape(J)[0]
     Naa = np.shape(J[0, 0])[0]
     J_new = np.zeros((Npos, Npos))
     for i in range(Npos):
         for j in range(i + 1, Npos):
-            if gauge == "default":
                 J_new[i, j] = np.linalg.norm(J[i, j], norm)
-            elif gauge == "zero-sum":
-                J_prime = np.zeros((Naa, Naa))
-                J_ij_mean = np.mean(J[i, j, :, :])
-                for a in range(0, Naa):
-                    J_ija_mean = np.mean(J[i, j, a, :])
-                    for b in range(0, Naa):
-                        J_prime[a, b] = (
-                            J[i, j, a, b]
-                            - J_ija_mean
-                            - np.mean(J[i, j, :, b])
-                            + J_ij_mean
-                        )
-                J_new[i, j] = np.linalg.norm(J_prime, norm)
-
     return J_new
 
 
