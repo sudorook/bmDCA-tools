@@ -167,9 +167,12 @@ function make_figures() {
 
   if [[ "$pdb" != "none" ]]; then
     echo "compute contact map"
-    taskset --cpu-list "$cpulist" plot_contacts \
+    compute_zero_gauge -g \
       -p "parameters_h_${step}.bin" \
-      -P "parameters_J_${step}.bin" \
+      -P "parameters_J_${step}.bin"
+    taskset --cpu-list "$cpulist" plot_contacts \
+      -p "parameters_h_${step}_zg.bin" \
+      -P "parameters_J_${step}_zg.bin" \
       -b "$pdb" \
       -c "$chain" \
       -n "msa_numerical.txt" \
