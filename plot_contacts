@@ -172,8 +172,9 @@ def main():
 
     h_truncate, J_truncate = tools.subset_model(h, J, pos_idx_ref)
 
+    h_1d = tools.reduce_h(h_truncate)
     J_2d = tools.reduce_J(J_truncate, "fro")
-    J_2d_zg = tools.reduce_J(J_truncate, "fro", "zero-sum")
+    J_2d_zg = tools.reduce_J(J_truncate, "fro",)
     J_2d_zg = tools.adjust_frobenius_norm(J_2d_zg)
     h_1d = tools.reduce_h(h_truncate)
 
@@ -214,7 +215,7 @@ def main():
         ax.yaxis.set_ticks_position("left")
         ax.xaxis.set_tick_params(rotation=45)
         ax.yaxis.set_tick_params(rotation=0)
-        plt.title(options.title)
+        plt.title(options.title + " (0-gauge)")
         plt.tight_layout()
         fig.savefig(outname1)
         plt.close()
@@ -226,7 +227,7 @@ def main():
         ax.yaxis.set_ticks_position("left")
         ax.xaxis.set_tick_params(rotation=45)
         ax.yaxis.set_tick_params(rotation=0)
-        plt.title(options.title + " (0-gauge)")
+        plt.title(options.title + " (0-gauge adj)")
         plt.tight_layout()
         fig.savefig(outname2)
         plt.close()
