@@ -130,9 +130,11 @@ main(int argc, char* argv[])
     }
     for (int i = 0; i < N; i++) {
       for (int j = 0; j < N; j++) {
-        for (int a = 1; a < Q; a++) {
-          for (int b = 1; b < Q; b++) {
-            params_zg_nogap.J(a - 1, b - 1) = params_zg.J(a, b);
+        if (i != j) {
+          for (int a = 1; a < Q; a++) {
+            for (int b = 1; b < Q; b++) {
+              params_zg_nogap.J(i, j)(a - 1, b - 1) = params_zg.J(i, j)(a, b);
+            }
           }
         }
       }
