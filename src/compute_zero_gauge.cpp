@@ -14,9 +14,10 @@ main(int argc, char* argv[])
   std::string params_file;
   std::string params_J_file;
   bool compat_mode = true;
+  bool drop_gaps = false;
 
   char c;
-  while ((c = getopt(argc, argv, "p:P:")) != -1) {
+  while ((c = getopt(argc, argv, "p:P:g")) != -1) {
     switch (c) {
       case 'p':
         params_file = optarg;
@@ -24,6 +25,9 @@ main(int argc, char* argv[])
       case 'P':
         params_J_file = optarg;
         compat_mode = false;
+        break;
+      case 'g':
+        drop_gaps = true;
         break;
       case '?':
         std::cerr << "what the fuck?" << std::endl;
@@ -49,92 +53,88 @@ main(int argc, char* argv[])
   params_zg.h = arma::Mat<double>(Q, N, arma::fill::zeros);
   params_zg.J = arma::field<arma::Mat<double>>(N, N);
   for (int i = 0; i < N; i++) {
-    for (int j = i + 1; j < N; j++) {
+    for (int j = 0; j < N; j++) {
+      if (i == j) continue;
       params_zg.J(i, j) = arma::Mat<double>(Q, Q, arma::fill::zeros);
     }
   }
-  
+
   // rescale couplings
   for (int i = 0; i < N; i++) {
-    for (int j = i + 1; j < N; j++) {
-      double J_ij_mean = arma::mean(arma::mean(params.J(i, j)));
-      arma::Mat<double> J_ija_mean = arma::mean(params.J(i, j), 1);
-      arma::Mat<double> J_ijb_mean = arma::mean(params.J(i, j), 0);
-      for (int a = 0; a < Q; a++) {
-        for (int b = 0; b < Q; b++) {
-          params_zg.J(i, j)(a, b) =
-            params.J(i, j)(a, b) - J_ija_mean(a) - J_ijb_mean(b) + J_ij_mean;
+    for (int j = 0; j < N; j++) {
+      if (i < j) {
+        double J_ij_mean = arma::mean(arma::mean(params.J(i, j)));
+        arma::Mat<double> J_ija_mean = arma::mean(params.J(i, j), 1);
+        arma::Mat<double> J_ijb_mean = arma::mean(params.J(i, j), 0);
+        for (int a = 0; a < Q; a++) {
+          for (int b = 0; b < Q; b++) {
+            params_zg.J(i, j)(a, b) =
+              params.J(i, j)(a, b) - J_ija_mean(a) - J_ijb_mean(b) + J_ij_mean;
+          }
+          params_zg.h(a, i) += J_ija_mean(a) - J_ij_mean;
+        }
+      } else if (i > j) {
+        double J_ij_mean = arma::mean(arma::mean(params.J(j, i)));
+        arma::Mat<double> J_ija_mean = arma::mean(params.J(j, i), 1);
+        arma::Mat<double> J_ijb_mean = arma::mean(params.J(j, i), 0);
+        for (int a = 0; a < Q; a++) {
+          for (int b = 0; b < Q; b++) {
+            params_zg.J(i, j)(a, b) =
+              params.J(j, i)(a, b) - J_ija_mean(a) - J_ijb_mean(b) + J_ij_mean;
+          }
+          params_zg.h(a, i) += J_ijb_mean(a) - J_ij_mean;
         }
       }
     }
   }
 
   // rescale fields
-  params_zg.h = params.h;
-  arma::Mat<double> h_i_mean = arma::mean(params.h, 0);
+  arma::Row<double> h_i_mean = arma::mean(params.h, 0);
   for (int i = 0; i < N; i++) {
-    arma::Col<double> J_ia = arma::Col<double>(N, arma::fill::zeros);
-    for (int j = 0; j < N; j++) {
-      if (j > i) {
-        J_ia(j) = arma::mean(arma::mean(params.J(i, j)));
-      } else if (i > j) {
-        J_ia(j) = arma::mean(arma::mean(params.J(j, i)));
-      }
-    }
-    arma::Col<double> J_i = arma::Col<double>(Q, arma::fill::zeros);
-    for (int b = 0; b < Q; b++) {
-      arma::Col<double> J_ib = arma::Col<double>(N, arma::fill::zeros);
-      for (int j = 0; j < N; j++) {
-        arma::Col<double> J_ijb = arma::Col<double>(Q, arma::fill::zeros);
-        for (int a = 0; a < Q; a++) {
-          if (j > i) {
-            J_ijb(a) = params.J(i, j)(a, b);
-          } else if (i > j) {
-            J_ijb(a) = params.J(j, i)(a, b);
-          }
-        }
-        J_ib(j) = arma::mean(J_ijb);
-      }
-      J_i(b) = arma::sum(J_ib);
-    }
     for (int a = 0; a < Q; a++) {
-      params_zg.h(a, i) += J_i(a) - arma::sum(J_ia) - h_i_mean(i);
+      params_zg.h(a, i) += params.h(a, i) - h_i_mean(i);
     }
   }
   std::cout << "done" << std::endl;
-
-  // checking means
-  double max = 0;
-  for (int i = 0; i < N; i++) {
-    for (int j = i + 1; j < N; j++) {
-      for (int a = 0; a < Q; a++) {
-        double sum = 0;
-        for (int b = 0; b < Q; b++) {
-          sum += params_zg.J(i, j)(a, b);
-        }
-        std::cout << "J(" << i << "," << j << ")(" << a << ",:) mean = " << sum
-                  << std::endl;
-        if (sum > max) max = sum;
-      }
-      for (int b = 0; b < Q; b++) {
-        double sum = 0;
-        for (int a = 0; a < Q; a++) {
-          sum += params_zg.J(i, j)(a, b);
-        }
-        std::cout << "J(" << i << "," << j << ")(:," << b << ") mean = " << sum
-                  << std::endl;
-        if (sum > max) max = sum;
-      }
-    }
-  }
-  std::cout << "Jmax = " << max << std::flush;
-
-  arma::sum(params_zg.h, 1).print("h_zg_means:");
-  arma::sum(params_zg.h, 0).print("h_zg_means:");
 
   // saving parameters
-  std::cout << "writing output... " << std::flush;
-  params_zg.h.save("zero_gauge_h.bin", arma::arma_binary);
-  params_zg.J.save("zero_gauge_J.bin", arma::arma_binary);
-  std::cout << "done" << std::endl;
-}
+  if (drop_gaps == false) {
+    std::cout << "writing output... " << std::flush;
+    params_zg.h.save("zero_gauge_h.bin", arma::arma_binary);
+    params_zg.J.save("zero_gauge_J.bin", arma::arma_binary);
+    std::cout << "done" << std::endl;
+  } else {
+    // initialize
+    std::cout << "dropping gaps... " << std::flush;
+    potts_model params_zg_nogap;
+    params_zg_nogap.h = arma::Mat<double>(Q-1, N, arma::fill::zeros);
+    params_zg_nogap.J = arma::field<arma::Mat<double>>(N, N);
+    for (int i = 0; i < N; i++) {
+      for (int j = 0; j < N; j++) {
+        if (i == j) continue;
+        params_zg_nogap.J(i, j) =
+          arma::Mat<double>(Q - 1, Q - 1, arma::fill::zeros);
+      }
+    }
+    for (int i = 0; i < N; i++) {
+      for (int j = 0; j < N; j++) {
+        for (int a = 1; a < Q; a++) {
+          for (int b = 1; b < Q; b++) {
+            params_zg_nogap.J(a - 1, b - 1) = params_zg.J(a, b);
+          }
+        }
+      }
+    }
+    for (int i = 0; i < N; i++) {
+      for (int a = 1; a < Q; a++) {
+        params_zg_nogap.h(a - 1, i) = params_zg.h(a, i);
+      }
+    }
+    std::cout << "done" << std::endl;
+
+    std::cout << "writing output... " << std::flush;
+    params_zg_nogap.h.save("zero_gauge_nogap_h.bin", arma::arma_binary);
+    params_zg_nogap.J.save("zero_gauge_nogap_J.bin", arma::arma_binary);
+    std::cout << "done" << std::endl;
+  }
+};
