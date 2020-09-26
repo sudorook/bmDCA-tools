@@ -50,10 +50,11 @@ def main():
         df = pd.read_csv(options.input, sep="\t")
 
     df["log10-burn-in"] = np.log10(df["burn-in"])
-    if np.sum(df["burn-between"] == 0) + np.sum(
-        df["burn-between"] == 1
-    ) != len(df["burn-between"]):
-        df["log10-burn-between"] = np.log10(df["burn-between"])
+    if "burn-between" in df:
+        if np.sum(df["burn-between"] == 0) + np.sum(
+            df["burn-between"] == 1
+        ) != len(df["burn-between"]):
+            df["log10-burn-between"] = np.log10(df["burn-between"])
 
     # collect fields
     wants = [
@@ -62,11 +63,13 @@ def main():
         "energy-err",
         "auto-corr",
         "cross-corr",
-        "error-tot",
-        "error-h",
-        "error-J",
-        "step-time",
+        "train-err-tot",
+        "train-err-1p",
+        "train-err-2p",
+        "diff-avg-energy",
+        "duration",
     ]
+
     fields = [field for field in wants if field in df.columns]
 
     with plt.style.context("fivethirtyeight"):
