@@ -65,11 +65,6 @@ function make_figures() {
   echo
 
   echo "sequence energies"
-  compute_energies \
-    -n msa_numerical.txt \
-    -p "parameters_h_${step}.bin" \
-    -P "parameters_J_${step}.bin" \
-    -o "msa_energies_${step}.txt"
   taskset --cpu-list "$cpulist" plot_energy.py \
     -e "msa_energies_${step}.txt" \
     -e "energies_${step}.txt" \
@@ -79,25 +74,12 @@ function make_figures() {
     -o "${slug}_energy_${step}.png"
   echo
 
-  if [[ "$validation" != "none" ]]; then
+  if [[ -f "${validation}" ]]; then
     echo "validation alignment energies"
-    if [[ "${validation##*.}" == "fasta" ]]; then
-      compute_energies \
-        -i "${validation}" \
-        -p "parameters_h_${step}.bin" \
-        -P "parameters_J_${step}.bin" \
-        -o "msa_energies_${step}_validation.txt"
-    else
-      compute_energies \
-        -n "${validation}" \
-        -p "parameters_h_${step}.bin" \
-        -P "parameters_J_${step}.bin" \
-        -o "msa_energies_${step}_validation.txt"
-    fi
     taskset --cpu-list "$cpulist" plot_energy.py \
       -e "msa_energies_${step}.txt" \
-      -e "msa_energies_${step}_validation.txt" \
-      -l "msa" \
+      -e "msa_energies_validate_${step}.txt" \
+      -l "msa (training)" \
       -l "msa (validation)" \
       -t "${title}, step ${step}" \
       -o "${slug}_energy_validation_${step}.png"
@@ -288,7 +270,7 @@ if ! [[ -v CHAIN ]]; then
 fi
 
 if ! [[ -v VALIDATION ]]; then
-  VALIDATION="none"
+  VALIDATION="msa_numerical_validate.txt"
 fi
 
 make_figures \
