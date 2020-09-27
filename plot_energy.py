@@ -84,8 +84,6 @@ def main():
 
     msa_labels = options.labels
 
-    mean_energies = [np.mean(msa) for msa in msa_energies]
-
     standard_energy = 0
     if options.mode == "1":
         standard_energy = msa_energies[0][0]
@@ -97,6 +95,8 @@ def main():
         msa_energies = [
             msa_energy - standard_energy for msa_energy in msa_energies
         ]
+
+    mean_energies = [np.mean(msa) for msa in msa_energies]
 
     colors = ['#008fd5', '#fc4f30', '#e5ae38', '#6d904f', '#8b8b8b', '#810f7c']
     n_colors = len(colors)
