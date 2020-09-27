@@ -220,13 +220,13 @@ def load_pdb_structure(pdb_id, pdb_file):
 
 def load_energies(energy_file):
     """ load sequences energies """
-    data = np.loadtxt(energy_file, dtype="double", skiprows=1)
+    data = np.loadtxt(energy_file, dtype="double", skiprows=0)
     return data
 
 
 def load_distances(distance_file):
     """ load sequence distances """
-    data = np.loadtxt(distance_file, dtype="double", skiprows=1)
+    data = np.loadtxt(distance_file, dtype="double", skiprows=0)
     return data
 
 
