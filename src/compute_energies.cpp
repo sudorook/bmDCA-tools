@@ -75,15 +75,14 @@ main(int argc, char* argv[])
       for (int i = 0; i < msa.N; i++) {
         if ((ignore_gaps) & (msa.alignment(seq, i) == 0))
           continue;
-        E -= params.h.at(msa.alignment.at(seq, i), i);
+        E -= params.h(msa.alignment(seq, i), i);
         for (int j = i + 1; j < msa.N; j++) {
           if ((ignore_gaps) & (msa.alignment(seq, j) == 0))
             continue;
-          E -= params.J.at(i, j).at(msa.alignment.at(seq, i),
-                                    msa.alignment.at(seq, j));
+          E -= params.J(i, j)(msa.alignment(seq, i), msa.alignment(seq, j));
         }
       }
-      energies.at(rep, seq) = E;
+      energies(rep, seq) = E;
     }
   }
   std::cout << "done" << std::endl;
@@ -91,9 +90,12 @@ main(int argc, char* argv[])
   std::cout << "writing energies... " << std::flush;
   std::ofstream output_stream(energy_file);
 
+  // output_stream.unsetf(std::ios::floatfield);
+  // output_stream.precision(50);
+
   for (int rep = 0; rep < 1; rep++) {
     for (int m = 0; m < msa.M; m++) {
-      output_stream << energies.at(rep, m) << std::endl;
+      output_stream << energies(rep, m) << std::endl;
     }
   }
   output_stream.close();
