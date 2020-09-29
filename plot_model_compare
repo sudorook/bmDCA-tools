@@ -205,10 +205,16 @@ def derive_file_names(model1, model2, model1_J=None, model2_J=None):
         )
 
         tmp = tmp.split("_")
-        values_h_hist = "_".join(tmp[0:-1]) + "_h_" + tmp[-1] + "_hist.tsv"
-        values_h_model = "_".join(tmp[0:-1]) + "_h_" + tmp[-1] + "_model.tsv"
-        values_J_hist = "_".join(tmp[0:-1]) + "_J_" + tmp[-1] + "_hist.tsv"
-        values_J_model = "_".join(tmp[0:-1]) + "_J_" + tmp[-1] + "_model.tsv"
+        if len(tmp) > 1:
+            values_h_hist = "_".join(tmp[0:-1]) + "_h_" + tmp[-1] + "_hist.tsv"
+            values_h_model = "_".join(tmp[0:-1]) + "_h_" + tmp[-1] + "_model.tsv"
+            values_J_hist = "_".join(tmp[0:-1]) + "_J_" + tmp[-1] + "_hist.tsv"
+            values_J_model = "_".join(tmp[0:-1]) + "_J_" + tmp[-1] + "_model.tsv"
+        else:
+            values_h_hist = tmp[0] + "_h_hist.tsv"
+            values_h_model = tmp[0] + "_h_model.tsv"
+            values_J_hist = tmp[0] + "_J_hist.tsv"
+            values_J_model = tmp[0] + "_J_model.tsv"
 
     return values_h_hist, values_h_model, values_J_hist, values_J_model
 
@@ -304,12 +310,20 @@ def main():
         if res != 0:
             sys.exit("Error generating input histograms. Exiting...")
 
-        (
-            values_h_hist,
-            values_h_model,
-            values_J_hist,
-            values_J_model,
-        ) = derive_file_names(file1, file2, file1_J, file2_J)
+        if file1_J is not None and file2_J is not None:
+            (
+                values_h_hist,
+                values_h_model,
+                values_J_hist,
+                values_J_model,
+            ) = derive_file_names(file1, file2, file1_J, file2_J)
+        else:
+            (
+                values_h_hist,
+                values_h_model,
+                values_J_hist,
+                values_J_model,
+            ) = derive_file_names(file1, file2)
 
         subplots.append(
             (
