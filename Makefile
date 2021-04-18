@@ -14,8 +14,8 @@ Z := compute_z
 
 CC := g++
 
-CXXFLAGS = -O3 $(shell pkg-config --cflags armadillo) \
-           -fopenmp -std=c++11 -DARMA_DONT_USE_HDF5
+CXXFLAGS = -O3 -Wall $(shell pkg-config --cflags armadillo) \
+           -fopenmp -std=c++11 -DARMA_DONT_USE_HDF5 -DARMA_NO_DEBUG
 LDFLAGS = -lm $(shell pkg-config --libs armadillo)
 
 SRCPATH = src
