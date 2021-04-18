@@ -34,13 +34,25 @@ function make_figures() {
   done
 
   local prev_step
-  for i in $(ls -t samples_stat_2p_[0-9]*.bin | \
-               cut -d "_" -f4 | cut -d"." -f1); do
-    if [[ "$i" -lt "$step" ]]; then
-      prev_step="$i"
-      break
-    fi
-  done
+  if ls -t samples_stat_2p_[0-9]*.bin >/dev/null; then
+    for i in $(ls -t samples_stat_2p_[0-9]*.bin | \
+                 cut -d "_" -f4 | cut -d"." -f1); do
+      if [[ "$i" -lt "$step" ]]; then
+        prev_step="$i"
+        break
+      fi
+    done
+  else
+    echo "ERROR: bmDCA output files not found."
+    exit 3
+  fi
+
+  if ! [ -f bmdca_run.log ]; then
+    echo "ERROR: missing bmDCA run log."
+    exit 3
+  fi
+
+  echo "plotting step $step"
 
   echo "run log"
   plot_runlog -i bmdca_run.log -o "${slug}_runlog.png"
