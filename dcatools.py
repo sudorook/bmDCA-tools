@@ -381,16 +381,17 @@ def numeric2fasta(numeric_msa_file, output_fasta_file):
     return res
 
 
-def load_run_log(log_file, offset=None):
+def load_run_log(log_file, start=0, end=None):
     """ load the run log """
 
-    if offset is not None:
-        offset = int(offset)
-        df = pd.read_csv(log_file, sep="\t")[offset:]
+    if end is not None:
+        df = pd.read_csv(log_file, sep="\t")[int(start):int(end)]
     else:
-        df = pd.read_csv(log_file, sep="\t")
+        df = pd.read_csv(log_file, sep="\t")[int(start):]
 
     df["log10-burn-in"] = np.log10(df["burn-in"])
-    df["log10-burn-between"] = np.log10(df["burn-between"])
+    if "burn-between" in df.columns:
+        if np.sum(df["burn-between"] == 0) + np.sum(df["burn-between"] == 1) != len(df["burn-between"]):
+            df["log10-burn-between"] = np.log10(df["burn-between"])
 
     return df
