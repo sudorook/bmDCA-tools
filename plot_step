@@ -260,7 +260,6 @@ done
 
 if ! [[ -v STEP ]]; then
   STEP="$(get_step)"
-  echo "plotting step $STEP"
 else
   CHECK_STEP="$(get_step)"
   if [ "${STEP}" -gt "${CHECK_STEP}" ]; then
