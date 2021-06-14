@@ -15,7 +15,8 @@ function make_figures() {
           iconv -t ascii//TRANSLIT | \
           sed -r s/[~\^]+//g | \
           sed -r s/[^a-zA-Z0-9]+/_/g | \
-          sed -r s/^-+\|-+$//g | tr A-Z a-z)"
+          sed -r s/^-+\|-+$//g | \
+          tr "[:upper:]" "[:lower:]")"
 
   local step="$3"
   local nproc="$4"
