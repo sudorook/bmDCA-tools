@@ -10,7 +10,6 @@ HIST2D := compute_histogram2d
 AVERAGE := compute_average
 SUBSET := subset_alignment
 PATHFINDER := compute_paths
-Z := compute_z
 
 CC := g++
 
@@ -80,10 +79,6 @@ SOURCES_PATHFINDER = ${SRCPATH}/compute_paths.cpp \
                      ${SRCPATH}/utils.cpp
 OBJECTS_PATHFINDER = $(SOURCES_PATHFINDER:%.cpp=%.o)
 
-SOURCES_Z = ${SRCPATH}/compute_z.cpp \
-            ${SRCPATH}/utils.cpp
-OBJECTS_Z = $(SOURCES_Z:%.cpp=%.o)
-
 .PHONY: all
 
 all: $(MSACOMPUTE) $(MSACOMPARE) $(ENERGY) $(DISTANCE) $(GAUGE) $(DMS) $(DCS) $(HIST1D) $(HIST2D) $(AVERAGE) $(SUBSET) $(PATHFINDER)
@@ -139,7 +134,6 @@ clean:
 	rm -f $(AVERAGE)
 	rm -f $(SUBSET)
 	rm -f $(PATHFINDER)
-	rm -f $(Z)
 	rm -f $(OBJECTS_MSACOMPUTE)
 	rm -f $(OBJECTS_MSACOMPARE)
 	rm -f $(OBJECTS_ENERGY)
