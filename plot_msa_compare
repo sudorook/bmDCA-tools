@@ -124,7 +124,7 @@ def parse_options():
         "--dest",
         dest="destination",
         required=False,
-        help="figure output name",
+        help="output directory",
     )
     parser.add_argument(
         "-p",
