@@ -357,7 +357,7 @@ def subset_distance_matrix(distmat, position_list):
 def slugify(text):
     """ convert text string to slug """
     text = unidecode.unidecode(text).lower()
-    return re.sub(r"[\W_]+", "_", text)
+    return re.sub(r"[\W_]+", "_", re.sub("\(|\)", "", text))
 
 
 def arma2ascii(h_file, J_file):
