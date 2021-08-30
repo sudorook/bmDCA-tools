@@ -97,6 +97,8 @@ def main():
             df_list[i] = df_list[i].iloc[0:min_steps,0:]
 
     with plt.style.context("fivethirtyeight"):
+        styles = ['-', '--', '-.', ':']
+        n_styles = len(styles)
         for idx, df in enumerate(df_list):
             if idx == 0:
                 ax = df.plot(
@@ -104,6 +106,7 @@ def main():
                     y=fields,
                     linewidth=1.0,
                     subplots=True,
+                    linestyle=styles[idx % n_styles],
                 )
             else:
                 df.plot(
@@ -112,7 +115,7 @@ def main():
                     linewidth=1.0,
                     subplots=True,
                     ax=ax,
-                    linestyle='--',
+                    linestyle=styles[idx % n_styles],
                 )
         plt.tight_layout()
         plt.savefig(options.output)
