@@ -394,4 +394,12 @@ def load_run_log(log_file, start=0, end=None):
         if np.sum(df["burn-between"] == 0) + np.sum(df["burn-between"] == 1) != len(df["burn-between"]):
             df["log10-burn-between"] = np.log10(df["burn-between"])
 
+    df["log10-train-err-tot"] = np.log10(df["train-err-tot"])
+    df["log10-train-err-1p"] = np.log10(df["train-err-1p"])
+    df["log10-train-err-2p"] = np.log10(df["train-err-2p"])
+
+    df["diff-err-tot"] = df["train-err-tot"]-df["validate-err-tot"]
+    df["diff-err-1p"] = df["train-err-1p"]-df["validate-err-1p"]
+    df["diff-err-2p"] = df["train-err-2p"]-df["validate-err-2p"]
+
     return df
