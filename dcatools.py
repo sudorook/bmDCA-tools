@@ -398,8 +398,13 @@ def load_run_log(log_file, start=0, end=None):
     df["log10-train-err-1p"] = np.log10(df["train-err-1p"])
     df["log10-train-err-2p"] = np.log10(df["train-err-2p"])
 
-    df["diff-err-tot"] = df["train-err-tot"]-df["validate-err-tot"]
-    df["diff-err-1p"] = df["train-err-1p"]-df["validate-err-1p"]
-    df["diff-err-2p"] = df["train-err-2p"]-df["validate-err-2p"]
+    if "validate-err-tot" in df.columns:
+        df["log10-validate-err-tot"] = np.log10(df["validate-err-tot"])
+        df["log10-validate-err-1p"] = np.log10(df["validate-err-1p"])
+        df["log10-validate-err-2p"] = np.log10(df["validate-err-2p"])
+
+        df["diff-err-tot"] = df["train-err-tot"]-df["validate-err-tot"]
+        df["diff-err-1p"] = df["train-err-1p"]-df["validate-err-1p"]
+        df["diff-err-2p"] = df["train-err-2p"]-df["validate-err-2p"]
 
     return df
