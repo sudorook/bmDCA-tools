@@ -170,7 +170,14 @@ def main():
                 color="gray",
             )
         data_df_new.plot.hexbin(
-            x="PC1", y="PC2", mincnt=1, cmap="viridis", zorder=1, ax=ax
+            x="PC1",
+            y="PC2",
+            mincnt=1,
+            cmap="viridis",
+            zorder=1,
+            ax=ax,
+            extent=(left, right, bottom, top),
+            gridsize=200,
         )
         if options.title is None:
             plt.title("Projection of samples onto MSA space")
