@@ -278,6 +278,7 @@ def main():
 
         with plt.style.context("fivethirtyeight"):
             fig, ax = plt.subplots()
+            ax.grid(False)
             h = ax.hist2d(
                 x=data_df[options.xlabel],
                 y=data_df[options.ylabel],
@@ -290,6 +291,7 @@ def main():
             x = np.linspace(*ax.get_xlim())
             plt.grid(zorder=0)
             plt.colorbar(h[3])
+            ax.grid(True)
             ax.set_xlabel(options.xlabel)
             ax.set_ylabel(options.ylabel)
             if a != 0:
