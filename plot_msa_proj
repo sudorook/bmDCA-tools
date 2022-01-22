@@ -146,7 +146,7 @@ def main():
             x="PC1", y="PC2", mincnt=1, cmap="viridis", zorder=1
         )
         [left, right] = ax.get_xlim()
-        [top, bottom] = ax.get_ylim()
+        [bottom, top] = ax.get_ylim()
         plt.close()
 
     # project new mcmc onto msa eigenvectors
@@ -177,7 +177,7 @@ def main():
         else:
             plt.title(options.title)
         ax.set_xlim(left, right)
-        ax.set_ylim(top, bottom)
+        ax.set_ylim(bottom, top)
         plt.tight_layout()
         plt.savefig(outfile_proj)
         plt.close()
