@@ -130,25 +130,27 @@ function make_figures() {
     -o "${slug}_proj_${step}.png" -b
   echo
 
+  # Plot all sequencies energies (training, validation, and samples)
   show_info "sequence energies"
-  taskset --cpu-list "$cpulist" plot_energy.py \
-    -e "msa_energies_${step}.txt" \
-    -e "energies_${step}.txt" \
-    -l "msa" \
-    -l "samples" \
-    -t "${title}, step ${step}" \
-    -o "${slug}_energy_${step}.png"
-  echo
-
   if [[ -f "${validation}" ]]; then
-    show_info "validation alignment energies"
     taskset --cpu-list "$cpulist" plot_energy.py \
       -e "msa_energies_${step}.txt" \
       -e "msa_energies_validate_${step}.txt" \
-      -l "msa (training)" \
-      -l "msa (validation)" \
+      -e "energies_${step}.txt" \
+      -l "Training MSA" \
+      -l "Validation MSA" \
+      -l "Samples" \
       -t "${title}, step ${step}" \
-      -o "${slug}_energy_validation_${step}.png"
+      -o "${slug}_energy_${step}.png"
+    echo
+  else
+    taskset --cpu-list "$cpulist" plot_energy.py \
+      -e "msa_energies_${step}.txt" \
+      -e "energies_${step}.txt" \
+      -l "MSA" \
+      -l "Samples" \
+      -t "${title}, step ${step}" \
+      -o "${slug}_energy_${step}.png"
     echo
   fi
 
