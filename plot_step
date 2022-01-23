@@ -104,9 +104,22 @@ function make_figures() {
     -n msa_numerical.txt \
     -w msa_weights.txt \
     -N "samples_${step}.txt" \
-    -l "MSA" \
+    -l "Training MSA" \
     -L "Samples" \
-    -T "${title}, step ${step}" -p 3 -c
+    -T "${name}, step ${step} (training)" \
+    -D "${description}" \
+    -p 3 -c
+
+  show_info "validation stats comparison"
+  plot_msa_compare \
+    -n msa_numerical_validate.txt \
+    -w msa_weights_validate.txt \
+    -N "samples_${step}.txt" \
+    -l "Validation MSA" \
+    -L "Samples" \
+    -T "${name}, step ${step} (validation)" \
+    -D "${description}" \
+    -p 3 -c
 
   show_info "pca projection"
   taskset --cpu-list "$cpulist" plot_msa_proj \
