@@ -1,0 +1,133 @@
+#! /bin/bash
+set -eu
+
+function show_error {
+  echo -e $'\033[1;31m'"$*"$'\033[0m' 1>&2
+}
+
+function show_info {
+  echo -e $'\033[1;32m'"$*"$'\033[0m'
+}
+
+function show_warning {
+  echo -e $'\033[1;33m'"$*"$'\033[0m'
+}
+
+function show_success {
+  echo -e $'\033[1;35m'"$*"$'\033[0m'
+}
+
+function show_header {
+  echo -e $'\033[1;36m'"$*"$'\033[0m'
+}
+
+function show_listitem {
+  echo -e $'\033[1;37m'"$*"$'\033[0m'
+}
+
+function check_command {
+  local state=true
+  local c
+  for c in "${@}"; do
+    if ! command -v "${c}" >/dev/null; then
+      show_error "MISSING: ${c} not installed."
+      state=false
+    fi
+  done
+  "${state}" && return 0 || return 1
+}
+
+function process_msa_wrapper {
+  local in="${1}"
+  local dir
+  local g="${2}"
+  local G="${3}"
+  local s="${4}"
+  local t="${5}"
+  
+  dir="$(dirname "${in}")"
+  in="$(basename "${in}")"
+
+  if [[ -v 6 ]]; then
+    is_numeric="${6}"
+  else
+    is_numeric=false
+  fi
+
+  local g_id="${g/./-}"
+  local G_id="${G/./-}"
+  local s_id="${s/./-}"
+  local t_id="${t/./-}"
+  local id="g=${g_id}_G=${G_id}_s=${s_id}_t=${t_id}"
+
+  local out_n="${in%%.*}_${id}_numerical.txt"
+  local out_w="${in%%.*}_${id}_weights.txt"
+
+  mkdir -p "${dir}/${id}"
+
+  if [ "${is_numeric}" = false ]; then
+    show_info \
+      process_msa \
+        -i "${dir}/${in}" \
+        -g "${g}" -G "${G}" -s "${s}" -t "${t}" \
+        -o "${dir}/${id}/${out_n}" -O "${dir}/${id}/${out_w}"
+    process_msa \
+      -i "${dir}/${in}" \
+      -g "${g}" -G "${G}" -s "${s}" -t "${t}" \
+      -o "${dir}/${id}/${out_n}" -O "${dir}/${id}/${out_w}"
+  else
+    show_info \
+      process_msa \
+        -n "${dir}/${in}" \
+        -g "${g}" -G "${G}" -s "${s}" -t "${t}" \
+        -o "${dir}/${id}/${out_n}" -O "${dir}/${id}/${out_w}"
+    process_msa \
+      -n "${dir}/${in}" \
+      -g "${g}" -G "${G}" -s "${s}" -t "${t}" \
+      -o "${dir}/${id}/${out_n}" -O "${dir}/${id}/${out_w}"
+  fi
+  echo
+}
+
+function is_numeric {
+  local item="${1}"
+  if grep -q "^>" "${item}"; then
+    echo false
+  elif head -n 1 "${item}" | \
+       grep -q "^\([0-9]\+\) \([0-9]\+\) \([0-9]\+\)$"; then
+    echo true
+  else
+    show_error "ERROR: input ${item@Q} not understood. Exiting."
+    exit 3
+  fi
+}
+
+
+#
+# Main
+#
+
+! check_command process_msa && exit 1
+
+IN="${1}"
+
+if ! [ -f "${IN}" ]; then
+  show_error "ERROR: ${IN@Q} not a file. Exiting."
+  exit 3
+elif ! [[ "$(file -b --mime-type "${IN}")" = "text/plain" ]]; then
+  show_error "ERROR: ${IN@Q} not a text file. Exiting."
+  exit 3
+fi
+
+IS_NUMERIC="$(is_numeric "${IN}")"
+
+show_header "Processing ${IN@Q}..."
+process_msa_wrapper "${IN}" 0.01 0.01 1.00 0.80 "${IS_NUMERIC}"
+process_msa_wrapper "${IN}" 0.02 0.02 1.00 0.80 "${IS_NUMERIC}"
+process_msa_wrapper "${IN}" 0.05 0.05 1.00 0.80 "${IS_NUMERIC}"
+process_msa_wrapper "${IN}" 0.10 0.10 1.00 0.80 "${IS_NUMERIC}"
+process_msa_wrapper "${IN}" 0.20 0.20 1.00 0.80 "${IS_NUMERIC}"
+process_msa_wrapper "${IN}" 0.25 0.25 1.00 0.80 "${IS_NUMERIC}"
+process_msa_wrapper "${IN}" 0.50 0.50 1.00 0.80 "${IS_NUMERIC}"
+process_msa_wrapper "${IN}" 1.00 1.00 1.00 0.80 "${IS_NUMERIC}"
+show_success "Done!"
