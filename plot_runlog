@@ -98,6 +98,7 @@ def main():
         "duration",
     ]
 
+    # subset the 'wants' fields by the fields actually present in the run logs
     all_fields = set()
     for df in df_list:
         if len(all_fields) == 0:
