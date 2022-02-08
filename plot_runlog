@@ -2,6 +2,7 @@
 """ docstring """
 
 import argparse
+import sys
 import matplotlib
 import matplotlib.pyplot as plt
 import dcatools as tools
@@ -19,6 +20,14 @@ def parse_options():
         dest="input",
         action="append",
         required=True,
+        help="run log file",
+    )
+    parser.add_argument(
+        "-d",
+        "--description",
+        dest="description",
+        action="append",
+        required=False,
         help="run log file",
     )
     parser.add_argument(
@@ -51,6 +60,14 @@ def parse_options():
 def main():
     """ do stuff """
     options = parse_options()
+
+    suffixes = []
+    if options.description:
+        if len(options.input) != len(options.description):
+            sys.exit("Mismatched number of inputs and description strings.")
+        suffixes = options.description
+    else:
+        suffixes = [item.rstrip("bmdca_run.log").rstrip("/") for item in options.input]
 
     df_list = []
     for item in options.input:
@@ -107,6 +124,7 @@ def main():
                 ax = df.plot(
                     x="step",
                     y=fields,
+                    label=[f + ' ' + suffixes[idx] for f in fields],
                     linewidth=1.0,
                     subplots=True,
                     linestyle=styles[idx % n_styles],
@@ -115,6 +133,7 @@ def main():
                 df.plot(
                     x="step",
                     y=fields,
+                    label=[f + ' ' + suffixes[idx] for f in fields],
                     linewidth=1.0,
                     subplots=True,
                     ax=ax,
