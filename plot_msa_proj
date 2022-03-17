@@ -164,7 +164,7 @@ def main():
                 x="PC1",
                 y="PC2",
                 zorder=0,
-                alpha=0.33,
+                alpha=0.2,
                 ax=ax,
                 s=5,
                 color="gray",
