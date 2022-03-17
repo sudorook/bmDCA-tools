@@ -2,7 +2,6 @@
 """ docstring """
 
 import argparse
-import os
 import sys
 import numpy as np
 import matplotlib
@@ -93,8 +92,6 @@ def main():
         ]
     else:
         sys.exit("ERROR: missing input data")
-
-    msa_labels = options.labels
 
     if len(energies) != 2:
         sys.exit("ERROR: only comparison of 2 energies supported.")
