@@ -107,7 +107,7 @@ def main():
         plt.legend(loc="upper right")
         plt.xlabel("Sequence Energy")
         plt.ylabel("Probability")
-        plt.title(options.title)
+        plt.suptitle(r"$\bf{Seq\ Energy:}$ " + options.title, fontsize="large")
         plt.tight_layout()
         plt.savefig(options.output)
         plt.close()
