@@ -133,7 +133,7 @@ function make_figures() {
   # Plot all sequencies energies (training, validation, and samples)
   show_info "sequence energies"
   if [[ -f "${validation}" ]]; then
-    taskset --cpu-list "$cpulist" plot_energy.py \
+    taskset --cpu-list "$cpulist" plot_energy \
       -e "msa_energies_${step}.txt" \
       -e "msa_energies_validate_${step}.txt" \
       -e "energies_${step}.txt" \
@@ -144,7 +144,7 @@ function make_figures() {
       -o "${slug}_energy_${step}.png"
     echo
   else
-    taskset --cpu-list "$cpulist" plot_energy.py \
+    taskset --cpu-list "$cpulist" plot_energy \
       -e "msa_energies_${step}.txt" \
       -e "energies_${step}.txt" \
       -l "MSA" \
@@ -184,7 +184,7 @@ function make_figures() {
       -p "parameters_h_${step}.bin" \
       -P "parameters_J_${step}.bin" \
       -o "energies_${step}_subset.txt"
-    taskset --cpu-list "$cpulist" plot_energy.py \
+    taskset --cpu-list "$cpulist" plot_energy \
       -e "msa_energies_${step}.txt" \
       -e "energies_${step}.txt" \
       -e "energies_${step}_subset.txt" \
@@ -247,7 +247,7 @@ function make_figures() {
       -P "parameters_J_${prev_step}.bin" \
       -o "msa_energies_${prev_step}.txt"
 
-    taskset --cpu-list "$cpulist" plot_energy_compare.py \
+    taskset --cpu-list "$cpulist" plot_energy_compare \
       -e "msa_energies_${prev_step}.txt" \
       -e "msa_energies_${step}.txt" \
       -l "MSA Energies, step $prev_step" \
