@@ -180,9 +180,9 @@ def main():
             gridsize=200,
         )
         if options.title is None:
-            plt.title("Projection of samples onto MSA space")
+            plt.suptitle("Projection of samples onto MSA space")
         else:
-            plt.title(options.title)
+            plt.suptitle(r"$\bf{PCA\ Projection:}$ " + options.title, fontsize="large")
         ax.set_xlim(left, right)
         ax.set_ylim(bottom, top)
         plt.tight_layout()
