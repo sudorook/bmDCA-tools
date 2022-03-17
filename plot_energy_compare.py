@@ -56,6 +56,9 @@ def parse_options():
         "-t", "--title", dest="title", required=False, help="title"
     )
     parser.add_argument(
+        "-d", "--description", dest="description", required=False, help="additional information"
+    )
+    parser.add_argument(
         "-o", "--output", dest="output", required=True, help="output file name"
     )
     parser.add_argument(
@@ -136,9 +139,12 @@ def main():
         ax.legend(loc="lower right")
 
         if options.title is None:
-            plt.title(options.labels[0] + " vs " + options.labels[1])
+            fig_title = options.labels[0] + " vs " + options.labels[1]
         else:
-            plt.title(options.title)
+            fig_title = options.title
+        if options.description:
+            fig_title = fig_title + '\n' + options.description
+        plt.suptitle(r"$\bf{Seq\ Energy\ Compare:}$ " + fig_title, fontsize="large")
 
         plt.tight_layout()
         plt.savefig(options.output)
