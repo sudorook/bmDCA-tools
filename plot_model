@@ -8,12 +8,10 @@ import subprocess
 import numpy as np
 import pandas as pd
 import matplotlib
-
+import matplotlib.pyplot as plt
 import dcatools as tools
 
 matplotlib.use("Agg")
-import matplotlib.pyplot as plt
-
 plt.rcParams.update({"mathtext.default": "regular"})
 
 

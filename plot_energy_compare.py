@@ -6,15 +6,13 @@ import os
 import sys
 import numpy as np
 import matplotlib
+import matplotlib.pyplot as plt
 import pandas as pd
 import statsmodels.formula.api as sm
-
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt
-
 import dcatools as tools
 
-plt.rcParams["figure.figsize"] = [12, 9]
+matplotlib.use("Agg")
+plt.rcParams["figure.figsize"] = [12, 10]
 plt.rcParams.update({"mathtext.default": "regular"})
 
 
