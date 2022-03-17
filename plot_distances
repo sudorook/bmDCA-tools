@@ -257,7 +257,7 @@ def main():
             right=False,
         )
         axes.grid(False)
-        axes.set_title("Sequence Similarity: " + options.title, pad=45)
+        plt.suptitle(r"$\bf{Seq\ Similarity:}$ " + options.title, fontsize="x-large")
         axes.set_xlabel("Nearest Sequence Similarity")
 
         ax = fig.add_subplot(int(subplots_rows + subplots_columns + "1"))
