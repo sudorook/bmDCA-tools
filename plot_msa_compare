@@ -298,8 +298,7 @@ def main():
                 norm=matplotlib.colors.LogNorm(),
             )
             x = np.linspace(*ax.get_xlim())
-            plt.grid(zorder=0)
-            plt.colorbar(h[3])
+            plt.colorbar(h[3], aspect=50, fraction=0.05)
             ax.grid(True)
             ax.set_xlabel(options.xlabel)
             ax.set_ylabel(options.ylabel)
