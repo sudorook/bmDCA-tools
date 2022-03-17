@@ -298,7 +298,7 @@ def main():
 
     with plt.style.context("fivethirtyeight"):
         if options.vertical:
-            fig = plt.figure(figsize=[20, 8 * subplots_count])
+            fig = plt.figure(figsize=[16, 7 * subplots_count])
         else:
             fig = plt.figure(figsize=[8 * subplots_count, 14])
         axes = fig.add_subplot(111)
@@ -312,12 +312,10 @@ def main():
             right=False,
         )
         axes.grid(False)
-        axes.set_title(title, pad=25)
+        plt.suptitle(r"$\bf{Model:}$ " + title, fontsize="x-large")
         axes.set_xlabel(
-            label, fontsize=plt.rcParams["axes.titlesize"], x=0.475, y=0
+            label, fontsize="large", x=0.475, y=0
         )
-        if options.vertical:
-            axes.yaxis.labelpad = 20
 
         for idx, s in enumerate(subplots):
             df_h = load_histogram_1d(
@@ -345,7 +343,7 @@ def main():
             )
             ax.set_title(
                 s[0] + " h",
-                fontsize=plt.rcParams["axes.titlesize"],
+                fontsize="medium",
             )
 
             if options.vertical:
@@ -370,9 +368,8 @@ def main():
             )
             ax.set_title(
                 s[0] + " J",
-                fontsize=plt.rcParams["axes.titlesize"],
+                fontsize="medium",
             )
-            #  ax.set_yscale('log')
 
         fig.tight_layout()
         fig.savefig(title_prefix + prefix + ".png")
