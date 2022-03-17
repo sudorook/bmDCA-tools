@@ -491,7 +491,7 @@ def main():
 
     with plt.style.context("fivethirtyeight"):
         if options.vertical:
-            fig = plt.figure(figsize=[20, 8 * subplots_count])
+            fig = plt.figure(figsize=[16, 7 * subplots_count])
         else:
             fig = plt.figure(figsize=[8 * subplots_count, 14])
         axes = fig.add_subplot(111)
@@ -505,15 +505,15 @@ def main():
             right=False,
         )
         axes.grid(False)
-        axes.set_title(title, pad=25)
+        plt.suptitle(r"$\bf{Model\ Compare:}$ " + title, fontsize="x-large")
         axes.set_xlabel(
-            label1, fontsize=plt.rcParams["axes.titlesize"], x=0.475, y=0
+            label1, fontsize="large", x=0.475, y=0
         )
         axes.set_ylabel(
-            label2, fontsize=plt.rcParams["axes.titlesize"], x=0, y=0.5
+            label2, fontsize="large", x=0, y=0.5
         )
         if options.vertical:
-            axes.yaxis.labelpad = 20
+            axes.yaxis.labelpad = 10
 
         for idx, s in enumerate(subplots):
             h = load_histogram_2d(s[1][0], names=[label1, label2, "Count"])
@@ -558,7 +558,7 @@ def main():
             ax.plot(x, x, "--k", alpha=0.25, zorder=0, label=r"y=x")
             ax.set_title(
                 s[0] + " h",
-                fontsize=plt.rcParams["axes.titlesize"],
+                fontsize="medium",
             )
             ax.grid(True)
             ax.set_xlabel("")
@@ -606,7 +606,7 @@ def main():
             ax.plot(x, x, "--k", alpha=0.25, zorder=0, label=r"y=x")
             ax.set_title(
                 s[0] + " J",
-                fontsize=plt.rcParams["axes.titlesize"],
+                fontsize="medium",
             )
             ax.grid(True)
             ax.set_xlabel("")
