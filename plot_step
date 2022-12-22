@@ -260,9 +260,9 @@ function make_figures() {
 }
 
 function get_step() {
-  local STEP
-  STEP=$(wc -l bmdca_run.log | cut -d" " -f1)
-  echo $(( STEP - 1 ))
+  local step
+  step=$(wc -l bmdca_run.log | cut -d" " -f1)
+  echo $(( step - 1 ))  # subtract 1 for the header
 }
 
 #
