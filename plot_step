@@ -325,21 +325,10 @@ else
   fi
 fi
 
-if ! [[ -v NPROC ]]; then
-  NPROC=$(nproc)
-fi
-
-if ! [[ -v PDB ]]; then
-  PDB="none"
-fi
-
-if ! [[ -v CHAIN ]]; then
-  CHAIN="A"
-fi
-
-if ! [[ -v VALIDATION ]]; then
-  VALIDATION="msa_numerical_validate.txt"
-fi
+NPROC="${NPROC:-$(nproc)}"
+PDB="${PDB:-none}"
+CHAIN="${CHAIN:-A}"
+VALIDATION="${VALIDATION:-msa_numerical_validate.txt}"
 
 make_figures \
   "$TITLE" "$DESCRIPTION" "$STEP" "$NPROC" "$PDB" "$CHAIN" "$VALIDATION"
