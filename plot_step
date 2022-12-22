@@ -320,8 +320,8 @@ if ! [[ -v STEP ]]; then
 else
   CHECK_STEP="$(get_step)"
   if [ "${STEP}" -gt "${CHECK_STEP}" ]; then
-    show_error "ERROR: step $STEP has not been reached."
-    exit
+    show_error "ERROR: step ${STEP} has not been reached."
+    exit 3
   fi
 fi
 
