@@ -122,6 +122,7 @@ $(PATHFINDER): $(OBJECTS_PATHFINDER)
 .PHONY: clean
 
 clean:
+	rm -rf __pycache__
 	rm -f $(MSACOMPUTE)
 	rm -f $(MSACOMPARE)
 	rm -f $(ENERGY)
