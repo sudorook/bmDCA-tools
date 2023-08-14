@@ -29,7 +29,7 @@ function check_command {
   local state=true
   local c
   for c in "${@}"; do
-    if ! command -v "${c}" >/dev/null; then
+    if ! command -v "${c}" > /dev/null; then
       show_error "MISSING: ${c} not installed."
       state=false
     fi
@@ -44,7 +44,7 @@ function process_msa_wrapper {
   local G="${3}"
   local s="${4}"
   local t="${5}"
-  
+
   dir="$(dirname "${in}")"
   in="$(basename "${in}")"
 
@@ -93,7 +93,7 @@ function is_numeric {
   local item="${1}"
   if grep -q "^>" "${item}"; then
     echo false
-  elif head -n 1 "${item}" | \
+  elif head -n 1 "${item}" |
        grep -q "^\([0-9]\+\) \([0-9]\+\) \([0-9]\+\)$"; then
     echo true
   else
@@ -101,7 +101,6 @@ function is_numeric {
     exit 3
   fi
 }
-
 
 #
 # Main

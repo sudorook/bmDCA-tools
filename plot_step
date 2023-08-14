@@ -47,15 +47,15 @@ function make_figures() {
   local title="$name, $description"
 
   local slug
-  slug="$(echo "$name, $description" | \
-          sed -r s/λ/l/g | \
-          sed -r s/α/a/g | \
-          sed -r s/β/b/g | \
-          sed -r s/γ/g/g | \
-          iconv -t ascii//TRANSLIT | \
-          sed -r s/[~\^]+//g | \
-          sed -r s/[^a-zA-Z0-9]+/_/g | \
-          sed -r s/^-+\|-+$//g | \
+  slug="$(echo "$name, $description" |
+          sed -r s/λ/l/g |
+          sed -r s/α/a/g |
+          sed -r s/β/b/g |
+          sed -r s/γ/g/g |
+          iconv -t ascii//TRANSLIT |
+          sed -r s/[~\^]+//g |
+          sed -r s/[^a-zA-Z0-9]+/_/g |
+          sed -r s/^-+\|-+$//g |
           tr "[:upper:]" "[:lower:]")"
 
   local step="$3"
@@ -75,8 +75,8 @@ function make_figures() {
   done
 
   local prev_step
-  if ls -t samples_stat_2p_[0-9]*.bin >/dev/null; then
-    for i in $(ls -t samples_stat_2p_[0-9]*.bin | \
+  if ls -t samples_stat_2p_[0-9]*.bin > /dev/null; then
+    for i in $(ls -t samples_stat_2p_[0-9]*.bin |
                  cut -d "_" -f4 | cut -d"." -f1); do
       if [[ "$i" -lt "$step" ]]; then
         prev_step="$i"
@@ -177,8 +177,7 @@ function make_figures() {
     -b "${between}" \
     -w "${within}" \
     -o "samples_${step}_subset.txt"
-  if [ "$(wc -l "samples_${step}_subset.txt" | cut -d" " -f1)" -gt 1 ]
-  then
+  if [ "$(wc -l "samples_${step}_subset.txt" | cut -d" " -f1)" -gt 1 ]; then
     compute_energies \
       -n "samples_${step}_subset.txt" \
       -p "parameters_h_${step}.bin" \
@@ -262,7 +261,7 @@ function make_figures() {
 function get_step() {
   local step
   step=$(wc -l bmdca_run.log | cut -d" " -f1)
-  echo $(( step - 1 ))  # subtract 1 for the header
+  echo $((step - 1))    # subtract 1 for the header
 }
 
 #
@@ -275,31 +274,31 @@ PARSED=$(getopt -o ${OPTIONS} --long ${LONGOPTIONS} -n "$0" -- "$@")
 eval set -- "$PARSED"
 while [ $# -ge 1 ]; do
   case "$1" in
-    -t|--title)
+    -t | --title)
       TITLE="${2}"
       shift 2
       ;;
-    -d|--description)
+    -d | --description)
       DESCRIPTION="${2}"
       shift 2
       ;;
-    -s|--step)
+    -s | --step)
       STEP="${2}"
       shift 2
       ;;
-    -n|--nproc)
+    -n | --nproc)
       NPROC="${2}"
       shift 2
       ;;
-    -p|--pdb)
+    -p | --pdb)
       PDB="${2}"
       shift 2
       ;;
-    -c|--chain)
+    -c | --chain)
       CHAIN="${2}"
       shift 2
       ;;
-    -v|--validation)
+    -v | --validation)
       VALIDATION="${2}"
       shift 2
       ;;
