@@ -17,19 +17,19 @@ from Bio import SeqIO
 from Bio import AlignIO
 
 
-def reduce_J(J, norm=2,):
-    """ reduce J using Frobenius-norm """
+def reduce_J(J, norm=2):
+    """reduce J using Frobenius-norm"""
     Npos = np.shape(J)[0]
-    Naa = np.shape(J[0, 0])[0]
+    # Naa = np.shape(J[0, 0])[0]
     J_new = np.zeros((Npos, Npos))
     for i in range(Npos):
         for j in range(i + 1, Npos):
-                J_new[i, j] = np.linalg.norm(J[i, j], norm)
+            J_new[i, j] = np.linalg.norm(J[i, j], norm)
     return J_new
 
 
 def reduce_h(h, norm=2, gap_pos=-1):
-    """ reduce h using Frobenius-norm """
+    """reduce h using Frobenius-norm"""
     Npos, Naa = np.shape(h)
     pos_range = list(x for x in range(Npos) if x != gap_pos)
     h_new = np.zeros(len(pos_range))
@@ -44,7 +44,7 @@ def reduce_h(h, norm=2, gap_pos=-1):
 
 
 def adjust_frobenius_norm(frob_mat, reflect=True):
-    """ adjust Frobenius norm for sampling error """
+    """adjust Frobenius norm for sampling error"""
     corr_mat = np.zeros(np.shape(frob_mat))
     if reflect:
         frob_mat = frob_mat + np.transpose(frob_mat)
@@ -61,7 +61,7 @@ def adjust_frobenius_norm(frob_mat, reflect=True):
 
 
 def compute_energies(seqs, h, J):
-    """ compute statistical energies for sequences """
+    """compute statistical energies for sequences"""
     energies = np.zeros(seqs.shape[0])
     N = len(seqs[0])
     for i, seq in enumerate(seqs):
@@ -73,7 +73,7 @@ def compute_energies(seqs, h, J):
 
 
 def compute_pdb_distance_matrix(structure, chain_id="A", mode="CA"):
-    """ compute PDB distance matrix """
+    """compute PDB distance matrix"""
 
     chain = structure[0][chain_id]
     labels = [
@@ -112,7 +112,7 @@ def compute_pdb_distance_matrix(structure, chain_id="A", mode="CA"):
 
 
 def get_pdb_sequence(structure, chain_id="A"):
-    """ compute PDB distance matrix """
+    """compute PDB distance matrix"""
 
     aa_table = defaultdict(lambda: "X")
     aa_table["ALA"] = "A"
@@ -143,34 +143,36 @@ def get_pdb_sequence(structure, chain_id="A"):
         if aa.get_id()[0] == " "
     ]
 
-    return Seq("".join(sequence),)
+    return Seq(
+        "".join(sequence),
+    )
 
 
 def compute_contact_matrix(distmat, threshold=8.0):
-    """ convert distance matrix to contact matrix """
+    """convert distance matrix to contact matrix"""
     return distmat * (distmat != 0) * (distmat < threshold)
 
 
 def load_sequences(msa_file):
-    """ load sequences """
+    """load sequences"""
     data = np.loadtxt(msa_file, dtype="int", skiprows=1)
     return data
 
 
 def load_sequences_fasta(sequence_file, sequence_format="fasta"):
-    """ load FASTA-formatted sequences """
+    """load FASTA-formatted sequences"""
     sequences = list(SeqIO.parse(sequence_file, sequence_format))
     return sequences
 
 
 def load_alignment_fasta(alignment_file, alignment_format="fasta"):
-    """ Load the alignment and return it. """
+    """Load the alignment and return it."""
     alignment = AlignIO.read(alignment_file, alignment_format)
     return alignment
 
 
 def load_model(data_file):
-    """ syntax checker is annoying me """
+    """syntax checker is annoying me"""
     tmpJ = []
     tmph = []
     Naa = 0
@@ -204,7 +206,7 @@ def load_model(data_file):
 
 
 def load_model_mat(data_file):
-    """ load mat file with alignment, fields, and couplings """
+    """load mat file with alignment, fields, and couplings"""
     data = loadmat(data_file)
     alignment = data["align"]
     params_h = data["h"]
@@ -213,25 +215,25 @@ def load_model_mat(data_file):
 
 
 def load_pdb_structure(pdb_id, pdb_file):
-    """ load pdb structure """
-    parser = PDBParser(PERMISSIVE=1)
+    """load pdb structure"""
+    parser = PDBParser(PERMISSIVE=True)
     return parser.get_structure(pdb_id, pdb_file)
 
 
 def load_energies(energy_file):
-    """ load sequences energies """
+    """load sequences energies"""
     data = np.loadtxt(energy_file, dtype="double", skiprows=0)
     return data
 
 
 def load_distances(distance_file):
-    """ load sequence distances """
+    """load sequence distances"""
     data = np.loadtxt(distance_file, dtype="double", skiprows=0)
     return data
 
 
 def save_alignment(alignment, M, N, Q, filename):
-    """ save numerical alignment """
+    """save numerical alignment"""
     with open(filename, "w") as handle:
         handle.write("%d %d %d\n" % (M, N, Q))
         for i in range(0, M):
@@ -241,7 +243,7 @@ def save_alignment(alignment, M, N, Q, filename):
 
 
 def save_sequences_fasta(sequence, sequence_file, sequence_format="fasta"):
-    """ save sequences to disk """
+    """save sequences to disk"""
     with open(sequence_file, "w") as handle:
         SeqIO.write(
             SeqRecord(sequence, id="PDB sequence"), handle, sequence_format
@@ -249,13 +251,13 @@ def save_sequences_fasta(sequence, sequence_file, sequence_format="fasta"):
 
 
 def save_alignment_fasta(alignment, filename, sequence_format="fasta"):
-    """ save FASTA alignment """
+    """save FASTA alignment"""
     with open(filename, "w") as handle:
         AlignIO.write(alignment, handle, format="fasta-2line")
 
 
 def save_parameters(h, J, M, N, Q, filename):
-    """ save parameters (h, J) to file """
+    """save parameters (h, J) to file"""
     with open(filename, "w") as handle:
         for i in range(N):
             for j in range(i + 1, N):
@@ -272,7 +274,7 @@ def save_parameters(h, J, M, N, Q, filename):
 def find_reference_sequence_ggsearch(
     sequence_reference_fasta, msa_fasta, N_pos
 ):
-    """ use ggsearch to find the reference sequence in an MSA """
+    """use ggsearch to find the reference sequence in an MSA"""
     command = [
         "ggsearch36",
         "-M 1-" + str(N_pos),
@@ -290,7 +292,7 @@ def find_reference_sequence_ggsearch(
 
 
 def find_positions_to_keep(target_sequence, reference_sequence):
-    """ align 2 sequences and return list of ungapped positons to keep """
+    """align 2 sequences and return list of ungapped positons to keep"""
     target_strip = str(target_sequence).replace("-", "")
     target_start_positions = [
         i for i in range(0, len(target_sequence)) if target_sequence[i] != "-"
@@ -330,7 +332,7 @@ def find_positions_to_keep(target_sequence, reference_sequence):
 
 
 def subset_model(h, J, position_list):
-    """ subset the positions in a Potts model """
+    """subset the positions in a Potts model"""
     N_pos = len(position_list)
     N_aa = h.shape[1]
 
@@ -345,7 +347,7 @@ def subset_model(h, J, position_list):
 
 
 def subset_distance_matrix(distmat, position_list):
-    """ subset the distance matrix """
+    """subset the distance matrix"""
     N_pos = len(position_list)
     distmat_subset = np.zeros((N_pos, N_pos))
     for i, pos1 in enumerate(position_list):
@@ -355,13 +357,13 @@ def subset_distance_matrix(distmat, position_list):
 
 
 def slugify(text):
-    """ convert text string to slug """
+    """convert text string to slug"""
     text = unidecode.unidecode(text).lower()
     return re.sub(r"[\W_]+", "_", re.sub("\(|\)", "", text))
 
 
 def arma2ascii(h_file, J_file):
-    """ convert armadillo binary to text file """
+    """convert armadillo binary to text file"""
 
     command = ["arma2ascii", "-p", h_file, "-P", J_file]
     res = subprocess.call(command)
@@ -369,7 +371,7 @@ def arma2ascii(h_file, J_file):
 
 
 def numeric2fasta(numeric_msa_file, output_fasta_file):
-    """ convert numeric MSA to a FASTA file """
+    """convert numeric MSA to a FASTA file"""
     command = [
         "numeric2fasta",
         "-n",
@@ -382,16 +384,18 @@ def numeric2fasta(numeric_msa_file, output_fasta_file):
 
 
 def load_run_log(log_file, start=0, end=None):
-    """ load the run log """
+    """load the run log"""
 
     if end is not None:
-        df = pd.read_csv(log_file, sep="\t")[int(start):int(end)]
+        df = pd.read_csv(log_file, sep="\t")[int(start) : int(end)]
     else:
-        df = pd.read_csv(log_file, sep="\t")[int(start):]
+        df = pd.read_csv(log_file, sep="\t")[int(start) :]
 
     df["log10-burn-in"] = np.log10(df["burn-in"])
     if "burn-between" in df.columns:
-        if np.sum(df["burn-between"] == 0) + np.sum(df["burn-between"] == 1) != len(df["burn-between"]):
+        if np.sum(df["burn-between"] == 0) + np.sum(
+            df["burn-between"] == 1
+        ) != len(df["burn-between"]):
             df["log10-burn-between"] = np.log10(df["burn-between"])
 
     df["log10-train-err-tot"] = np.log10(df["train-err-tot"])
@@ -403,8 +407,8 @@ def load_run_log(log_file, start=0, end=None):
         df["log10-validate-err-1p"] = np.log10(df["validate-err-1p"])
         df["log10-validate-err-2p"] = np.log10(df["validate-err-2p"])
 
-        df["diff-err-tot"] = df["train-err-tot"]-df["validate-err-tot"]
-        df["diff-err-1p"] = df["train-err-1p"]-df["validate-err-1p"]
-        df["diff-err-2p"] = df["train-err-2p"]-df["validate-err-2p"]
+        df["diff-err-tot"] = df["train-err-tot"] - df["validate-err-tot"]
+        df["diff-err-1p"] = df["train-err-1p"] - df["validate-err-1p"]
+        df["diff-err-2p"] = df["train-err-2p"] - df["validate-err-2p"]
 
     return df

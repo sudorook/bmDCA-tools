@@ -16,7 +16,7 @@ plt.rcParams.update({"mathtext.default": "regular"})
 
 
 def parse_options():
-    """ cli parser """
+    """cli parser"""
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-s",
@@ -123,7 +123,7 @@ def parse_options():
 
 
 def load_fit(filename):
-    """ load parameters in fit """
+    """load parameters in fit"""
     intercept = 0
     slope = 0
     rsquared = 0
@@ -139,7 +139,7 @@ def load_fit(filename):
 
 
 def load_histogram_2d(filename, names):
-    """ load histogram grid and counts """
+    """load histogram grid and counts"""
     data_df = pd.read_csv(
         filename,
         sep="\t",
@@ -154,7 +154,7 @@ def load_histogram_2d(filename, names):
 
 
 def cleanup(filenames):
-    """ delete list of files """
+    """delete list of files"""
     for f in filenames:
         os.remove(f[1][0])
         os.remove(f[1][1])
@@ -163,7 +163,7 @@ def cleanup(filenames):
 
 
 def derive_file_names(model1, model2, model1_J=None, model2_J=None):
-    """ Match the output format in compute_histogram2d.cpp """
+    """Match the output format in compute_histogram2d.cpp"""
     if model1_J is not None and model2_J is not None:
         tmp1 = model1.split("/")[-1]
         tmp1 = ".".join(tmp1.split(".")[0:-1])
@@ -204,9 +204,13 @@ def derive_file_names(model1, model2, model1_J=None, model2_J=None):
         tmp = tmp.split("_")
         if len(tmp) > 1:
             values_h_hist = "_".join(tmp[0:-1]) + "_h_" + tmp[-1] + "_hist.tsv"
-            values_h_model = "_".join(tmp[0:-1]) + "_h_" + tmp[-1] + "_model.tsv"
+            values_h_model = (
+                "_".join(tmp[0:-1]) + "_h_" + tmp[-1] + "_model.tsv"
+            )
             values_J_hist = "_".join(tmp[0:-1]) + "_J_" + tmp[-1] + "_hist.tsv"
-            values_J_model = "_".join(tmp[0:-1]) + "_J_" + tmp[-1] + "_model.tsv"
+            values_J_model = (
+                "_".join(tmp[0:-1]) + "_J_" + tmp[-1] + "_model.tsv"
+            )
         else:
             values_h_hist = tmp[0] + "_h_hist.tsv"
             values_h_model = tmp[0] + "_h_model.tsv"
@@ -217,7 +221,7 @@ def derive_file_names(model1, model2, model1_J=None, model2_J=None):
 
 
 def main():
-    """ do stuff """
+    """do stuff"""
     options = parse_options()
 
     if options.steps is not None:
@@ -503,12 +507,8 @@ def main():
         )
         axes.grid(False)
         plt.suptitle(r"$\bf{Model\ Compare:}$ " + title, fontsize="x-large")
-        axes.set_xlabel(
-            label1, fontsize="large", x=0.475, y=0
-        )
-        axes.set_ylabel(
-            label2, fontsize="large", x=0, y=0.5
-        )
+        axes.set_xlabel(label1, fontsize="large", x=0.475, y=0)
+        axes.set_ylabel(label2, fontsize="large", x=0, y=0.5)
         if options.vertical:
             axes.yaxis.labelpad = 10
 

@@ -11,8 +11,9 @@ matplotlib.use("Agg")
 plt.rcParams["figure.figsize"] = [13.5, 24]
 plt.rcParams.update({"mathtext.default": "regular"})
 
+
 def parse_options():
-    """ cli parser """
+    """cli parser"""
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-i",
@@ -58,7 +59,7 @@ def parse_options():
 
 
 def main():
-    """ do stuff """
+    """do stuff"""
     options = parse_options()
 
     suffixes = []
@@ -67,7 +68,9 @@ def main():
             sys.exit("Mismatched number of inputs and description strings.")
         suffixes = options.description
     else:
-        suffixes = [item.rstrip("bmdca_run.log").rstrip("/") for item in options.input]
+        suffixes = [
+            item.rstrip("bmdca_run.log").rstrip("/") for item in options.input
+        ]
 
     df_list = []
     for item in options.input:
@@ -115,17 +118,17 @@ def main():
     if min_steps != max_steps:
         print("WARNING: subsetting due to different step counts...")
         for i in range(0, len(df_list)):
-            df_list[i] = df_list[i].iloc[0:min_steps,0:]
+            df_list[i] = df_list[i].iloc[0:min_steps, 0:]
 
     with plt.style.context("fivethirtyeight"):
-        styles = ['-', '--', '-.', ':']
+        styles = ["-", "--", "-.", ":"]
         n_styles = len(styles)
         for idx, df in enumerate(df_list):
             if idx == 0:
                 ax = df.plot(
                     x="step",
                     y=fields,
-                    label=[f + ' ' + suffixes[idx] for f in fields],
+                    label=[f + " " + suffixes[idx] for f in fields],
                     linewidth=1.0,
                     subplots=True,
                     linestyle=styles[idx % n_styles],
@@ -134,7 +137,7 @@ def main():
                 df.plot(
                     x="step",
                     y=fields,
-                    label=[f + ' ' + suffixes[idx] for f in fields],
+                    label=[f + " " + suffixes[idx] for f in fields],
                     linewidth=1.0,
                     subplots=True,
                     ax=ax,

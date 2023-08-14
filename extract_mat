@@ -6,8 +6,9 @@ import argparse
 import os
 import dcatools as tools
 
+
 def parse_options():
-    """ cli parser """
+    """cli parser"""
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-i", "--input", dest="input", required=True, help="mat file"
@@ -16,7 +17,7 @@ def parse_options():
 
 
 def main():
-    """ do stuff """
+    """do stuff"""
     options = parse_options()
     prefix = os.path.splitext((options.input).replace("/", "_"))[0]
 

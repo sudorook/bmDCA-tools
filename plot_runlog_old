@@ -14,7 +14,7 @@ plt.rcParams.update({"mathtext.default": "regular"})
 
 
 def parse_options():
-    """ cli parser """
+    """cli parser"""
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-i",
@@ -41,7 +41,7 @@ def parse_options():
 
 
 def main():
-    """ do stuff """
+    """do stuff"""
     options = parse_options()
     if options.start is not None:
         offset = int(options.start)

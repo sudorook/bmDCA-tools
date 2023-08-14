@@ -17,7 +17,7 @@ plt.rcParams.update({"mathtext.default": "regular"})
 
 
 def parse_options():
-    """ cli parser """
+    """cli parser"""
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-i",
@@ -160,7 +160,7 @@ def parse_options():
 
 
 def load_fit(filename):
-    """ load parameters in fit """
+    """load parameters in fit"""
     intercept = 0
     slope = 0
     rsquared = 0
@@ -176,7 +176,7 @@ def load_fit(filename):
 
 
 def load_grid(filename, names):
-    """ load histogram grid and counts """
+    """load histogram grid and counts"""
     data_df = pd.read_csv(
         filename,
         sep="\t",
@@ -191,14 +191,14 @@ def load_grid(filename, names):
 
 
 def cleanup(filenames):
-    """ delete list of files """
+    """delete list of files"""
     for f in filenames:
         os.remove(f[1] + "_hist.tsv")
         os.remove(f[1] + "_model.tsv")
 
 
 def main():
-    """ do stuff """
+    """do stuff"""
     options = parse_options()
 
     if options.destination is None:

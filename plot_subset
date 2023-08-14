@@ -74,14 +74,14 @@ function compute_subset_energies() {
 
 function make_plots() {
   local slug
-  slug="$(echo "$TITLE, $DESCRIPTION Subset (b=${BETWEEN} w=${WITHIN})" | \
-          sed -r s/λ/l/g | \
-          sed -r s/α/a/g | \
-          sed -r s/β/b/g | \
-          sed -r s/γ/g/g | \
-          iconv -t ascii//TRANSLIT | \
-          sed -r s/[~\^]+//g | \
-          sed -r s/[^a-zA-Z0-9]+/_/g | \
+  slug="$(echo "$TITLE, $DESCRIPTION Subset (b=${BETWEEN} w=${WITHIN})" |
+          sed -r s/λ/l/g |
+          sed -r s/α/a/g |
+          sed -r s/β/b/g |
+          sed -r s/γ/g/g |
+          iconv -t ascii//TRANSLIT |
+          sed -r s/[~\^]+//g |
+          sed -r s/[^a-zA-Z0-9]+/_/g |
           sed -r s/^-+\|-+$//g | tr "[:upper:]" "[:lower:]")"
 
   plot_energy.py \
@@ -116,7 +116,6 @@ function make_plots() {
     -T "${TITLE}, ${DESCRIPTION} Subset (b=${BETWEEN} w=${WITHIN})" -c
 }
 
-
 #
 # Parse command line options
 #
@@ -127,75 +126,75 @@ PARSED=$(getopt -o ${OPTIONS} --long ${LONGOPTIONS} -n "$0" -- "$@")
 eval set -- "$PARSED"
 while [ $# -ge 1 ]; do
   case "$1" in
-    -i|--msa_fasta)
+    -i | --msa_fasta)
       MSA="${2}"
       MSA_NUMERIC=false
       shift 2
       ;;
-    -n|--msa_fasta_ref)
+    -n | --msa_fasta_ref)
       MSA="${2}"
       MSA_NUMERIC=true
       shift 2
       ;;
-    -I|--msa_numeric)
+    -I | --msa_numeric)
       MSA_REF="${2}"
       MSA_REF_NUMERIC=false
       shift 2
       ;;
-    -N|--msa_numeric_ref)
+    -N | --msa_numeric_ref)
       MSA_REF="${2}"
       MSA_REF_NUMERIC=true
       shift 2
       ;;
-    -W|--msa_ref_weights)
+    -W | --msa_ref_weights)
       MSA_REF_WEIGHTS="${2}"
       shift 2
       ;;
-    -e|--msa_energy)
+    -e | --msa_energy)
       ENERGY="${2}"
       shift 2
       ;;
-    -E|--msa_ref_energy)
+    -E | --msa_ref_energy)
       ENERGY_REF="${2}"
       shift 2
       ;;
-    -l|--msa_label)
+    -l | --msa_label)
       LABEL="${2}"
       shift 2
       ;;
-    -L|--msa_ref_label)
+    -L | --msa_ref_label)
       LABEL_REF="${2}"
       shift 2
       ;;
-    -b|--between)
+    -b | --between)
       BETWEEN="${2}"
       shift 2
       ;;
-    -w|--within)
+    -w | --within)
       WITHIN="${2}"
       shift 2
       ;;
-    -o|--output)
+    -o | --output)
       OUTPUT="${2}"
       shift 2
       ;;
-    -O|--output_energy)
+    -O | --output_energy)
       OUTPUT_ENERGY="${2}"
       shift 2
       ;;
-    -p|--parameters)
+    -p | --parameters)
       PARAMS="${2}"
       shift 2
       ;;
-    -P|--parameters_J)
+    -P | --parameters_J)
       PARAMS_J="${2}"
       shift 2
       ;;
-    -t|--title)
+    -t | --title)
       TITLE="${2}"
       shift 2
       ;;
-    -d|--description)
+    -d | --description)
       DESCRIPTION="${2}"
       shift 2
       ;;

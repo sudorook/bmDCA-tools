@@ -18,7 +18,7 @@ sns.set(rc={"figure.figsize": (10, 7.5)})
 
 
 def parse_options():
-    """ cli parser """
+    """cli parser"""
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-i",
@@ -31,7 +31,7 @@ def parse_options():
 
 
 def reduce_tensor(J, norm=2):
-    """ reduce rank 4 tensor using 2-norm """
+    """reduce rank 4 tensor using 2-norm"""
     Npos = np.shape(J)[0]
     J_new = np.zeros((Npos, Npos))
     for i in range(Npos):
@@ -41,7 +41,7 @@ def reduce_tensor(J, norm=2):
 
 
 def load_data(data_file):
-    """ syntax checker is annoying me """
+    """syntax checker is annoying me"""
 
     tmpJ = []
     tmph = []
@@ -73,7 +73,7 @@ def load_data(data_file):
 
 
 def main():
-    """ do stuff """
+    """do stuff"""
     options = parse_options()
 
     prefix = os.path.splitext((options.params).replace("/", "_"))[0]

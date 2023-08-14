@@ -14,7 +14,7 @@ plt.rcParams.update({"mathtext.default": "regular"})
 
 
 def parse_options():
-    """ cli parser """
+    """cli parser"""
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-n",
@@ -64,7 +64,7 @@ def parse_options():
 
 
 def main():
-    """ do stuff """
+    """do stuff"""
     options = parse_options()
 
     if options.energies is not None:
@@ -96,12 +96,14 @@ def main():
 
     mean_energies = [np.mean(msa) for msa in msa_energies]
 
-    colors = ['#008fd5', '#fc4f30', '#e5ae38', '#6d904f', '#8b8b8b', '#810f7c']
+    colors = ["#008fd5", "#fc4f30", "#e5ae38", "#6d904f", "#8b8b8b", "#810f7c"]
     n_colors = len(colors)
     with plt.style.context("fivethirtyeight"):
         for i, msa_energy in enumerate(msa_energies):
             plt.hist(msa_energy, alpha=0.5, label=msa_labels[i], density=True)
-            plt.axvline(mean_energies[i], color=colors[i % n_colors], alpha=0.5)
+            plt.axvline(
+                mean_energies[i], color=colors[i % n_colors], alpha=0.5
+            )
         plt.legend(loc="upper right")
         plt.xlabel("Sequence Energy")
         plt.ylabel("Probability")

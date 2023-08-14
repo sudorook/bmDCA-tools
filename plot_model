@@ -16,7 +16,7 @@ plt.rcParams.update({"mathtext.default": "regular"})
 
 
 def parse_options():
-    """ cli parser """
+    """cli parser"""
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-s",
@@ -118,7 +118,7 @@ def parse_options():
 
 
 def load_histogram_1d(filename, names):
-    """ load histogram grid and counts """
+    """load histogram grid and counts"""
     data_df = pd.read_csv(
         filename,
         sep="\t",
@@ -132,14 +132,14 @@ def load_histogram_1d(filename, names):
 
 
 def cleanup(filenames):
-    """ delete list of files """
+    """delete list of files"""
     for f in filenames:
         os.remove(f[1])
         os.remove(f[2])
 
 
 def main():
-    """ do stuff """
+    """do stuff"""
     options = parse_options()
 
     if options.step is not None:
@@ -311,9 +311,7 @@ def main():
         )
         axes.grid(False)
         plt.suptitle(r"$\bf{Model:}$ " + title, fontsize="x-large")
-        axes.set_xlabel(
-            label, fontsize="large", x=0.475, y=0
-        )
+        axes.set_xlabel(label, fontsize="large", x=0.475, y=0)
 
         for idx, s in enumerate(subplots):
             df_h = load_histogram_1d(

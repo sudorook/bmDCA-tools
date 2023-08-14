@@ -7,19 +7,18 @@ import sys
 import numpy as np
 import pandas as pd
 import matplotlib
-
-matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import seaborn as sns
-
 import dcatools as tools
+
+matplotlib.use("Agg")
 
 #  sns.set(rc={"figure.figsize": (10, 7.5)})
 sns.set(rc={"figure.figsize": (12.5, 12)})
 
 
 def parse_options():
-    """ cli parser """
+    """cli parser"""
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-p",
@@ -88,7 +87,7 @@ def parse_options():
 
 
 def main():
-    """ do stuff """
+    """do stuff"""
     options = parse_options()
 
     if options.title is not None:
@@ -174,7 +173,10 @@ def main():
 
     h_1d = tools.reduce_h(h_truncate)
     J_2d = tools.reduce_J(J_truncate, "fro")
-    J_2d_zg = tools.reduce_J(J_truncate, "fro",)
+    J_2d_zg = tools.reduce_J(
+        J_truncate,
+        "fro",
+    )
     J_2d_zg = tools.adjust_frobenius_norm(J_2d_zg)
 
     distmat_truncate = tools.subset_distance_matrix(
@@ -220,7 +222,9 @@ def main():
         plt.close()
 
     with sns.axes_style("white"):
-        ax = sns.heatmap((model_zg_df), cmap="Blues", linewidths=0.2, cbar=False)
+        ax = sns.heatmap(
+            (model_zg_df), cmap="Blues", linewidths=0.2, cbar=False
+        )
         fig = ax.get_figure()
         ax.xaxis.set_ticks_position("top")
         ax.yaxis.set_ticks_position("left")

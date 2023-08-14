@@ -21,7 +21,7 @@ np.random.seed(0)
 
 
 def parse_options():
-    """ cli parser """
+    """cli parser"""
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-n",
@@ -66,18 +66,18 @@ def parse_options():
 
 
 def load_sequences(seq_file):
-    """ load sequences """
+    """load sequences"""
     data = np.loadtxt(seq_file, dtype=np.int16, skiprows=1)
     return data
 
 
 def load_sequence_weights_input(weight_file):
-    """ load msa weights_input """
+    """load msa weights_input"""
     return np.loadtxt(weight_file, dtype=np.float32)
 
 
 def compute_sequence_weights_input(msa, Q=21):
-    """ comptue seq weights_input """
+    """comptue seq weights_input"""
     X2d = sca.alg2bin(msa, Q)
     simMat = (X2d.dot(X2d.T)) / msa.shape[1]
     seqw = np.array(1 / (simMat > 0.8).sum(axis=0))
@@ -86,7 +86,7 @@ def compute_sequence_weights_input(msa, Q=21):
 
 
 def sample_msa_weighted(msa, weights_input, N):
-    """ subset the alignment """
+    """subset the alignment"""
     Ntot = min(int(sum(weights_input)), N)
     wlist = [w for w in weights_input]
     selection2 = np.random.choice(
@@ -99,7 +99,7 @@ def sample_msa_weighted(msa, weights_input, N):
 
 
 def main():
-    """ do stuff """
+    """do stuff"""
     options = parse_options()
 
     msa_basis = load_sequences(options.msa_basis) + 1
@@ -180,7 +180,9 @@ def main():
         if options.title is None:
             plt.suptitle("Projection of samples onto MSA space")
         else:
-            plt.suptitle(r"$\bf{PCA\ Projection:}$ " + options.title, fontsize="large")
+            plt.suptitle(
+                r"$\bf{PCA\ Projection:}$ " + options.title, fontsize="large"
+            )
         ax.set_xlim(left, right)
         ax.set_ylim(bottom, top)
         plt.tight_layout()
