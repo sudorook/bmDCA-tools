@@ -141,8 +141,9 @@ def main():
     with plt.style.context("fivethirtyeight"):
         styles = ["-", "--", "-.", ":"]
         n_styles = len(styles)
+        ax = None
         for idx, df in enumerate(df_list):
-            if idx == 0:
+            if not ax:
                 ax = df.plot(
                     x="step",
                     y=fields,
