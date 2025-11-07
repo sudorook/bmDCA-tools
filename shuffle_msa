@@ -21,6 +21,7 @@
 
 import argparse
 import os
+import sys
 import random
 
 from Bio.Align import MultipleSeqAlignment
@@ -88,6 +89,9 @@ def main():
         alignment = tools.load_alignment_fasta(options.msa)
     elif options.msa_numeric:
         alignment = tools.load_sequences(options.msa_numeric)
+    else:
+        sys.stderr.write("No input MSA.")
+        sys.exit(3)
 
     M = len(alignment)
     N = len(alignment[0])
