@@ -146,7 +146,7 @@ main(int argc, char* argv[])
             count++;
           }
         }
-        id = (double)count / N1;
+        id = static_cast<double>(count) / static_cast<double>(N1);
 
         msa1_msa2_mean_distances(m1) += id;
         msa2_msa1_mean_distances(m2) += id;
@@ -182,7 +182,7 @@ main(int argc, char* argv[])
             count++;
           }
         }
-        id = (double)count / N1;
+        id = static_cast<double>(count) / static_cast<double>(N1);
         msa1_ref1_max_distances(m1) = id;
       }
     }
@@ -205,7 +205,7 @@ main(int argc, char* argv[])
             count++;
           }
         }
-        id = (double)count / N2;
+        id = static_cast<double>(count) / static_cast<double>(N2);
         msa2_ref1_max_distances(m2) = id;
       }
     }
@@ -230,7 +230,7 @@ main(int argc, char* argv[])
             count++;
           }
         }
-        id = (double)count / N1;
+        id = static_cast<double>(count) / static_cast<double>(N1);
         msa1_ref2_max_distances(m1) = id;
       }
     }
@@ -253,7 +253,7 @@ main(int argc, char* argv[])
             count++;
           }
         }
-        id = (double)count / N2;
+        id = static_cast<double>(count) / static_cast<double>(N2);
         msa2_ref2_max_distances(m2) = id;
       }
     }
